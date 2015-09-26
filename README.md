@@ -24,6 +24,10 @@ Then `import`, `require`, `steal`, or `define` the `"can-fixture"` module:
 var fixture = require("can-fixture");
 ```
 
-## Use
+## Basic Use
+
+
+
+## APIs
 
 
