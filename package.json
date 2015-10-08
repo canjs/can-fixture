@@ -4,7 +4,7 @@
   "description": "Intercept AJAX requests and simulate responses.",
   "main": "fixture.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "testee --browsers firefox test/test.html"
   },
   "dependencies": {
     "can-set": "^0.3.0"
@@ -14,7 +14,7 @@
     "steal-qunit": "0.0.2",
     "testee": "^0.2.0",
     "steal-tools": "^0.12.0-pre.3",
-    "jquery": "^2.1.4"
+    "jquery": "^1.11.0"
   },
   "repository": {
     "type": "git",
@@ -28,5 +28,12 @@
   "bugs": {
     "url": "https://github.com/canjs/can-fixture/issues"
   },
-  "homepage": "https://github.com/canjs/can-fixture"
+  "homepage": "https://github.com/canjs/can-fixture",
+  "system": {
+    "npmDependencies": [
+      "can-set",
+      "steal-qunit",
+      "jquery"
+    ]
+  }
 }

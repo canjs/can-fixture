@@ -5,7 +5,7 @@ var sub = require("./helpers/sub");
 
 // ## fixture
 // Simulates AJAX requests.
-// - `settings` - the `"METHOD URL"` to intercept, or an object of fixture 
+// - `settings` - the `"METHOD URL"` to intercept, or an object of fixture
 var fixture;
 var $fixture = fixture = function (settings, fixture) {
 	// If fixture is provided, set up a new fixture.
@@ -39,8 +39,8 @@ var $fixture = fixture = function (settings, fixture) {
 		}
 		settings.fixture = fixture;
 		overwrites.push(settings);
-		
-	} 
+
+	}
 	// If a fixture isn't provided, we assume that settings is
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
@@ -206,7 +206,7 @@ var updateSettings = function (settings, originalOptions) {
 // OVERWRITE XHR
 var XHR = XMLHttpRequest,
 	g = typeof global !== "undefined"? global : window;
-	
+
 g.XMLHttpRequest = function(){
 	var headers = this._headers = {};
 	this._xhr = {
@@ -227,9 +227,20 @@ XMLHttpRequest.prototype.getAllResponseHeaders = function(){
 	return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
 };
 
-["response","responseText", "responseType", "responseURL","status","statusText","readyState"].forEach(function(prop){
-	
-	Object.defineProperty(XMLHttpRequest.prototype, prop, {
+var defineProperty = (function(){
+	try {
+		Object.defineProperty({}, 'a', {});
+		return Object.defineProperty;
+	} catch (_) {
+		return function(obj, name, desc) {
+			if(desc.value) obj[name] = value;
+		}
+	}
+})();
+
+helpers.each(["response","responseText", "responseType", "responseURL","status","statusText","readyState", "onreadystatechange"], function(prop){
+
+	defineProperty(XMLHttpRequest.prototype, prop, {
 		get: function(){
 			return this._xhr[prop];
 		},
@@ -237,13 +248,12 @@ XMLHttpRequest.prototype.getAllResponseHeaders = function(){
 			this._xhr[prop] = newVal;
 		}
 	});
-	
+
 });
 
 
 
 XMLHttpRequest.prototype.send = function(data) {
-	
 	var settings = {
 		url: this.url,
 		data: data,
@@ -260,23 +270,22 @@ XMLHttpRequest.prototype.send = function(data) {
 		} catch(e) {
 			settings.data = deparam( settings.data );
 		}
-		
+
 	}
-	
+
 	var self = this;
 	updateSettings(settings, settings);
 
 	// If the call is a fixture call, we run the same type of code as we would
 	// with jQuery's ajaxTransport.
 	if (settings.fixture) {
-		var timeout, 
+		var timeout,
 			stopped = false;
 
 		// set a timeout that simulates making a request ....
 		timeout = setTimeout(function () {
 			// if the user wants to call success on their own, we allow it ...
 			var success = function () {
-				
 				var response = extractResponse.apply(settings, arguments),
 					status = response[0];
 
@@ -314,13 +323,31 @@ XMLHttpRequest.prototype.send = function(data) {
 	} else {
 		//debugger;
 		var xhr = new XHR();
-		
-		// copy everything on this to the xhr object that is not on `this`'s prototype
-		for(var prop in this){
-			if(!( prop in XMLHttpRequest.prototype) ) {
-				xhr[prop] = this[prop];
+
+		var copyProps = function(source, dest, excluding){
+			excluding = excluding || {};
+
+			// copy everything on this to the xhr object that is not on `this`'s prototype
+			for(var prop in source){
+				if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+					dest[prop] = source[prop];
+				}
 			}
-		}
+		};
+		copyProps(this, xhr);
+
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState === 4) {
+				// Copy back everything over because in IE8 defineProperty
+				// doesn't work, so we need to make our shim XHR have the same
+				// values as the real xhr.
+				copyProps(xhr, self, { onreadystatechange: true });
+
+				self.onreadystatechange && self.onreadystatechange();
+				self.onload && self.onload();
+			}
+		};
+
 		//helpers.extend(xhr, this);
 		helpers.extend(xhr, settings);
 		this._xhr = xhr;
@@ -438,7 +465,7 @@ helpers.extend(fixture, {
 
 		// Shift off the URL and just keep the data.
 		res.shift();
-		order.forEach(function (name) {
+		helpers.each(order, function (name) {
 			// Add data from regular expression onto data object.
 			data[name] = res.shift();
 		});
@@ -448,7 +475,7 @@ helpers.extend(fixture, {
 	// Make a store of objects to use when making requests against fixtures.
 	store: function (count, make, filter) {
 		/*jshint eqeqeq:false */
-		
+
 		// the currentId to use when a new instance is created.
 		var	currentId = 0,
 			findOne = function (id) {
@@ -462,8 +489,8 @@ helpers.extend(fixture, {
 			types,
 			items,
 			reset;
-			
-		if(Array.isArray(count) && typeof count[0] === "string" ){
+
+		if(helpers.isArrayLike(count) && typeof count[0] === "string" ){
 			types = count;
 			count = make;
 			make= filter;
@@ -474,8 +501,8 @@ helpers.extend(fixture, {
 			make= filter;
 			filter = arguments[3];
 		}
-		
-		
+
+
 		if(typeof count === "number") {
 			items = [];
 			reset = function () {
@@ -490,7 +517,7 @@ helpers.extend(fixture, {
 					currentId = Math.max(item.id + 1, currentId + 1) || items.length;
 					items.push(item);
 				}
-				if (Array.isArray(types)) {
+				if (helpers.isArrayLike(types)) {
 					fixture["~" + types[0]] = items;
 					fixture["-" + types[0]] = methods.getListData;
 					fixture["-" + types[1]] = methods.getData;
@@ -506,21 +533,21 @@ helpers.extend(fixture, {
 				items = initialItems.slice(0);
 			};
 		}
-		
+
 
 		// make all items
 		helpers.extend(methods, {
 			getListData: function (request) {
-				
+
 				request = request || {};
 				//copy array of items
 				var retArr = items.slice(0);
 				request.data = request.data || {};
 				//sort using order
 				//order looks like ["age ASC","gender DESC"]
-				(request.data.order || [])
+				helpers.each((request.data.order || [])
 					.slice(0)
-					.reverse().forEach(function (name) {
+					.reverse(), function (name) {
 						var split = name.split(" ");
 						retArr = retArr.sort(function (a, b) {
 							if (split[1].toUpperCase() !== "ASC") {
@@ -544,9 +571,9 @@ helpers.extend(fixture, {
 					});
 
 				//group is just like a sort
-				(request.data.group || [])
+				helpers.each((request.data.group || [])
 					.slice(0)
-					.reverse().forEach(function (name) {
+					.reverse(), function (name) {
 						var split = name.split(" ");
 						retArr = retArr.sort(function (a, b) {
 							return a[split[0]] > b[split[0]];
@@ -560,6 +587,7 @@ helpers.extend(fixture, {
 				//filter results if someone added an attr like parentId
 				for (var param in request.data) {
 					i = 0;
+
 					if (request.data[param] !== undefined && // don't do this if the value of the param is null (ignore it)
 						(param.indexOf("Id") !== -1 || param.indexOf("_id") !== -1)) {
 						while (i < retArr.length) {
@@ -598,13 +626,13 @@ helpers.extend(fixture, {
 					"count": retArr.length,
 					"data": retArr.slice(offset, offset + limit)
 				};
-				["limit","offset"].forEach(function(prop){
+				helpers.each(["limit","offset"], function(prop){
 					if(prop in request.data) {
 						responseData[prop] = request.data[prop];
 					}
 				});
-				
-				
+
+
 				return responseData;
 			},
 
@@ -629,7 +657,7 @@ helpers.extend(fixture, {
 			 */
 			getData: function (request, response) {
 				var item = findOne(getId(request));
-				
+
 				if(typeof item === "undefined") {
 					return response(404, 'Requested resource not found');
 				}
@@ -676,7 +704,7 @@ helpers.extend(fixture, {
 			destroyData: function (request, response) {
 				var id = getId(request),
 					item = findOne(id);
-					
+
 				if(typeof item === "undefined") {
 					return response(404, 'Requested resource not found');
 				}

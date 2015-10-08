@@ -4,18 +4,17 @@ var set = require("can-set");
 var $ = require("jquery");
 
 var errorCallback = function(xhr, status, error){
-	debugger;
 	ok(false);
 	start();
 };
 
 	QUnit.module('can/util/fixture');
 	test('static fixtures', function () {
-		
+
 		stop();
 		fixture('GET something', __dirname+'/fixtures/test.json');
 		fixture('POST something', __dirname+'/fixtures/test.json');
-		
+
 		$.ajax({
 			url: 'something',
 			dataType: 'json'
@@ -33,7 +32,7 @@ var errorCallback = function(xhr, status, error){
 					},errorCallback);
 			}, errorCallback);
 	});
-	
+
 	test('templated static fixtures', function () {
 		stop();
 		fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
@@ -92,7 +91,7 @@ var errorCallback = function(xhr, status, error){
 					});
 			});
 	});
-	
+
 
 	test('fixture.store fixtures', function () {
 		stop();
@@ -108,7 +107,7 @@ var errorCallback = function(xhr, status, error){
 			}
 		});
 		fixture('things', store.findAll);
-		
+
 		$.ajax({
 			url: 'things',
 			dataType: 'json',
@@ -290,7 +289,7 @@ var errorCallback = function(xhr, status, error){
 					});
 			});
 	});
-	
+
 	test('fixture.store with can.Model', function () {
 		var store = fixture.store(100, function (i) {
 			return {
@@ -305,21 +304,20 @@ var errorCallback = function(xhr, status, error){
 				update: 'PUT /models/{id}',
 				destroy: 'DELETE /models/{id}'
 			}, {})*/;
-		
+
 		fixture('GET /models', store.getListData);
 		fixture('GET /models/{id}', store.getData);
 		fixture('POST /models', store.createData);
 		fixture('PUT /models/{id}', store.updateData);
 		fixture('DELETE /models/{id}', store.destroyData);
-		
+
 		stop();
 		function errorAndStart(e){
 			ok(false, "borked"+e);
-			debugger;
 			start();
 		}
-		
-		
+
+
 		var check100Updated = function(){
 			return $.ajax({
 				url: "/models/100",
@@ -328,14 +326,14 @@ var errorCallback = function(xhr, status, error){
 				equal(model.name, 'Updated test object', 'Successfully updated object');
 			});
 		};
-		
-		
+
+
 		$.ajax({
 			url: "/models",
 			dataType: 'json'
 		}).then(function (modelsData) {
 			var models = modelsData.data;
-				
+
 			equal(models.length, 100, 'Got 100 models for findAll with no parameters');
 			equal(models[95].name, 'Object 95', 'All models generated properly');
 			return $.ajax({
@@ -371,9 +369,9 @@ var errorCallback = function(xhr, status, error){
 											}
 										})
 										.then(function (model) {
-											
+
 											return check100Updated().then(function(){
-												
+
 												return $.ajax({
 														url: "/models/100",
 														dataType: 'json',
@@ -382,9 +380,9 @@ var errorCallback = function(xhr, status, error){
 													.then(function (deleted) {
 														start();
 													},errorAndStart);
-												
+
 											}, errorAndStart);
-											
+
 										},errorAndStart);
 								},errorAndStart);
 						},errorAndStart);
@@ -409,7 +407,7 @@ var errorCallback = function(xhr, status, error){
 			start();
 		});
 	});
-	
+
 	test('fixture.store returns 404 on update with a bad id (#803)', function () {
 		var store = fixture.store(5, function (i) {
 			return {
@@ -419,9 +417,9 @@ var errorCallback = function(xhr, status, error){
 		});
 
 		stop();
-		
+
 		fixture('POST /models/{id}', store.update);
-		
+
 		$.ajax({url: "/models/6", dataType: "json", data: {'jedan': 'dva'}, type: 'POST'})
 			.then(function(){},function (data) {
 				equal(data.statusText, 'error', 'Got an error');
@@ -429,7 +427,7 @@ var errorCallback = function(xhr, status, error){
 				start();
 			});
 	});
-	
+
 	test('fixture.store returns 404 on destroy with a bad id (#803)', function () {
 		var store = fixture.store(2, function (i) {
 			return {
@@ -439,7 +437,7 @@ var errorCallback = function(xhr, status, error){
 		});
 
 		stop();
-		
+
 		fixture('DELETE /models/{id}', store.destroy);
 
 		$.ajax({url: "/models/6", dataType: "json", type: 'DELETE'})
@@ -566,9 +564,9 @@ var errorCallback = function(xhr, status, error){
 			url: 'foo/5'
 		});
 	});
-	
+
 	test("create a store with array and comparison object",function(){
-		
+
 		var store = fixture.store([
 			{id: 1, modelId: 1, year: 2013, name: "2013 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2012/07/01-2013-ford-mustang-gt-review-585x388.jpg"},
 			{id: 2, modelId: 1, year: 2014, name: "2014 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2013/03/2014-roush-mustang.jpg"},
@@ -581,23 +579,23 @@ var errorCallback = function(xhr, status, error){
 		],{
 			year: function(a, b){
 				return a == b;
-				
+
 			},
 			modelId: function(a, b){
 				return a == b;
 			}
 		});
-		
-		
+
+
 		fixture('GET /presetStore', store.findAll);
 		stop();
 		$.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" }).then(function(response){
-			
+
 			equal(response.data[0].id, 1, "got the first item");
 			equal(response.data.length, 1, "only got one item");
 			start();
 		});
-		
+
 	});
 
 	test("store with objects allows .create, .update and .destroy (#1471)", 4, function(){
@@ -624,9 +622,9 @@ var errorCallback = function(xhr, status, error){
 		};
 
 		stop();
-		
+
 		// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
-		
+
 		findAll().then(function(carsData) {
 			equal(carsData.data.length, 8, 'Got all cars');
 			return $.ajax({ url: "/cars/"+carsData.data[1].id, method: "DELETE", dataType: "json" });
@@ -659,13 +657,13 @@ var errorCallback = function(xhr, status, error){
 
 
 	test("filtering works", function() {
-	
+
 		var store = fixture.store(
 			[	{ state : 'CA', name : 'Casadina' },
-				{ state : 'NT', name : 'Alberny' }], 
+				{ state : 'NT', name : 'Alberny' }],
 			// David, make sure this is here!
 			{});
-	
+
 		fixture({
 			'GET /api/cities' : store.findAll,
 		});
@@ -683,9 +681,9 @@ var errorCallback = function(xhr, status, error){
 			ok(false, ""+e);
 			start()
 		});
-		
+
 		function next(){
-	
+
 			var store =fixture.store([{
 				_id : 1,
 				name : 'Cheese City',
@@ -703,14 +701,14 @@ var errorCallback = function(xhr, status, error){
 					state : 'NT'
 				}
 			}],{
-				
+
 			});
-	
+
 			fixture({
 				'GET /restaurants' : store.findAll
-			}); 
+			});
 			$.getJSON('/api/restaurants?address[city]=Alberny').then(function(responseData){
-				
+
 				deepEqual(responseData, {
 					count: 1,
 					data: [{
@@ -724,7 +722,7 @@ var errorCallback = function(xhr, status, error){
 					}]
 				});
 				last();
-				
+
 			}, function(e){
 				ok(false);
 				debugger;
@@ -769,6 +767,6 @@ var errorCallback = function(xhr, status, error){
 			});
 			start();
 		}
-	}); 
+	});
 
-	
+

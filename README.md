@@ -1,3 +1,6 @@
+[![Build Status](https://api.travis-ci.org/canjs/can-fixture.svg?branch=master)](https://travis-ci.org/canjs/can-fixture)
+[![npm version](https://badge.fury.io/js/can-fixture.svg)](http://badge.fury.io/js/can-fixture)
+
 # can-fixture
 
 
