@@ -1,3 +1,5 @@
+var helpers = require("can-set").helpers;
+
 var digitTest = /^\d+$/,
 	keyBreaker = /([^\[\]]+)|(\[\])/g,
 	paramTest = /([^?#]*)(#.*)?$/,
@@ -9,7 +11,7 @@ module.exports = function (params) {
 	var data = {}, pairs, lastPart;
 	if (params && paramTest.test(params)) {
 		pairs = params.split('&');
-		pairs.forEach(function (pair) {
+		helpers.each(pairs, function (pair) {
 			var parts = pair.split('='),
 				key = prep(parts.shift()),
 				value = prep(parts.join('=')),

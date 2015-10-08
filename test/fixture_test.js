@@ -4,7 +4,6 @@ var set = require("can-set");
 var $ = require("jquery");
 
 var errorCallback = function(xhr, status, error){
-	debugger;
 	ok(false);
 	start();
 };
@@ -315,7 +314,6 @@ var errorCallback = function(xhr, status, error){
 		stop();
 		function errorAndStart(e){
 			ok(false, "borked"+e);
-			debugger;
 			start();
 		}
 

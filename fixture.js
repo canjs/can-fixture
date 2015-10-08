@@ -240,7 +240,7 @@ var defineProperty = (function(){
 
 helpers.each(["response","responseText", "responseType", "responseURL","status","statusText","readyState", "onreadystatechange"], function(prop){
 
-	Object.defineProperty(XMLHttpRequest.prototype, prop, {
+	defineProperty(XMLHttpRequest.prototype, prop, {
 		get: function(){
 			return this._xhr[prop];
 		},
@@ -254,7 +254,6 @@ helpers.each(["response","responseText", "responseType", "responseURL","status",
 
 
 XMLHttpRequest.prototype.send = function(data) {
-
 	var settings = {
 		url: this.url,
 		data: data,
@@ -287,7 +286,6 @@ XMLHttpRequest.prototype.send = function(data) {
 		timeout = setTimeout(function () {
 			// if the user wants to call success on their own, we allow it ...
 			var success = function () {
-
 				var response = extractResponse.apply(settings, arguments),
 					status = response[0];
 
@@ -326,12 +324,30 @@ XMLHttpRequest.prototype.send = function(data) {
 		//debugger;
 		var xhr = new XHR();
 
-		// copy everything on this to the xhr object that is not on `this`'s prototype
-		for(var prop in this){
-			if(!( prop in XMLHttpRequest.prototype) ) {
-				xhr[prop] = this[prop];
+		var copyProps = function(source, dest, excluding){
+			excluding = excluding || {};
+
+			// copy everything on this to the xhr object that is not on `this`'s prototype
+			for(var prop in source){
+				if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+					dest[prop] = source[prop];
+				}
 			}
-		}
+		};
+		copyProps(this, xhr);
+
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState === 4) {
+				// Copy back everything over because in IE8 defineProperty
+				// doesn't work, so we need to make our shim XHR have the same
+				// values as the real xhr.
+				copyProps(xhr, self, { onreadystatechange: true });
+
+				self.onreadystatechange && self.onreadystatechange();
+				self.onload && self.onload();
+			}
+		};
+
 		//helpers.extend(xhr, this);
 		helpers.extend(xhr, settings);
 		this._xhr = xhr;
@@ -474,7 +490,7 @@ helpers.extend(fixture, {
 			items,
 			reset;
 
-		if(Array.isArray(count) && typeof count[0] === "string" ){
+		if(helpers.isArrayLike(count) && typeof count[0] === "string" ){
 			types = count;
 			count = make;
 			make= filter;
@@ -501,7 +517,7 @@ helpers.extend(fixture, {
 					currentId = Math.max(item.id + 1, currentId + 1) || items.length;
 					items.push(item);
 				}
-				if (Array.isArray(types)) {
+				if (helpers.isArrayLike(types)) {
 					fixture["~" + types[0]] = items;
 					fixture["-" + types[0]] = methods.getListData;
 					fixture["-" + types[1]] = methods.getData;
@@ -571,6 +587,7 @@ helpers.extend(fixture, {
 				//filter results if someone added an attr like parentId
 				for (var param in request.data) {
 					i = 0;
+
 					if (request.data[param] !== undefined && // don't do this if the value of the param is null (ignore it)
 						(param.indexOf("Id") !== -1 || param.indexOf("_id") !== -1)) {
 						while (i < retArr.length) {
