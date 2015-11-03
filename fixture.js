@@ -227,32 +227,6 @@ XMLHttpRequest.prototype.getAllResponseHeaders = function(){
 	return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
 };
 
-var defineProperty = (function(){
-	try {
-		Object.defineProperty({}, 'a', {});
-		return Object.defineProperty;
-	} catch (_) {
-		return function(obj, name, desc) {
-			if(desc.value) obj[name] = value;
-		}
-	}
-})();
-
-helpers.each(["response","responseText", "responseType", "responseURL","status","statusText","readyState", "onreadystatechange"], function(prop){
-
-	defineProperty(XMLHttpRequest.prototype, prop, {
-		get: function(){
-			return this._xhr[prop];
-		},
-		set: function(newVal){
-			this._xhr[prop] = newVal;
-		}
-	});
-
-});
-
-
-
 XMLHttpRequest.prototype.send = function(data) {
 	var settings = {
 		url: this.url,
