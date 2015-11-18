@@ -294,7 +294,7 @@ XMLHttpRequest.prototype.send = function(data) {
 					self.status = status;
 					self.statusText = "OK";
 					self.responseText = JSON.stringify(response[2][settings.dataType || 'json']);
-					self.onreadystatechange && self.onreadystatechange();
+					self.onreadystatechange && self.onreadystatechange({ target: self });
 					self.onload && self.onload();
 				} else {
 					// TODO probably resolve better
@@ -302,7 +302,7 @@ XMLHttpRequest.prototype.send = function(data) {
 					self.status = status;
 					self.statusText = "error";
 					self.responseText = typeof response[1] === "string" ? response[1] : JSON.stringify(response[1]);
-					self.onreadystatechange && self.onreadystatechange();
+					self.onreadystatechange && self.onreadystatechange({ target: self });
 					self.onload && self.onload();
 				}
 			},
@@ -314,7 +314,7 @@ XMLHttpRequest.prototype.send = function(data) {
 				self.status = 200;
 				self.statusText = "OK";
 				self.responseText = typeof result === "string" ? result : JSON.stringify(result);
-				self.onreadystatechange && self.onreadystatechange();
+				self.onreadystatechange && self.onreadystatechange({ target: self });
 				self.onload && self.onload();
 			}
 		}, fixture.delay);
@@ -336,15 +336,18 @@ XMLHttpRequest.prototype.send = function(data) {
 		};
 		copyProps(this, xhr);
 
-		xhr.onreadystatechange = function(){
+		xhr.onreadystatechange = function(ev){
 			if(xhr.readyState === 4) {
 				// Copy back everything over because in IE8 defineProperty
 				// doesn't work, so we need to make our shim XHR have the same
 				// values as the real xhr.
 				copyProps(xhr, self, { onreadystatechange: true });
 
-				self.onreadystatechange && self.onreadystatechange();
-				self.onload && self.onload();
+				self.onreadystatechange && self.onreadystatechange(ev);
+				if(self.onload && !xhr.__onloadCalled) {
+					self.onload();
+					xhr.__onloadCalled = true;
+				}
 			}
 		};
 
