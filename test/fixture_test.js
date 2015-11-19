@@ -784,3 +784,18 @@ QUnit.test("onreadystatechange, event is passed", function(){
 	xhr.send();
 	stop();
 });
+
+asyncTest("doesn't break onreadystatechange (#3)", function () {
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			ok(true, "we made a successful request");
+			start();
+		}
+	};
+
+	xhr.open('GET', url);
+	xhr.send();
+});
