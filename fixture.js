@@ -11,8 +11,8 @@ var $fixture = fixture = function (settings, fixture) {
 	// If fixture is provided, set up a new fixture.
 	if (fixture !== undefined) {
 		if (typeof settings === 'string') {
-			// Match URL if it has GET, POST, PUT, or DELETE.
-			var matches = settings.match(/(GET|POST|PUT|DELETE) (.+)/i);
+			// Match URL if it has GET, POST, PUT, DELETE or PATCH.
+			var matches = settings.match(/(GET|POST|PUT|DELETE|PATCH) (.+)/i);
 			// If not, we don't set the type, which eventually defaults to GET
 			if (!matches) {
 				settings = {

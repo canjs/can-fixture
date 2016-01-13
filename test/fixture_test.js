@@ -14,6 +14,7 @@ test('static fixtures', function () {
 	stop();
 	fixture('GET something', __dirname+'/fixtures/test.json');
 	fixture('POST something', __dirname+'/fixtures/test.json');
+	fixture('PATCH something', __dirname+'/fixtures/test.json');
 
 	$.ajax({
 		url: 'something',
@@ -28,7 +29,15 @@ test('static fixtures', function () {
 			})
 				.then(function (data) {
 					equal(data.sweet, 'ness', 'can.post works');
-					start();
+						$.ajax({
+					url: 'something',
+					method: 'PATCH',
+					dataType: 'json'
+				})
+					.then(function (data) {
+						equal(data.sweet, 'ness', 'can.patch works');
+						start();
+					},errorCallback);
 				},errorCallback);
 		}, errorCallback);
 });
