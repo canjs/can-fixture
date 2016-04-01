@@ -250,6 +250,10 @@ XMLHttpRequest.prototype.setDisableHeaderCheck = function(val){
 	this._disableHeaderCheck = !!val;
 };
 
+XMLHttpRequest.prototype.getResponseHeader = function(key){
+	return "";
+}
+
 XMLHttpRequest.prototype.send = function(data) {
 	var settings = {
 		url: this.url,
@@ -355,6 +359,12 @@ XMLHttpRequest.prototype.send = function(data) {
 
 		if(this._disableHeaderCheck && xhr.setDisableHeaderCheck) {
 			xhr.setDisableHeaderCheck(true);
+		}
+
+		if(xhr.getResponseHeader) {
+			this.getResponseHeader = function(){
+				return xhr.getResponseHeader.apply(xhr, arguments);
+			};
 		}
 
 		//helpers.extend(xhr, this);
