@@ -214,6 +214,12 @@ g.XMLHttpRequest = function(){
 			return headers;
 		}
 	};
+	this.__events = {};
+	// The way code detects if the browser supports onload is to check
+	// if a new XHR object has the onload property, so setting it to null
+	// passes that check.
+	this.onload = null;
+	this.onerror = null;
 };
 
 XMLHttpRequest.prototype.setRequestHeader = function(name, value){
@@ -225,6 +231,23 @@ XMLHttpRequest.prototype.open = function(type, url){
 };
 XMLHttpRequest.prototype.getAllResponseHeaders = function(){
 	return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
+};
+
+XMLHttpRequest.prototype.addEventListener = function(ev, fn){
+	var evs = this.__events[ev] = this.__events[ev] || [];
+	evs.push(fn);
+};
+
+XMLHttpRequest.prototype.removeEventListener = function(ev, fn){
+	var evs = this.__events[ev] = this.__events[ev] || [];
+	var idx = evs.indexOf(fn);
+	if(idx >= 0) {
+		evs.splice(idx, 1);
+	}
+};
+
+XMLHttpRequest.prototype.setDisableHeaderCheck = function(val){
+	this._disableHeaderCheck = !!val;
 };
 
 XMLHttpRequest.prototype.send = function(data) {
@@ -278,6 +301,7 @@ XMLHttpRequest.prototype.send = function(data) {
 					self.responseText = typeof response[1] === "string" ? response[1] : JSON.stringify(response[1]);
 					self.onreadystatechange && self.onreadystatechange({ target: self });
 					self.onload && self.onload();
+					callEvents(self, "load");
 				}
 			},
 				// Get the results from the fixture.
@@ -290,6 +314,7 @@ XMLHttpRequest.prototype.send = function(data) {
 				self.responseText = typeof result === "string" ? result : JSON.stringify(result);
 				self.onreadystatechange && self.onreadystatechange({ target: self });
 				self.onload && self.onload();
+				callEvents(self, "load");
 			}
 		}, fixture.delay);
 
@@ -315,15 +340,22 @@ XMLHttpRequest.prototype.send = function(data) {
 				// Copy back everything over because in IE8 defineProperty
 				// doesn't work, so we need to make our shim XHR have the same
 				// values as the real xhr.
-				copyProps(xhr, self, { onreadystatechange: true });
+				copyProps(xhr, self, { onreadystatechange: true, onload: true });
 
 				self.onreadystatechange && self.onreadystatechange(ev);
-				if(self.onload && !xhr.__onloadCalled) {
-					self.onload();
-					xhr.__onloadCalled = true;
-				}
 			}
 		};
+
+		xhr.onload = function(){
+			callEvents(self, "load");
+			if(self.onload) {
+				return self.onload.apply(this, arguments);
+			}
+		};
+
+		if(this._disableHeaderCheck && xhr.setDisableHeaderCheck) {
+			xhr.setDisableHeaderCheck(true);
+		}
 
 		//helpers.extend(xhr, this);
 		helpers.extend(xhr, settings);
@@ -332,6 +364,17 @@ XMLHttpRequest.prototype.send = function(data) {
 		return xhr.send(data);
 	}
 };
+
+/**
+ * Call all of an event for an XHR object
+ */
+function callEvents(xhr, ev) {
+	var evs = xhr.__events[ev] || [], fn;
+	for(var i = 0, len = evs.length; i < len; i++) {
+		fn = evs[i];
+		fn.call(xhr);
+	}
+}
 
 // overwrite XHR
 
