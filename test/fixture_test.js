@@ -879,3 +879,19 @@ asyncTest("supports setRequestHeader", function(){
 	xhr.open("GET", url);
 	xhr.send();
 });
+
+asyncTest("supports getResponseHeader", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4) {
+			var header = xhr.getResponseHeader("Content-Type");
+			ok(typeof header === "string", "did get a header back");
+			start();
+		}
+	};
+
+	xhr.open("GET", url);
+	xhr.send();
+});
