@@ -808,3 +808,74 @@ asyncTest("doesn't break onreadystatechange (#3)", function () {
 	xhr.open('GET', url);
 	xhr.send();
 });
+
+QUnit.module("XHR Shim");
+
+test("Supports onload", function(){
+	var xhr = new XMLHttpRequest();
+	QUnit.ok(("onload" in xhr), "shim passes onload detection");
+});
+
+asyncTest("supports addEventListener on XHR shim", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports addEventListener");
+		start();
+	});
+
+	xhr.open('GET', url);
+	xhr.send();
+});
+
+asyncTest("supports removeEventListener on XHR shim", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	var onload = function(){
+		ok(false, "this should not be called");
+	};
+
+	xhr.addEventListener('load', onload);
+	xhr.removeEventListener("load", onload);
+
+	xhr.onload = function(){
+		setTimeout(function(){
+			ok(true, 'didn\'t call the event listener');
+			start();
+		});
+	};
+
+	xhr.open('GET', url);
+	xhr.send();
+});
+
+test("supports setDisableHeaderCheck", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	try {
+		xhr.setDisableHeaderCheck(true);
+		ok(true, "did not throw");
+	} catch(e) {
+		ok(false, "do not support setDisableHeaderCheck");
+	}
+});
+
+asyncTest("supports setRequestHeader", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.setRequestHeader("foo", "bar");
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4) {
+			equal(xhr._headers.foo, "bar", "header was set");
+			start();
+		}
+	};
+
+	xhr.open("GET", url);
+	xhr.send();
+});
