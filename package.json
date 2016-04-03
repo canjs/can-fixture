@@ -13,13 +13,13 @@
     "test": "testee --browsers firefox test/test.html"
   },
   "dependencies": {
-    "can-set": "^0.3.0"
+    "can-set": "^0.5.1"
   },
   "devDependencies": {
-    "steal": "^0.12.0-pre.6",
-    "steal-qunit": "0.0.2",
-    "testee": "^0.2.0",
-    "steal-tools": "^0.12.0-pre.3",
+    "steal": "^0.15.3",
+    "steal-qunit": "0.1.1",
+    "testee": "^0.2.5",
+    "steal-tools": "^0.15.5",
     "jquery": "^1.11.0"
   },
   "repository": {
@@ -40,6 +40,7 @@
       "can-set",
       "steal-qunit",
       "jquery"
-    ]
+    ],
+    "npmAlgorithm": "flat"
   }
 }
