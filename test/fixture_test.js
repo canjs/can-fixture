@@ -1,5 +1,6 @@
 var Qunit = require('steal-qunit');
 var fixture = require("can-fixture");
+var core = require("../core");
 var set = require("can-set");
 var $ = require("jquery");
 
@@ -135,9 +136,9 @@ test('fixture.store fixtures', function () {
 });
 
 test('simulating an error', function () {
-	var st = '{type: "unauthorized"}';
+
 	fixture('/foo', function (request, response) {
-		return response(401, st);
+		return response(401, {type: "unauthorized"});
 	});
 	stop();
 	$.ajax({
@@ -150,7 +151,7 @@ test('simulating an error', function () {
 		})
 		.fail(function (original, type) {
 			ok(true, 'error called');
-			equal(original.responseText, st, 'Original text passed');
+			deepEqual(JSON.parse(original.responseText), {type: "unauthorized"}, 'Original text passed');
 			start();
 		});
 });
@@ -184,55 +185,55 @@ test('rand', function () {
 	}, 10);
 });
 
-test('_getData', function () {
-	var data = fixture._getData('/thingers/{id}', '/thingers/5');
+test('core.dataFromUrl', function () {
+	var data = core.dataFromUrl('/thingers/{id}', '/thingers/5');
 	equal(data.id, 5, 'gets data');
-	data = fixture._getData('/thingers/5?hi.there', '/thingers/5?hi.there');
+	data = core.dataFromUrl('/thingers/5?hi.there', '/thingers/5?hi.there');
 	deepEqual(data, {}, 'gets data');
 });
 
-test('_getData with double character value', function () {
-	var data = fixture._getData('/days/{id}/time_slots.json', '/days/17/time_slots.json');
+test('core.dataFromUrl with double character value', function () {
+	var data = core.dataFromUrl('/days/{id}/time_slots.json', '/days/17/time_slots.json');
 	equal(data.id, 17, 'gets data');
 });
 
-test('_compare', function () {
+test('core.defaultCompare', function () {
 	var same = set.equal({
 		url: '/thingers/5'
 	}, {
 		url: '/thingers/{id}'
-	}, fixture._compare);
+	}, core.defaultCompare);
 	ok(same, 'they are similar');
 	same = set.equal({
 		url: '/thingers/5'
 	}, {
 		url: '/thingers'
-	}, fixture._compare);
+	}, core.defaultCompare);
 	ok(!same, 'they are not the same');
 });
 
-test('_similar', function () {
-	var same = fixture._similar({
+test('core.matches', function () {
+	var same = core.matches({
 		url: '/thingers/5'
 	}, {
 		url: '/thingers/{id}'
 	});
 	ok(same, 'similar');
-	same = fixture._similar({
+	same = core.matches({
 		url: '/thingers/5',
 		type: 'get'
 	}, {
 		url: '/thingers/{id}'
 	});
 	ok(same, 'similar with extra pops on settings');
-	var exact = fixture._similar({
+	var exact = core.matches({
 		url: '/thingers/5',
 		type: 'get'
 	}, {
 		url: '/thingers/{id}'
 	}, true);
 	ok(!exact, 'not exact');
-	exact = fixture._similar({
+	exact = core.matches({
 		url: '/thingers/5'
 	}, {
 		url: '/thingers/5'
@@ -322,6 +323,7 @@ test('fixture.store with can.Model', function () {
 
 	stop();
 	function errorAndStart(e){
+		debugger;
 		ok(false, "borked"+e);
 		start();
 	}
@@ -806,5 +808,112 @@ asyncTest("doesn't break onreadystatechange (#3)", function () {
 	};
 
 	xhr.open('GET', url);
+	xhr.send();
+});
+
+QUnit.module("XHR Shim");
+
+test("Supports onload", function(){
+	var xhr = new XMLHttpRequest();
+	QUnit.ok(("onload" in xhr), "shim passes onload detection");
+});
+
+asyncTest("supports addEventListener on XHR shim", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports addEventListener");
+		start();
+	});
+
+	xhr.open('GET', url);
+	xhr.send();
+});
+
+asyncTest("supports removeEventListener on XHR shim", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	var onload = function(){
+		ok(false, "this should not be called");
+	};
+
+	xhr.addEventListener('load', onload);
+	xhr.removeEventListener("load", onload);
+
+	xhr.onload = function(){
+		setTimeout(function(){
+			ok(true, 'didn\'t call the event listener');
+			start();
+		});
+	};
+
+	xhr.open('GET', url);
+	xhr.send();
+});
+
+test("supports setDisableHeaderCheck", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	try {
+		xhr.setDisableHeaderCheck(true);
+		ok(true, "did not throw");
+	} catch(e) {
+		ok(false, "do not support setDisableHeaderCheck");
+	}
+});
+
+asyncTest("supports setRequestHeader", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.setRequestHeader("foo", "bar");
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4) {
+			equal(xhr._headers.foo, "bar", "header was set");
+			start();
+		}
+	};
+
+	xhr.open("GET", url);
+	xhr.send();
+});
+
+asyncTest("supports getResponseHeader", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4) {
+			var header = xhr.getResponseHeader("Content-Type");
+			ok(typeof header === "string", "did get a header back");
+			start();
+		}
+	};
+
+	xhr.open("GET", url);
+	xhr.send();
+});
+
+asyncTest("pass data to response handler (#13)", function(){
+	
+	fixture("GET something", function(req,res){
+		res(403, {
+		    message: 'No bad guys'
+		});
+	});
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "something");
+	xhr.onreadystatechange = function(ev){
+		deepEqual(JSON.parse(this.responseText),{
+		    message: 'No bad guys'
+		}, "correct response");
+		equal(this.status, 403, "correct status");
+		start();
+	};
 	xhr.send();
 });

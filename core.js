@@ -28,9 +28,10 @@ exports.add = function (settings, fixture) {
 
 		// Check if the same fixture was previously added, if so, we remove it
 		// from our array of fixture overwrites.
-		var index = exports.index(settings, !! fixture);
+		var index = exports.index(settings, true);
+		
 		if (index > -1) {
-			overwrites.splice(index, 1);
+			fixtures.splice(index, 1);
 		}
 		if (fixture == null) {
 			return;
@@ -52,69 +53,31 @@ var $fixture = exports.add;
 $fixture.on = true;
 $fixture.delay =10;
 
-// Manipulates the AJAX prefilter to identify whether or not we should
-// manipulate the AJAX call to change the URL to a static file or call
-// a function for a dynamic fixture.
-exports.updateSettingsOrReturnFixture = function ( settings ) {
-	if ( !$fixture.on ) {
-		return;
-	}
 
-	// We always need the type which can also be called method, default to GET
-	settings.type = settings.type || settings.method || 'GET';
+// Calls a dynamic fixture and calls `cb` with the response data.
+exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
+	// this is for legacy.  In the future, people should get it from fixtureSettings probably.
+	xhrSettings.data = fixtureSettings.data;
 
-	// add the fixture option if programmed in
-	var fixture = exports.get(settings);
+	//!steal-remove-start
+	exports.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" -> handler(req,res)");
+	//!steal-remove-end
 
-	// If there is not a fixture for this AJAX request, do nothing.
-	if (!fixture) {
-		return;
-	}
+	var response = function(){
+		var res = exports.extractResponse.apply(xhrSettings, arguments);
+		return cb.apply(this, res);
+	};
 
-	// If the fixture setting is a string, we just change the URL of the
-	// AJAX call to the fixture URL.
-	if (typeof fixture === "string") {
-		var url = fixture;
+	setTimeout(function () {
+		// fall the fixture
+		var result = fixtureSettings.fixture(xhrSettings, response, xhrSettings.headers, fixtureSettings);
 
-		// If the URL starts with //, we need to update the URL to become
-		// the full path.
-		if (/^\/\//.test(url)) {
-			// this lets us use rootUrl w/o having steal...
-			url = getUrl(fixture.substr(2));
+		if (result !== undefined) {
+			// Resolve with fixture results
+			response(200, result );
 		}
-		// here we could read data from first url and translate into next
-		//if (data) {
-			// Template static fixture URLs
-		//	url = sub(url, data);
-		//}
-
-		//!steal-remove-start
-		log("looking for fixture in " + url);
-		//!steal-remove-end
-
-		// Override the AJAX settings, changing the URL to the fixture file,
-		// removing the data, and changing the type to GET.
-		settings.url = url;
-		settings.data = null;
-		settings.type = "GET";
-		if (!settings.error) {
-			// If no error handling is provided, we provide one and throw an
-			// error.
-			settings.error = function (xhr, error, message) {
-				throw "fixtures.js Error " + error + " " + message;
-			};
-		}
-		// Otherwise, it is a function and we add the fixture data type so the
-		// fixture transport will handle it.
-	} else {
-		//!steal-remove-start
-		log("using a dynamic fixture for " + settings.type + " " + settings.url);
-		//!steal-remove-end
-
-		return fixture;
-	}
-};
-
+	}, $fixture.delay);
+}
 
 exports.index = function (settings, exact) {
 	for (var i = 0; i < fixtures.length; i++) {
@@ -124,12 +87,52 @@ exports.index = function (settings, exact) {
 	}
 	return -1;
 };
-exports.get = function(settings, exact) {
-	var index = exports.index(settings, exact);
-	return index >=0 ? fixtures[index].fixture : undefined;
+exports.get = function(xhrSettings) {
+	if ( !$fixture.on ) {
+		return;
+	}
+	// First try an exact match
+	var index = exports.index(xhrSettings, true);
+
+	// If that doesn't work, try a looser match.
+	if(index === -1) {
+		index = exports.index(xhrSettings, false);
+	}
+
+	var fixtureSettings = index >=0 ? helpers.extend({},fixtures[index]) : undefined;
+	if(fixtureSettings) {
+		var url = fixtureSettings.fixture,
+			data = exports.dataFromUrl(fixtureSettings.url, xhrSettings.url);
+		if(typeof fixtureSettings.fixture === "string") {
+			// check that we might have a replacement
+
+			// here we could read data from first url and translate into next
+			if (data) {
+				// Template static fixture URLs
+				url = sub(url, data);
+			}
+
+			// Override the AJAX settings, changing the URL to the fixture file,
+			// removing the data, and changing the type to GET.
+			fixtureSettings.url = url;
+			fixtureSettings.data = null;
+			fixtureSettings.type = "GET";
+			if (!fixtureSettings.error) {
+				// If no error handling is provided, we provide one and throw an
+				// error.
+				fixtureSettings.error = function (xhr, error, message) {
+					throw "fixtures.js Error " + error + " " + message;
+				};
+			}
+		} else {
+			var xhrData = helpers.extend({}, xhrSettings.data || {});
+			fixtureSettings.data = helpers.extend(xhrData, data);
+		}
+	}
+
+
+	return fixtureSettings;
 };
-
-
 
 exports.matches = function(settings, fixture, exact) {
 	if (exact) {
@@ -140,7 +143,6 @@ exports.matches = function(settings, fixture, exact) {
 		return canSet.subset(settings, fixture, exports.defaultCompare);
 	}
 };
-
 
 // Comparator object used to find a similar fixture.
 exports.defaultCompare = {
@@ -194,41 +196,25 @@ exports.dataFromUrl = function (fixtureUrl, url) {
 
 // A helper function that takes what's called with response
 // and moves some common args around to make it easier to call
-exports.extractResponse = function (status, statusText, responses, headers) {
-	// if we get response(RESPONSES, HEADERS)
+exports.extractResponse = function (status, response, headers, statusText) {
+	// if we get response(RESPONSE, HEADERS)
 	if (typeof status !== "number") {
-		headers = statusText;
-		responses = status;
-		statusText = "success";
+		headers = response;
+		response = status;
 		status = 200;
 	}
-	// if we get response(200, RESPONSES, HEADERS)
-	if (typeof statusText !== "string") {
-		headers = responses;
-		responses = statusText;
-		statusText = "success";
+	// if we get response(200, RESPONSE, STATUS_TEXT)
+	if (typeof headers === "string") {
+		statusText = headers;
+		headers = {};
 	}
-	if (status >= 400 && status <= 599) {
-		this.dataType = "text";
-	}
-	return [status, statusText, exports.extractResponses(this, responses), headers];
-},
-// If we get data instead of responses, make sure we provide a response
-// type that matches the first datatype (typically JSON)
-exports.extractResponses = function (settings, responses) {
-	var next = settings.dataTypes ? settings.dataTypes[0] : (settings.dataType || 'json');
-	if (!responses || !responses[next]) {
-		var tmp = {};
-		tmp[next] = responses;
-		responses = tmp;
-	}
-	return responses;
+	return [status, response, headers, statusText];
 };
 
 // A simple wrapper for logging fixture.js.
-var log = function () {
+exports.log = function () {
 	//!steal-remove-start
-	console.log('can-fixture ' + Array.prototype.slice.call(arguments)
+	console.log('can-fixture: ' + Array.prototype.slice.call(arguments)
 		.join(' '));
 	//!steal-remove-end
 };

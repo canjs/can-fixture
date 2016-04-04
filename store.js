@@ -80,14 +80,6 @@ module.exports = function (count, make, filter) {
 				currentId = Math.max(item.id + 1, currentId + 1) || items.length;
 				items.push(item);
 			}
-			if (helpers.isArrayLike(types)) {
-				fixture["~" + types[0]] = items;
-				fixture["-" + types[0]] = methods.getListData;
-				fixture["-" + types[1]] = methods.getData;
-				fixture["-" + types[1] + "Update"] = methods.updateData;
-				fixture["-" + types[1] + "Destroy"] = methods.destroyData;
-				fixture["-" + types[1] + "Create"] = methods.createData;
-			}
 		};
 	} else {
 		filter = make;

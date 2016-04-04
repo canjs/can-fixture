@@ -4,6 +4,7 @@ var canSet = require("can-set");
 var helpers = canSet.helpers;
 var deparam = require("./helpers/deparam");
 
+
 var XHR = XMLHttpRequest,
 	g = typeof global !== "undefined"? global : window;
 
@@ -14,6 +15,12 @@ g.XMLHttpRequest = function(){
 			return headers;
 		}
 	};
+	this.__events = {};
+	// The way code detects if the browser supports onload is to check
+	// if a new XHR object has the onload property, so setting it to null
+	// passes that check.
+	this.onload = null;
+	this.onerror = null;
 };
 
 XMLHttpRequest.prototype.setRequestHeader = function(name, value){
@@ -27,107 +34,144 @@ XMLHttpRequest.prototype.getAllResponseHeaders = function(){
 	return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
 };
 
+XMLHttpRequest.prototype.addEventListener = function(ev, fn){
+	var evs = this.__events[ev] = this.__events[ev] || [];
+	evs.push(fn);
+};
+
+XMLHttpRequest.prototype.removeEventListener = function(ev, fn){
+	var evs = this.__events[ev] = this.__events[ev] || [];
+	var idx = evs.indexOf(fn);
+	if(idx >= 0) {
+		evs.splice(idx, 1);
+	}
+};
+
+XMLHttpRequest.prototype.setDisableHeaderCheck = function(val){
+	this._disableHeaderCheck = !!val;
+};
+
+XMLHttpRequest.prototype.getResponseHeader = function(key){
+	return "";
+}
+
 XMLHttpRequest.prototype.send = function(data) {
-	var settings = {
+	// derive the XHR settings object from the XHR object
+	var xhrSettings = {
 		url: this.url,
 		data: data,
 		headers: this._headers,
-		type: this.type.toLowerCase()
+		type: this.type.toLowerCase() || 'get'
 	};
-	if(!settings.data && settings.type === "get" || settings.type === "delete") {
-		settings.data = deparam( settings.url.split("?")[1] );
-		settings.url = settings.url.split("?")[0];
+	if(!xhrSettings.data && xhrSettings.type === "get" || xhrSettings.type === "delete") {
+		xhrSettings.data = deparam( xhrSettings.url.split("?")[1] );
+		xhrSettings.url = xhrSettings.url.split("?")[0];
 	}
-	if(typeof settings.data === "string") {
+	if(typeof xhrSettings.data === "string") {
 		try {
-			settings.data = JSON.parse(settings.data);
+			xhrSettings.data = JSON.parse(xhrSettings.data);
 		} catch(e) {
-			settings.data = deparam( settings.data );
+			xhrSettings.data = deparam( xhrSettings.data );
 		}
-
 	}
 
-	var self = this;
+	// See if the XHR settings match a fixture.
+	var fixtureSettings = fixtureCore.get(xhrSettings);
 
-	var fixture = fixtureCore.updateSettingsOrReturnFixture(settings);
+	// If a dynamic fixture is being used, we call the dynamic fixture function and then
+	// copy the response back onto the `mockXHR` in the right places.
+	if(fixtureSettings && typeof fixtureSettings.fixture === "function") {
+		var mockXHR = this;
+		return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
+			body = typeof body === "string" ? body :  JSON.stringify(body);
 
-	// If the call is a fixture call, we run the same type of code as we would
-	// with jQuery's ajaxTransport.
-	if (fixture) {
-		var timeout,
-			stopped = false;
-
-		// set a timeout that simulates making a request ....
-		timeout = setTimeout(function () {
-			// if the user wants to call success on their own, we allow it ...
-			var success = function () {
-				var response = extractResponse.apply(settings, arguments),
-					status = response[0];
-
-				helpers.extend(self,{
-					readyState: 4,
-					status: status
+			helpers.extend(mockXHR,{
+				readyState: 4,
+				status: status
+			});
+			if ( (status >= 200 && status < 300 || status === 304) ) {
+				helpers.extend(mockXHR,{
+					statusText: statusText || "OK",
+					responseText: body
 				});
-				if ((status >= 200 && status < 300 || status === 304) && stopped === false) {
-					helpers.extend({
-						statusText: "OK",
-						responseText: JSON.stringify(response[2][settings.dataType || 'json'])
-					});
-				} else {
-					helpers.extend({
-						statusText: "error",
-						responseText: typeof response[1] === "string" ? response[1] : JSON.stringify(response[1])
-					});
-					self.statusText = "error";
-				}
-				self.onreadystatechange && self.onreadystatechange({ target: self });
-				self.onload && self.onload();
-			},
-				// Get the results from the fixture.
-				result = fixture(settings, success, settings.headers, settings);
-
-			if (result !== undefined) {
-				// Resolve with fixture results
-				success(200, "success", result );
+			} else {
+				helpers.extend(mockXHR,{
+					statusText: statusText || "error",
+					responseText: body
+				});
 			}
-		}, fixtureCore.add.delay);
-
-		// Otherwise just run a normal ajax call.
-	} else {
-
-		var xhr = new XHR();
-
-		var copyProps = function(source, dest, excluding){
-			excluding = excluding || {};
-
-			// copy everything on this to the xhr object that is not on `this`'s prototype
-			for(var prop in source){
-				if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-					dest[prop] = source[prop];
-				}
-			}
-		};
-		copyProps(this, xhr);
-
-		xhr.onreadystatechange = function(ev){
-			if(xhr.readyState === 4) {
-				// Copy back everything over because in IE8 defineProperty
-				// doesn't work, so we need to make our shim XHR have the same
-				// values as the real xhr.
-				copyProps(xhr, self, { onreadystatechange: true });
-
-				self.onreadystatechange && self.onreadystatechange(ev);
-				if(self.onload && !xhr.__onloadCalled) {
-					self.onload();
-					xhr.__onloadCalled = true;
-				}
-			}
-		};
-
-		//helpers.extend(xhr, this);
-		helpers.extend(xhr, settings);
-		this._xhr = xhr;
-		xhr.open(settings.type, settings.url);
-		return xhr.send(data);
+			mockXHR.onreadystatechange && mockXHR.onreadystatechange({ target: mockXHR });
+			mockXHR.onload && mockXHR.onload();
+		});
 	}
+	// Make a realXHR object based around the settings of the mockXHR.
+	var xhr = makeXHR(this);
+	if(fixtureSettings) {
+		// we need to modify the XHR object to send with `fixtureSettings`.
+		//!steal-remove-start
+		fixtureCore.log(xhrSettings.url+" -> " + fixtureSettings.url);
+		//!steal-remove-end
+		helpers.extend(xhr, fixtureSettings);
+	}
+
+	this._xhr = xhr;
+	xhr.open(xhr.type, xhr.url);
+	return xhr.send(data);
+};
+
+/**
+ * Call all of an event for an XHR object
+ */
+function callEvents(xhr, ev) {
+	var evs = xhr.__events[ev] || [], fn;
+	for(var i = 0, len = evs.length; i < len; i++) {
+		fn = evs[i];
+		fn.call(xhr);
+	}
+}
+
+var copyProps = function(source, dest, excluding){
+	excluding = excluding || {};
+
+	// copy everything on this to the xhr object that is not on `this`'s prototype
+	for(var prop in source){
+		if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+			dest[prop] = source[prop];
+		}
+	}
+};
+
+var makeXHR = function(mockXHR){
+	var xhr = new XHR();
+
+	copyProps(mockXHR, xhr);
+
+	xhr.onreadystatechange = function(ev){
+		if(xhr.readyState === 4) {
+			// Copy back everything over because in IE8 defineProperty
+			// doesn't work, so we need to make our shim XHR have the same
+			// values as the real xhr.
+			copyProps(xhr, mockXHR, { onreadystatechange: true, onload: true });
+
+			mockXHR.onreadystatechange && mockXHR.onreadystatechange(ev);
+		}
+	};
+
+	xhr.onload = function(){
+		callEvents(mockXHR, "load");
+		if(mockXHR.onload) {
+			return mockXHR.onload.apply(mockXHR, arguments);
+		}
+	};
+
+	if(mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
+		xhr.setDisableHeaderCheck(true);
+	}
+
+	if(xhr.getResponseHeader) {
+		mockXHR.getResponseHeader = function(){
+			return xhr.getResponseHeader.apply(xhr, arguments);
+		};
+	}
+	return xhr;
 };
