@@ -26,15 +26,22 @@ exports.add = function (settings, fixture) {
 			}
 		}
 
+
 		// Check if the same fixture was previously added, if so, we remove it
 		// from our array of fixture overwrites.
 		var index = exports.index(settings, true);
-		
+
 		if (index > -1) {
 			fixtures.splice(index, 1);
 		}
 		if (fixture == null) {
 			return;
+		}
+		if(typeof fixture === "object") {
+			var data = fixture;
+			fixture = function(){
+				return data;
+			};
 		}
 		settings.fixture = fixture;
 		fixtures.push(settings);
@@ -45,7 +52,7 @@ exports.add = function (settings, fixture) {
 	// the new fixtures.
 	else {
 		helpers.each(settings, function (fixture, url) {
-			$fixture(url, fixture);
+			exports.add(url, fixture);
 		});
 	}
 };
@@ -77,7 +84,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 			response(200, result );
 		}
 	}, $fixture.delay);
-}
+};
 
 exports.index = function (settings, exact) {
 	for (var i = 0; i < fixtures.length; i++) {
@@ -136,11 +143,18 @@ exports.get = function(xhrSettings) {
 
 exports.matches = function(settings, fixture, exact) {
 	if (exact) {
-		return canSet.equal(settings, fixture, {
-			fixture: function(){ return true; }
-		});
+		return canSet.equal(settings, fixture, exports.defaultCompare);
 	} else {
 		return canSet.subset(settings, fixture, exports.defaultCompare);
+	}
+};
+var isEmptyOrNull = function(a, b){
+	if( a == null && helpers.isEmptyObject(b) ) {
+		return true;
+	} else if( b == null && helpers.isEmptyObject(a) ) {
+		return true;
+	} else {
+		return canSet.equal(a, b);
 	}
 };
 
@@ -153,11 +167,13 @@ exports.defaultCompare = {
 		return true;
 	},
 	type: function(a,b){
-		return b ? a.toLowerCase() === b.toLowerCase() : false;
+		return b && a ? a.toLowerCase() === b.toLowerCase() : b === a;
 	},
 	helpers: function(){
 		return true;
-	}
+	},
+	headers: isEmptyOrNull,
+	data: isEmptyOrNull
 };
 
 var replacer =  /\{([^\}]+)\}/g;
@@ -217,32 +233,4 @@ exports.log = function () {
 	console.log('can-fixture: ' + Array.prototype.slice.call(arguments)
 		.join(' '));
 	//!steal-remove-end
-};
-// used to get a url relative to some established root.
-var getUrl = function (url) {
-	if (typeof steal !== 'undefined') {
-		// New steal
-		// TODO The correct way to make this work with new Steal is to change getUrl
-		// to return a deferred and have the other code accept a deferred.
-		if(steal.joinURIs) {
-			var base = steal.config("baseUrl");
-			var joined = steal.joinURIs(base, url);
-			return joined;
-		}
-
-		// Legacy steal
-		if (typeof steal.config === "function") {
-			if (steal.System) {
-				return steal.joinURIs(steal.config('baseURL'), url);
-			}
-			else {
-				return steal.config()
-					.root.mapJoin(url)
-					.toString();
-			}
-		}
-		return steal.root.join(url)
-			.toString();
-	}
-	return (fixture.rootUrl || '') + url;
 };

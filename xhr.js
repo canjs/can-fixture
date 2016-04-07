@@ -8,6 +8,71 @@ var deparam = require("./helpers/deparam");
 var XHR = XMLHttpRequest,
 	g = typeof global !== "undefined"? global : window;
 
+// HELPERS
+/**
+ * Call all of an event for an XHR object
+ */
+function callEvents(xhr, ev) {
+	var evs = xhr.__events[ev] || [], fn;
+	for(var i = 0, len = evs.length; i < len; i++) {
+		fn = evs[i];
+		fn.call(xhr);
+	}
+}
+var copyProps = function(source, dest, excluding){
+	excluding = excluding || {};
+
+	// copy everything on this to the xhr object that is not on `this`'s prototype
+	for(var prop in source){
+		if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+			dest[prop] = source[prop];
+		}
+	}
+};
+
+// Helper that given the mockXHR, creates a real XHR that will call the mockXHR's
+// callbacks when the real XHR's request completes.
+var makeXHR = function(mockXHR){
+	var xhr = new XHR();
+
+	copyProps(mockXHR, xhr);
+
+	xhr.onreadystatechange = function(ev){
+		if(xhr.readyState === 4) {
+			// Copy back everything over because in IE8 defineProperty
+			// doesn't work, so we need to make our shim XHR have the same
+			// values as the real xhr.
+			copyProps(xhr, mockXHR, { onreadystatechange: true, onload: true });
+			if(mockXHR.onreadystatechange) {
+				mockXHR.onreadystatechange(ev);
+			}
+		}
+	};
+
+	xhr.onload = function(){
+		callEvents(mockXHR, "load");
+		if(mockXHR.onload) {
+			return mockXHR.onload.apply(mockXHR, arguments);
+		}
+	};
+
+	if(mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
+		xhr.setDisableHeaderCheck(true);
+	}
+
+	if(xhr.getResponseHeader) {
+		mockXHR.getResponseHeader = function(){
+			return xhr.getResponseHeader.apply(xhr, arguments);
+		};
+	}
+	return xhr;
+};
+
+
+
+
+
+
 g.XMLHttpRequest = function(){
 	var headers = this._headers = {};
 	this._xhr = {
@@ -53,7 +118,7 @@ XMLHttpRequest.prototype.setDisableHeaderCheck = function(val){
 
 XMLHttpRequest.prototype.getResponseHeader = function(key){
 	return "";
-}
+};
 
 XMLHttpRequest.prototype.send = function(data) {
 	// derive the XHR settings object from the XHR object
@@ -100,8 +165,12 @@ XMLHttpRequest.prototype.send = function(data) {
 					responseText: body
 				});
 			}
-			mockXHR.onreadystatechange && mockXHR.onreadystatechange({ target: mockXHR });
-			mockXHR.onload && mockXHR.onload();
+			if(mockXHR.onreadystatechange) {
+				mockXHR.onreadystatechange({ target: mockXHR });
+			}
+			if(mockXHR.onload) {
+				mockXHR.onload();
+			}
 		});
 	}
 	// Make a realXHR object based around the settings of the mockXHR.
@@ -117,61 +186,4 @@ XMLHttpRequest.prototype.send = function(data) {
 	this._xhr = xhr;
 	xhr.open(xhr.type, xhr.url);
 	return xhr.send(data);
-};
-
-/**
- * Call all of an event for an XHR object
- */
-function callEvents(xhr, ev) {
-	var evs = xhr.__events[ev] || [], fn;
-	for(var i = 0, len = evs.length; i < len; i++) {
-		fn = evs[i];
-		fn.call(xhr);
-	}
-}
-
-var copyProps = function(source, dest, excluding){
-	excluding = excluding || {};
-
-	// copy everything on this to the xhr object that is not on `this`'s prototype
-	for(var prop in source){
-		if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-			dest[prop] = source[prop];
-		}
-	}
-};
-
-var makeXHR = function(mockXHR){
-	var xhr = new XHR();
-
-	copyProps(mockXHR, xhr);
-
-	xhr.onreadystatechange = function(ev){
-		if(xhr.readyState === 4) {
-			// Copy back everything over because in IE8 defineProperty
-			// doesn't work, so we need to make our shim XHR have the same
-			// values as the real xhr.
-			copyProps(xhr, mockXHR, { onreadystatechange: true, onload: true });
-
-			mockXHR.onreadystatechange && mockXHR.onreadystatechange(ev);
-		}
-	};
-
-	xhr.onload = function(){
-		callEvents(mockXHR, "load");
-		if(mockXHR.onload) {
-			return mockXHR.onload.apply(mockXHR, arguments);
-		}
-	};
-
-	if(mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
-		xhr.setDisableHeaderCheck(true);
-	}
-
-	if(xhr.getResponseHeader) {
-		mockXHR.getResponseHeader = function(){
-			return xhr.getResponseHeader.apply(xhr, arguments);
-		};
-	}
-	return xhr;
 };

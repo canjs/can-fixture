@@ -10,17 +10,21 @@
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
-    "test": "testee --browsers firefox test/test.html"
+    "testee": "testee --browsers firefox test/test.html",
+    "test": "npm run jshint && npm run testee",
+    "jshint": "jshint fixture.js core.js store.js xhr.js --config"
   },
   "dependencies": {
-    "can-set": "^0.5.1"
+    "can-set": "^0.5.5",
+    "can-connect": "^0.5.3"
   },
   "devDependencies": {
     "steal": "^0.15.3",
     "steal-qunit": "0.1.1",
     "testee": "^0.2.5",
     "steal-tools": "^0.15.5",
-    "jquery": "^1.11.0"
+    "jquery": "^1.11.0",
+    "jshint": "^2.7.0"
   },
   "repository": {
     "type": "git",
@@ -39,7 +43,8 @@
     "npmDependencies": [
       "can-set",
       "steal-qunit",
-      "jquery"
+      "jquery",
+      "can-connect"
     ],
     "npmAlgorithm": "flat"
   }

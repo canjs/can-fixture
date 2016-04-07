@@ -1,5 +1,9 @@
 var canSet = require("can-set");
 var helpers = canSet.helpers;
+
+var connect = require("can-connect");
+require("can-connect/data/memory-cache/");
+
 // Attemps to guess where the id is in an AJAX call's URL and returns it.
 var getId = function (settings) {
 	var id = settings.data.id;
@@ -41,6 +45,7 @@ module.exports = function (count, make, filter) {
 
 	// the currentId to use when a new instance is created.
 	var	currentId = 0,
+		items,
 		findOne = function (id) {
 			for (var i = 0; i < items.length; i++) {
 				if (id == items[i].id) {
@@ -50,7 +55,6 @@ module.exports = function (count, make, filter) {
 		},
 		methods = {},
 		types,
-		items,
 		reset;
 
 	if(helpers.isArrayLike(count) && typeof count[0] === "string" ){
@@ -81,6 +85,65 @@ module.exports = function (count, make, filter) {
 				items.push(item);
 			}
 		};
+	} else if ( make instanceof canSet.Algebra ) {
+		items = count;
+		var algebra = make,
+			// TODO: this should get the max id
+			newId = count.length+1;
+		var idProp = helpers.firstProp(algebra.clauses.id || {}) || "id";
+
+		var connection = connect(["data-memory-cache"],{
+			algebra: algebra,
+			idProp: idProp
+		});
+
+		connection.addSet({}, {data: JSON.parse(JSON.stringify(items))});
+		var connectToConnection = function(method){
+			return function(req, res){
+				// have to get data from
+				connection[method](req.data).then(function(data){
+					res(data);
+				}, function(err){
+					res(403, err);
+				});
+			};
+		};
+		var connectionStore = {
+			getListData: connectToConnection("getListData"),
+			getData: connectToConnection("getData"),
+			createData: function(req, res){
+				// add an id
+				req.data[idProp] = ++newId;
+
+				connection.createData(req.data).then(function(data){
+					var responseData = {};
+					responseData[idProp] = req.data[idProp];
+					res(responseData);
+				}, function(err){
+					res(403, err);
+				});
+			},
+			updateData: connectToConnection("updateData"),
+			destroyData: connectToConnection("destroyData"),
+			find: function (params) {
+				var id = connection.id(params);
+				return connection.getInstance(id);
+			},
+			reset: function(newItems){
+				if(newItems) {
+					items = newItems;
+				}
+				connection.addSet({}, {data: JSON.parse(JSON.stringify(items))});
+			}
+		};
+
+		return helpers.extend(connectionStore,{
+			findAll: connectionStore.getListData,
+			findOne: connectionStore.getData,
+			create: connectionStore.createData,
+			update: connectionStore.updateData,
+			destroy: connectionStore.destroyData
+		});
 	} else {
 		filter = make;
 		var initialItems = count;

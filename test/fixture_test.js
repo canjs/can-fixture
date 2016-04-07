@@ -899,7 +899,6 @@ asyncTest("supports getResponseHeader", function(){
 });
 
 asyncTest("pass data to response handler (#13)", function(){
-	
 	fixture("GET something", function(req,res){
 		res(403, {
 		    message: 'No bad guys'
@@ -916,4 +915,246 @@ asyncTest("pass data to response handler (#13)", function(){
 		start();
 	};
 	xhr.send();
+});
+
+asyncTest("pass return value for fixture", function(){
+
+	fixture("GET something", {foo:"bar"});
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "something");
+	xhr.onreadystatechange = function(ev){
+		deepEqual(JSON.parse(this.responseText),{foo:"bar"}, "correct response");
+		equal(this.status, 200, "correct status");
+		start();
+	};
+	xhr.send();
+});
+
+
+test("set.Algebra CRUD works (#12)", 5, function(){
+
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.comparators.id("_id"),
+		set.comparators.sort('orderBy'),
+		set.comparators.enum("type", ["used","new","certified"]),
+		set.comparators.rangeInclusive("start","end")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+
+	fixture('GET /cars', store.findAll);
+	fixture('POST /cars', store.create);
+	fixture('PUT /cars/{_id}', store.update);
+	fixture('DELETE /cars/{_id}', store.destroy);
+	fixture('GET /cars/{_id}', store.findOne);
+
+	var findAll = function(){
+		return $.ajax({ url: "/cars", dataType: "json" });
+	};
+
+	stop();
+
+	// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
+
+	findAll().then(function(carsData) {
+		equal(carsData.data.length, 8, 'Got all cars');
+		return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
+	}).then(function() {
+		return findAll();
+	}).then(function(carsData) {
+		equal(carsData.data.length, 7, 'One car less');
+		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+	}).then(function() {
+
+		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: "2015 Altima",
+			type: "new"
+		} });
+	}).then(function(saved) {
+
+		return $.ajax({ url: "/cars/"+saved._id, method: "put", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: '2015 Nissan Altima'
+		} });
+	}).then(function(updated) {
+		return findAll();
+	}).then(function (cars) {
+		equal(cars.data.length, 8, 'New car created');
+		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
+
+	}).then(function(car){
+		equal(car.name, "2013 Altima", "get a single car works")
+		start();
+	});
+});
+
+test("set.Algebra CRUD works (#12)", 5, function(){
+
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.comparators.id("_id"),
+		set.comparators.sort('orderBy'),
+		set.comparators.enum("type", ["used","new","certified"]),
+		set.comparators.rangeInclusive("start","end")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+
+	fixture('GET /cars', store.getListData);
+	fixture('POST /cars', store.createData);
+	fixture('PUT /cars/{_id}', store.updateData);
+	fixture('DELETE /cars/{_id}', store.destroyData);
+	fixture('GET /cars/{_id}', store.getData);
+
+	var findAll = function(){
+		return $.ajax({ url: "/cars", dataType: "json" });
+	};
+
+	stop();
+
+	// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
+
+	findAll().then(function(carsData) {
+		equal(carsData.data.length, 8, 'Got all cars');
+		return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
+	}).then(function() {
+		return findAll();
+	}).then(function(carsData) {
+		equal(carsData.data.length, 7, 'One car less');
+		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+	}).then(function() {
+
+		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: "2015 Altima",
+			type: "new"
+		} });
+	}).then(function(saved) {
+
+		return $.ajax({ url: "/cars/"+saved._id, method: "put", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: '2015 Nissan Altima'
+		} });
+	}).then(function(updated) {
+		return findAll();
+	}).then(function (cars) {
+		equal(cars.data.length, 8, 'New car created');
+		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
+
+	}).then(function(car){
+		equal(car.name, "2013 Altima", "get a single car works")
+		start();
+	});
+});
+
+asyncTest("set.Algebra clauses work", function(){
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.comparators.id("_id"),
+		set.comparators.sort('orderBy'),
+		set.comparators.enum("type", ["used","new","certified"]),
+		set.comparators.rangeInclusive("start","end"),
+		{
+			year: function(a, b){
+				if(a === b) {
+					return true;
+				}
+				if(a && b) {
+					return +a === +b;
+				}
+				return false;
+			}
+		}
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+	fixture('GET /cars', store.findAll);
+
+	$.ajax({ url: "/cars?where[year]=2013", dataType: "json" }).then(function(carsData) {
+		equal(carsData.data.length, 4, 'Where clause works with numbers');
+
+		return $.ajax({ url: "/cars?where[year]=2013&orderBy=name", dataType: "json" });
+
+	}).then(function(carsData){
+		var names = carsData.data.map(function(c){ return c.name; });
+		deepEqual(names, ["2013 Altima","2013 Focus","2013 Leaf","2013 Mustang"],"sort works");
+
+		return $.ajax({ url: "/cars?where[year]=2013&orderBy=name&start=1&end=2", dataType: "json" });
+	}).then(function(carsData){
+		var names = carsData.data.map(function(c){ return c.name; });
+		deepEqual(names, ["2013 Focus","2013 Leaf"], "pagination works");
+		start();
+	});
+
+});
+
+test("storeConnection reset", function(){
+
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.comparators.id("_id")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"}
+	], algebra);
+
+
+	fixture('GET /cars', store.getListData);
+	fixture('POST /cars', store.createData);
+	fixture('PUT /cars/{_id}', store.updateData);
+	fixture('DELETE /cars/{_id}', store.destroyData);
+	fixture('GET /cars/{_id}', store.getData);
+
+	var findAll = function(){
+		return $.ajax({ url: "/cars", dataType: "json" });
+	};
+	$.ajax({ url: "/cars/1", method: "DELETE", dataType: "json" }).then(function(){
+		store.reset();
+		return findAll();
+	}).then(function(carsData){
+		equal(carsData.data.length, 2, 'Got all cars');
+		start();
+	});
+
+	stop();
+
 });
