@@ -376,7 +376,7 @@ var todoStore = fixture.store([
 fixture("/todos/{_id}", todoStore);
 ```
 
-### `fixture.store(count, makeItems, algebra)`
+### `fixture.store(count, makeItems, algebra)` {#fixture-store-items}
 
 Similar to `fixture.store(baseItems, algebra)`, except that
 it uses `makeItems` to create `count` entries in the store.
