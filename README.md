@@ -119,12 +119,12 @@ fixture({
 
 ## APIs
 
-### `fixture(args...)`
+### `fixture(...)`
 
 The `fixture` function has multiple signatures, most based on convenience.  However,
 we'll start with the lowest-level API which everything else is based:
 
-#### `fixture(ajaxSettings, requestHandler(request, response, requestHeaders, ajaxSettings))`
+#### `fixture(ajaxSettings, requestHandler(...))`
 
 If an XHR request matches `ajaxSettings`, calls `requestHandler` with
 the XHR requests data.  Makes the XHR request responds with the return value of
@@ -151,7 +151,7 @@ fixture({method: "get", url: "/todos"},
 
 
 
-#### `requestHandler(request, response, requestHeaders, ajaxSettings)`
+#### `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
 The request handler argument is called with:
 
@@ -196,7 +196,7 @@ $.post("/todos/delete");
 ```
 
 
-#### `response([status,] body [, headers][,statusText])`
+#### `response(status, body, headers, statusText)`
 
 Used to detail a response.
 
