@@ -1,14 +1,37 @@
+// Adds
 var canSet = require("can-set");
 var helpers = canSet.helpers;
 var sub = require("./helpers/sub");
+var Store = require("./store");
+
+
+
 var fixtures = [];
 exports.fixtures = fixtures;
 
-// This becomes the fixture function
+// Adds a fixture to the list of fixtures.
 exports.add = function (settings, fixture) {
+	// When a fixture is passed a store like:
+	// `fixture("/things/{id}", store)`
+	if(fixture && fixture instanceof Store) {
+		var root = settings,
+			store = fixture,
+			idProp = store.idProp;
+		fixture = undefined;
+		settings = {};
+		settings["GET "+root] = store.getData;
+		settings["DELETE "+root] = store.destroyData;
+		settings["PUT "+root] = store.updateData;
+		var getListUrl = root.replace( new RegExp('\\/\\{' + idProp+"\\}.*" ),"");
+		settings["GET "+getListUrl] = store.getListData;
+		settings["POST "+getListUrl] = store.createData;
+	}
+
 	// If fixture is provided, set up a new fixture.
 	if (fixture !== undefined) {
+
 		if (typeof settings === 'string') {
+
 			// Match URL if it has GET, POST, PUT, DELETE or PATCH.
 			var matches = settings.match(/(GET|POST|PUT|DELETE|PATCH) (.+)/i);
 			// If not, we don't set the type, which eventually defaults to GET
@@ -56,6 +79,7 @@ exports.add = function (settings, fixture) {
 		});
 	}
 };
+
 var $fixture = exports.add;
 $fixture.on = true;
 $fixture.delay =10;

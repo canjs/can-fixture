@@ -1,7 +1,7 @@
 var core = require("./core");
 var fixture = core.add;
 var helpers = require("can-set").helpers;
-var store = require("./store");
+var Store = require("./store");
 require("./xhr");
 // HELPERS START
 
@@ -56,7 +56,7 @@ helpers.extend(fixture, {
 			statusText: "OK"
 		}, xhr);
 	},
-	store: store,
+	store: Store.make,
 	fixtures: core.fixtures
 });
 

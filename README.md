@@ -31,7 +31,7 @@ var fixture = require("can-fixture");
 
 Use the `fixture` function to trap settings on a [XMLHttpRequest object](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) to a request handler.
 
-The following traps all `GET` type requests to `/service` and results in a `responseText` of `"{\"message\":\"Hello World\"}"`: 
+The following traps all `GET` type requests to `/service` and results in a `responseText` of `"{\"message\":\"Hello World\"}"`:
 
 ```js
 fixture({url: "/service", method: "get"}, function(request, response){
@@ -39,7 +39,7 @@ fixture({url: "/service", method: "get"}, function(request, response){
 })
 ```
 
-The fixture function has a wide variety of signatures that allow more control or easier shorthands.  The previous
+The `fixture` function has a wide variety of signatures that allow more control or easier shorthands.  The previous
 example could be written like:
 
 ```js
@@ -77,38 +77,163 @@ Remove a fixture by calling `fixture` with null in place of a responseHandler:
 fixture("GET /service", null);
 ```
 
-Finally, you can create a [can-connect](http://connect.canjs.com/) like object that simulates a restful
-service and provides methods to .
+Finally, use `fixture.store` to create a [can-connect](http://connect.canjs.com/) like-data store that simulates a restful service connected to a data store. Use [can-set](https://github.com/canjs/can-set#can-set) to describe the service's parameters.
 
 ```js
-var tasksStore = fixture.store([{
-				_id : 1,
-				name : 'Cheese City',
-				slug : 'cheese-city',
-			}, {
-				_id : 2,
-				name : 'Crab Barn',
-				slug : 'crab-barn',
-			}], );
+// Describe the services parameters:
+var todoAlgebra = new set.Algebra({
+    set.comparators.id("_id"),
+    set.comparators.boolean("completed"),
+    set.comparators.rangeInclusive("start","end"),
+    set.comparators.sort("orderBy"),
+});
+
+// Create a store:
+var todoStore = fixture.store([
+    {
+    	_id : 1,
+    	name : 'Do the dishes',
+    	complete: true
+    }, {
+    	_id : 2,
+    	name : 'Walk the dog',
+    	complete: false
+    }],
+    todoAlgebra );
+
+// Hookup urls to the store:
+fixture("/todos/{_id}", todoStore);
 ```
 
+If your urls aren't restful you can wire up the store manually:
+
+```js
+fixture({
+    "GET /todos": todoStore.getListData,
+    "POST /todos": todoStore.createData,
+    "GET /todos/{_id}": todoStore.getData,
+    "PUT /todos/{_id}": todoStore.updateData,
+    "DELETE /todos/{_id}": todoStore.deleteData
+});
+```
 
 ## APIs
 
-### `fixture(ajaxSettingsOrUrl, requestHandlerOrUrl)`
+### `fixture(args...)`
 
+The `fixture` function has multiple signatures, most based on convenience.  However,
+we'll start with the lowest-level API which everything else is based:
 
+#### `fixture(ajaxSettings, requestHandler(request, response, requestHeaders, ajaxSettings))`
 
-For example:
+If an XHR request matches `ajaxSettings`, calls `requestHandler` with
+the XHR requests data.  Makes the XHR request responds with the return value of
+`requestHandler` or the result of calling its `response` argument.
+
+- `ajaxSettings` - An object that is used to match values on an XHR object, namely the
+ `url` and `method`.  `url` can be templated like `/todos/{_id}`.
+- `requestHandler` - Handles the request and provides a response.  The
+  next section details this function's use.
+
+The following traps requests to `GET /todos` and responds with an array of data:
 
 ```js
-fixture({url: "/service", method: "get"}, function(){
-  
+fixture({method: "get", url: "/todos"},
+        function(request, response, headers, ajaxSettings){
+    return {
+        data: [
+            {id: 1, name: "dishes"},
+            {id: 2, name: "mow"}
+        ]
+    };
 })
 ```
 
 
 
-#### `fixture(ajaxSettings, function(request, responseHandler, requestHeaders))`
+#### `requestHandler(request, response, requestHeaders, ajaxSettings)`
 
-### fixture(url, 
+The request handler argument is called with:
+
+- `request` - Information about the request. The request's `data` property will
+  contain data from the request's querystring or request body.
+- `response` - A callback function that provides response information. The
+  next section details this function's use.
+- `requestHeaders` - Headers used to make the request.
+- `ajaxSettings` - The settings object used to match this request.
+
+Example:
+
+```js
+fixture({method: "get", url: "/todos"},
+  function(request, response, headers, ajaxSettings){
+    request //-> {
+            //    method: "get",
+            //    url: "/todos",
+            //    data: {complete: true}
+            //   }
+
+  }
+});
+
+$.ajax({ method: "get", url: "/todos?complete=true" })
+```
+
+Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
+
+```js
+fixture({url: "/todos/{action}"},
+  function(request, response, headers, ajaxSettings){
+    request //-> {
+            //    method: "post",
+            //    url: "/todos",
+            //    data: {action: delete}
+            //   }
+  }
+});
+
+$.post("/todos/delete");
+```
+
+
+#### `response([status,] body [, headers][,statusText])`
+
+Used to detail a response.
+
+- `status` - The [HTTP response code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html). Ex: `200`.
+- `body` - A JS object that will be serialized and set as the responseText of the XHR object, or
+  the raw string text that will be set as the responseText of the XHR object.
+- `headers` - An object of HTTP response headers and values.
+- `statusText` - The status text of the response. Ex: ``"ok"`` for 200.
+
+Example:
+
+```js
+fixture({url: "/todos/{action}"},
+  function(request, response, headers, ajaxSettings){
+    response(
+        401,
+        { message: "Unauthorized"},
+        { "WWW-Authenticate": 'Basic realm="myRealm"'},
+        "unauthorized");
+  }
+});
+
+$.post("/todos/delete");
+```
+
+You don't have to provide every argument to `response`. It can be called like:
+
+```js
+// Just body
+response({ message: "Hello World"});
+// status and body
+response(401, { message: "Unauthorized"});
+// body and headers
+response('{"message":"Unauthorized"}',{"WWW-Authenticate":'Basic realm="myRealm"'});
+// status, body statusText
+response(401, '{"message":"Unauthorized"}','unauthorized');
+```
+
+The default `statusText` will be `ok` for `200 <= status < 300, status === 304` and `error`
+for everything else.

@@ -1158,3 +1158,67 @@ test("storeConnection reset", function(){
 	stop();
 
 });
+
+test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
+
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.comparators.id("_id"),
+		set.comparators.sort('orderBy'),
+		set.comparators.enum("type", ["used","new","certified"]),
+		set.comparators.rangeInclusive("start","end")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+	fixture('/cars/{_id}', store)
+
+	var findAll = function(){
+		return $.ajax({ url: "/cars", dataType: "json" });
+	};
+
+	stop();
+
+	findAll().then(function(carsData) {
+		equal(carsData.data.length, 8, 'Got all cars');
+		return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
+	}).then(function() {
+		return findAll();
+	}).then(function(carsData) {
+		equal(carsData.data.length, 7, 'One car less');
+		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+	}).then(function() {
+
+		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: "2015 Altima",
+			type: "new"
+		} });
+	}).then(function(saved) {
+
+		return $.ajax({ url: "/cars/"+saved._id, method: "put", dataType: "json", data: {
+			modelId: 3,
+			year: 2015,
+			name: '2015 Nissan Altima'
+		} });
+	}).then(function(updated) {
+		return findAll();
+	}).then(function (cars) {
+		equal(cars.data.length, 8, 'New car created');
+		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
+
+	}).then(function(car){
+		equal(car.name, "2013 Altima", "get a single car works")
+		start();
+	});
+});
