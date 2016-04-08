@@ -119,12 +119,10 @@ fixture({
 
 ## APIs
 
-### `fixture(...)`
-
 The `fixture` function has multiple signatures, most based on convenience.  However,
 we'll start with the lowest-level API which everything else is based:
 
-#### `fixture(ajaxSettings, requestHandler(...))`
+### `fixture(ajaxSettings, requestHandler(...))`
 
 If an XHR request matches `ajaxSettings`, calls `requestHandler` with
 the XHR requests data.  Makes the XHR request responds with the return value of
@@ -149,7 +147,7 @@ fixture({method: "get", url: "/todos"},
 })
 ```
 
-
+When adding a fixture, it will remove any identical fixtures from the list of fixtures.
 
 #### `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
@@ -237,3 +235,183 @@ response(401, '{"message":"Unauthorized"}','unauthorized');
 
 The default `statusText` will be `ok` for `200 <= status < 300, status === 304` and `error`
 for everything else.
+
+### `fixture(ajaxSettings, url)`
+
+Redirects the request to another url.  This can be useful for simulating a response with a file.
+
+```js
+fixture({url: "/tasks"}, "fixtures/tasks.json");
+```
+
+Placeholders available in the `ajaxSettings` url will be available in the redirect url:
+
+```js
+fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
+```
+
+### `fixture(ajaxSettings, data)`
+
+Responds with the `JSON.stringify` result of `data`.
+
+```js
+fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
+```
+
+### `fixture(ajaxSettings, null)`
+
+Removes the matching fixture from the list of fixtures.
+
+```js
+fixture({url: "/tasks"}, "fixtures/tasks.json");
+
+$.get("/tasks") // requests fixtures/tasks.json
+
+fixture({url: "/tasks"}, null);
+
+$.get("/tasks") // requests /tasks
+```
+
+### `fixture(methodAndUrl, url|data|requestHandler )`
+
+A short hand for creating an `ajaxSetting` with a `method` and `url`.
+
+```
+fixture("GET /tasks", requestHandler );
+
+// is the same as
+
+fixture({method: "get", url: "/tasks"}, requestHandler );
+```
+
+The format is `METHOD URL`.
+
+### `fixture(url, url|data|requestHandler )`
+
+A short hand for creating an `ajaxSetting` with just a `url`.
+
+```
+fixture("/tasks", requestHandler);
+
+// is the same as
+
+fixture({url: "/tasks"}, requestHandler);
+```
+
+### `fixture(fixtures)`
+
+Create multiple fixtures at once.
+
+- fixtures `{Object<methodAndUrl,url|data|requestHandler|store>}` - An mapping of methodAndUrl to
+  some response argument type.
+
+```js
+fixture({
+    "POST /tasks": function(){
+        return {id: Math.random()}
+    },
+    "GET /tasks": {data: [{id: 1, name: "mow lawn"}]},
+    "/people": "fixtures/people.json"
+});
+```
+
+### `fixture(restfulUrl, store)`
+
+Wire up a restful API scheme to a store.  
+
+```js
+var todoAlgebra = new set.Algebra();
+var todoStore = fixture.store([
+  { id: 1, name: 'Do the dishes'},
+  { id: 2, name: 'Walk the dog'}
+], todoAlgebra);
+
+fixture("/api/todos/{id}", todoStore);
+```
+
+This is a shorthand for wiring up the `todoStore` as follows:
+
+```js
+fixture({
+    "GET /api/todos": todoStore.getListData,
+    "GET /api/todos/{id}": todoStore.getData,
+    "POST /api/todos": todosStore.createData,
+    "PUT /api/todos/{id}": todos.updateData,
+    "DELETE /api/todos/{id}": todos.destroyData
+});
+```
+
+### `fixture.store(baseItems, algebra)`
+
+Create a store that starts with `baseItems` for a service layer
+described by `algebra`.
+
+- baseItems `{Array}` - An array of items that will populate the store.
+- algebra `{can.Algebra}` - A description of the service layer's parameters.
+
+```js
+// Describe the services parameters:
+var todoAlgebra = new set.Algebra({
+    set.comparators.id("_id"),
+    set.comparators.boolean("completed"),
+    set.comparators.rangeInclusive("start","end"),
+    set.comparators.sort("orderBy"),
+});
+
+// Create a store with initial data.
+// Pass [] if you want it to be empty.
+var todoStore = fixture.store([
+    {
+    	_id : 1,
+    	name : 'Do the dishes',
+    	complete: true
+    }, {
+    	_id : 2,
+    	name : 'Walk the dog',
+    	complete: false
+    }],
+    todoAlgebra );
+
+// Hookup urls to the store:
+fixture("/todos/{_id}", todoStore);
+```
+
+### `fixture.store(count, makeItems, algebra)`
+
+Similar to `fixture.store(baseItems, algebra)`, except that
+it uses `makeItems` to create `count` entries in the store.
+
+```js
+// Describe the services parameters:
+var todoAlgebra = new set.Algebra({ ... });
+
+// Create a store with initial data.
+// Pass [] if you want it to be empty.
+var todoStore = fixture.store(
+    1000,
+    function(i){
+        return {
+        	_id : i+1,
+        	name : 'Todo '+i,
+        	complete: fixture.rand([true, false],1)[0]
+        }
+    },
+    todoAlgebra );
+
+// Hookup urls to the store:
+fixture("/todos/{_id}", todoStore);
+```
+
+### `fixture.Store`
+
+#### `fixture.Store.reset()`
+
+### `fixture.rand(items)`
+
+### `fixture.delay`
+
+### `fixture.on`
+
+### `fixture.fixtures`
+
+The list of currently active fixtures.  
