@@ -77,6 +77,9 @@ helpers.extend(Store.prototype,{
 	get: function (params) {
 		var id = this.connection.id(params);
 		return this.connection.getInstance(id);
+	},
+	getList: function(set){
+		return this.connection._getListData(set);
 	}
 });
 // legacy methods
