@@ -272,7 +272,7 @@ fixture({url: "/tasks"}, null);
 $.get("/tasks") // requests /tasks
 ```
 
-### `fixture(methodAndUrl, url|data|requestHandler )`
+### `fixture(methodAndUrl, url|data|requestHandler)`
 
 A short hand for creating an `ajaxSetting` with a `method` and `url`.
 
@@ -286,7 +286,7 @@ fixture({method: "get", url: "/tasks"}, requestHandler );
 
 The format is `METHOD URL`.
 
-### `fixture(url, url|data|requestHandler )`
+### `fixture(url, url|data|requestHandler)`
 
 A short hand for creating an `ajaxSetting` with just a `url`.
 
@@ -376,7 +376,7 @@ var todoStore = fixture.store([
 fixture("/todos/{_id}", todoStore);
 ```
 
-### `fixture.store(count, makeItems, algebra)` {#fixture-store-items}
+### `fixture.store(count, makeItems, algebra)`
 
 Similar to `fixture.store(baseItems, algebra)`, except that
 it uses `makeItems` to create `count` entries in the store.
@@ -402,15 +402,139 @@ var todoStore = fixture.store(
 fixture("/todos/{_id}", todoStore);
 ```
 
-### `fixture.Store`
+### `Store`
 
-#### `fixture.Store.reset()`
+The following documents the methods on a store object returned by
+`fixture.store`.
 
-### `fixture.rand(items)`
+#### `Store.prototype.getListData(request, response)`
+
+A `requestHandler` that gets multiple items from the store.
+
+```js
+fixture("GET /api/todos", todoStore.getListData);
+```
+
+#### `Store.prototype.getData(request, response)`
+
+A `requestHandler` that gets a single item from the store.
+
+```js
+fixture("GET /api/todos/{_id}", todoStore.getData);
+```
+
+#### `Store.prototype.createData(request, response)`
+
+A `requestHandler` that creates an item in the store.
+
+```js
+fixture("POST /api/todos", todoStore.createData);
+```
+
+#### `Store.prototype.updateData(request, response)`
+
+A `requestHandler` that updates an item in the store.
+
+```js
+fixture("PUT /api/todos/{_id}", todoStore.updateData);
+```
+
+#### `Store.prototype.destroyData(request, response)`
+
+A `requestHandler` that removes an item from the store.
+
+```js
+fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
+```
+
+
+#### `Store.prototype.reset([baseItems])`
+
+Sets the items in the store to their original state or to `baseItems` if it's passed.
+
+```js
+// Creates a store with one item.
+var todoStore = fixture.store(
+    [{id: 1, name: "dishes"}],
+    new set.Algebra());
+fixture("/todos/{id}", todoStore)
+todoStore.getList({}).length //-> 1
+
+// delete that item
+$.ajax({url: "todos/1", method: "delete"}).then(function(){
+    return todoStore.getList({}).length //-> 0
+}).then(function(){
+    // calling reset adds it back
+    todoStore.reset();
+    todoStore.getList({}).length //-> 1
+});
+```
+
+#### `Store.prototype.get(params)`
+
+Returns a single item's data from the store.
+
+```
+todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
+```
+
+#### `Store.prototype.getList(set)`
+
+Returns the matching items from the store like: `{data: [...]}`.
+
+```
+todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
+```
+
+### `fixture.rand(min, max)`
+
+Returns a random integer in the range [min, max]. If only one argument is provided,
+returns a random integer from [0, max].
+
+```js
+fixture.rand(1, 10) //-> Random number between 1 and 10 inclusive.
+fixture.rand(10) //-> Random number between 0 and 10 inclusive.
+```
+
+### `fixture.rand(choices, min, max)`
+
+An array of between min and max random items from choices. If only `min` is
+provided, `max` will equal `min`.  If both `max` ad `min` are not provided,
+`min` will be 1 and `max` will be `choices.length`.
+
+```js
+// pick a random number of items from an array
+fixture.rand(["a","b","c"]) //-> ["c"]
+fixture.rand(["a","b","c"]) //-> ["b","a"]
+
+// pick one item from an array
+fixture.rand(["a","b","c"],1) //-> ["c"]
+
+// get one item from an array
+fixture.rand(["a","b","c"],1)[0] //-> "b"
+
+// get 2 or 3 items from the array
+fixture.rand(["a","b","c"],2,3) //-> ["c","a","b"]
+```
 
 ### `fixture.delay`
 
+Sets the delay until a response is fired in milliseconds.
+
+```
+fixture.delay = 1000; // 1 second delay
+```
+
 ### `fixture.on`
+
+Turns the fixtures on or off. Defaults to `true` for on.
+
+```
+fixture.on = false; //-> AJAX requests will not be trapped
+```
+
+To remove a fixture you can also use `fixture(ajaxSetting, null)`.
+
 
 ### `fixture.fixtures`
 

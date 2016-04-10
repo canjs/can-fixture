@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "can-set": "^0.5.5",
-    "can-connect": "^0.5.3"
+    "can-connect": "^0.5.4"
   },
   "devDependencies": {
     "steal": "^0.15.3",

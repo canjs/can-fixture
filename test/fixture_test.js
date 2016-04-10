@@ -158,31 +158,41 @@ test('simulating an error', function () {
 
 test('rand', function () {
 	var rand = fixture.rand;
-	var num = rand(5);
+	var num = rand(3);
 	equal(typeof num, 'number');
-	ok(num >= 0 && num < 5, 'gets a number');
-	stop();
-	var zero, three, between, next = function () {
-			start();
-		};
-	// make sure rand can be everything we need
-	setTimeout(function timer() {
-		var res = rand([1, 2, 3]);
+	var matched = {};
+	// this could ocassionally fail.
+	for(var i = 0; i < 100; i++) {
+		num = rand(3);
+		matched[num] = true;
+	}
+	for(i = 0; i <= 3; i++) {
+		ok(matched[i], "has "+i);
+	}
 
-		if (res.length === 0) {
-			zero = true;
-		} else if (res.length === 3) {
-			three = true;
-		} else {
-			between = true;
-		}
-		if (zero && three && between) {
-			ok(true, 'got zero, three, between');
-			next();
-		} else {
-			setTimeout(timer, 10);
-		}
-	}, 10);
+	matched = {};
+	var result,
+		choices = ["a","b","c"];
+
+	// makes sure we have the right length arrays and
+	// every item can be first
+	for(var i = 0; i < 100; i++) {
+		result = rand(choices);
+		matched[result.length] = true;
+		matched[result[0]] = true;
+	}
+
+	for(i = 1; i <= 3; i++) {
+		ok(matched[i], "has "+i);
+		delete matched[i];
+	}
+
+	set.helpers.each(choices, function(choice){
+		ok(matched[choice], "has "+choice);
+		delete matched[choice];
+	});
+
+	ok(set.helpers.isEmptyObject(matched), "nothing else unexpected");
 });
 
 test('core.dataFromUrl', function () {
@@ -1221,4 +1231,28 @@ test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
 		equal(car.name, "2013 Altima", "get a single car works")
 		start();
 	});
+});
+
+
+test("store.getList and store.get", function(){
+
+	var algebra = new set.Algebra(
+		set.comparators.id("_id")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+	equal( store.getList({year: 2013}).data.length, 4, "filtered");
+
+	deepEqual(store.get({_id: 5}).name, "2013 Altima", "get");
+
 });

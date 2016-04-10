@@ -8,33 +8,37 @@ require("./xhr");
 var noop = function(){};
 
 helpers.extend(fixture, {
-	rand: function randomize(arr, min, max) {
+	rand: function randomize (arr, min, max) {
 		if (typeof arr === 'number') {
 			if (typeof min === 'number') {
-				return arr + Math.floor(Math.random() * (min - arr));
+				return arr + Math.floor(Math.random() * (min - arr+1));
 			} else {
-				return Math.floor(Math.random() * arr);
+				return Math.floor(Math.random() * (arr+1));
 			}
 
 		}
-		var rand = randomize;
+		// clone the array because we will remove items from it.
+		var choices = arr.slice(0);
+
 		// get a random set
 		if (min === undefined) {
-			return rand(arr, rand(arr.length + 1));
-		}
-		// get a random selection of arr
-		var res = [];
-		arr = arr.slice(0);
-		// set max
-		if (!max) {
+			min = 1;
+			max = choices.length;
+		} else if(max === undefined){
 			max = min;
 		}
+		// get a random selection of arr
+		var result = [];
+
+		// set max
 		//random max
-		max = min + Math.round(rand(max - min));
-		for (var i = 0; i < max; i++) {
-			res.push(arr.splice(rand(arr.length), 1)[0]);
+		var selectedCount = min + Math.round(randomize(max - min));
+		for (var i = 0; i < selectedCount; i++) {
+			var selectedIndex = randomize(choices.length - 1),
+				selected = choices.splice(selectedIndex, 1)[0];
+			result.push(selected);
 		}
-		return res;
+		return result;
 	},
 	xhr: function (xhr) {
 		return helpers.extend({}, {
