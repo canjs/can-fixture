@@ -12,7 +12,8 @@
     "release:major": "npm version major && npm publish",
     "testee": "testee --browsers firefox test/test.html",
     "test": "npm run jshint && npm run testee",
-    "jshint": "jshint fixture.js core.js store.js xhr.js --config"
+    "jshint": "jshint fixture.js core.js store.js xhr.js --config",
+    "build": "node build.js"
   },
   "dependencies": {
     "can-set": "^0.5.5",
