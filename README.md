@@ -24,6 +24,25 @@ the response with a file or function. Use `can-fixture` to:
   - <code>[fixture(ajaxSettings, data)](#fixtureajaxsettings-data)</code>
   - <code>[fixture(ajaxSettings, null)](#fixtureajaxsettings-null)</code>
   - <code>[fixture(methodAndUrl, url|data|requestHandler)](#fixturemethodandurl-urldatarequesthandler)</code>
+  - <code>[fixture(url, url|data|requestHandler)](#fixtureurl-urldatarequesthandler)</code>
+  - <code>[fixture(fixtures)](#fixturefixtures)</code>
+  - <code>[fixture(restfulUrl, store)](#fixturerestfulurl-store)</code>
+  - <code>[fixture.store(baseItems, algebra)](#fixturestorebaseitems-algebra)</code>
+  - <code>[fixture.store(count, makeItems, algebra)](#fixturestorecount-makeitems-algebra)</code>
+  - <code>[Store](#store)</code>
+    - <code>[Store.prototype.getListData(request, response)](#storeprototypegetlistdatarequest-response)</code>
+    - <code>[Store.prototype.getData(request, response)](#storeprototypegetdatarequest-response)</code>
+    - <code>[Store.prototype.createData(request, response)](#storeprototypecreatedatarequest-response)</code>
+    - <code>[Store.prototype.updateData(request, response)](#storeprototypeupdatedatarequest-response)</code>
+    - <code>[Store.prototype.destroyData(request, response)](#storeprototypedestroydatarequest-response)</code>
+    - <code>[Store.prototype.reset([baseItems])](#storeprototyperesetbaseitems)</code>
+    - <code>[Store.prototype.get(params)](#storeprototypegetparams)</code>
+    - <code>[Store.prototype.getList(set)](#storeprototypegetlistset)</code>
+  - <code>[fixture.rand(min, max)](#fixturerandmin-max)</code>
+  - <code>[fixture.rand(choices, min, max)](#fixturerandchoices-min-max)</code>
+  - <code>[fixture.delay](#fixturedelay)</code>
+  - <code>[fixture.on](#fixtureon)</code>
+  - <code>[fixture.fixtures](#fixturefixtures-1)</code>
 
 
 ## Install
@@ -290,7 +309,7 @@ $.get("/tasks") // requests /tasks
 
 A short hand for creating an `ajaxSetting` with a `method` and `url`.
 
-```
+```js
 fixture("GET /tasks", requestHandler );
 
 // is the same as
@@ -304,7 +323,7 @@ The format is `METHOD URL`.
 
 A short hand for creating an `ajaxSetting` with just a `url`.
 
-```
+```js
 fixture("/tasks", requestHandler);
 
 // is the same as
