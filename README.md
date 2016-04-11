@@ -507,7 +507,7 @@ $.ajax({url: "todos/1", method: "delete"}).then(function(){
 
 Returns a single item's data from the store.
 
-```
+```js
 todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 ```
 
@@ -515,7 +515,7 @@ todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 
 Returns the matching items from the store like: `{data: [...]}`.
 
-```
+```js
 todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
 ```
 
@@ -554,7 +554,7 @@ fixture.rand(["a","b","c"],2,3) //-> ["c","a","b"]
 
 Sets the delay until a response is fired in milliseconds.
 
-```
+```js
 fixture.delay = 1000; // 1 second delay
 ```
 
@@ -564,7 +564,7 @@ fixture.delay = 1000; // 1 second delay
 
 Turns the fixtures on or off. Defaults to `true` for on.
 
-```
+```js
 fixture.on = false; //-> AJAX requests will not be trapped
 ```
 
