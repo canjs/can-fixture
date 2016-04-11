@@ -13,9 +13,9 @@ the response with a file or function. Use `can-fixture` to:
 
 `can-fixture` is self contained and can be used without the rest of CanJS.
 
-- Install
-- Basic Use
-- API
+- [Install](#install)
+- [Basic Use](#basic-use)
+- [API](#api)
   - <code>[fixture.on](#fixture.on)</code>
   - <code>[fixture(ajaxSettings, requestHandler(...))](#fixtureajaxsettings-requesthandler)</code>
     - <code>[requestHandler(request, response(...), requestHeaders, ajaxSettings)](#requesthandlerrequest-response-requestheaders-ajaxsettings)</code>
@@ -149,7 +149,7 @@ fixture({
 });
 ```
 
-## APIs
+## API
 
 The `fixture` function has multiple signatures, most based on convenience.  However,
 we'll start with the lowest-level API which everything else is based:
