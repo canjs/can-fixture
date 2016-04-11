@@ -13,6 +13,11 @@ the response with a file or function. Use `can-fixture` to:
 
 `can-fixture` is self contained and can be used without the rest of CanJS.
 
+- 
+- API
+  - [fixture.on](#fixture.on) 	
+
+
 ## Install
 
 If you are using `Browserify` or [StealJS](http://stealjs.com), install it with NPM:
@@ -527,6 +532,8 @@ fixture.delay = 1000; // 1 second delay
 ```
 
 ### `fixture.on`
+
+<a id="fixture.on"/>
 
 Turns the fixtures on or off. Defaults to `true` for on.
 
