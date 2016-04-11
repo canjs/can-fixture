@@ -68,7 +68,7 @@ test('dynamic fixtures', function () {
 		dataType: 'json'
 	})
 		.done(function (data) {
-			equal(data.sweet, 'ness', 'can.get works');
+			equal(data[0].sweet, 'ness', 'can.get works');
 			start();
 		});
 });

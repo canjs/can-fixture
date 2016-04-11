@@ -67,7 +67,7 @@ exports.add = function (settings, fixture) {
 			};
 		}
 		settings.fixture = fixture;
-		fixtures.push(settings);
+		fixtures.unshift(settings);
 
 	}
 	// If a fixture isn't provided, we assume that settings is
@@ -167,7 +167,7 @@ exports.get = function(xhrSettings) {
 
 exports.matches = function(settings, fixture, exact) {
 	if (exact) {
-		return canSet.equal(settings, fixture, exports.defaultCompare);
+		return canSet.equal(settings, fixture, {fixture: function(){ return true; }});
 	} else {
 		return canSet.subset(settings, fixture, exports.defaultCompare);
 	}
