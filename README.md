@@ -147,7 +147,8 @@ fixture({method: "get", url: "/todos"},
 })
 ```
 
-When adding a fixture, it will remove any identical fixtures from the list of fixtures.
+When adding a fixture, it will remove any identical fixtures from the list of fixtures. The
+last fixture added will be the first matched.
 
 #### `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
