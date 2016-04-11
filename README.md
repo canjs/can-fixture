@@ -17,13 +17,13 @@ the response with a file or function. Use `can-fixture` to:
 - Basic Use
 - API
   - <code>[fixture.on](#fixture.on)</code>
-  - [fixture(ajaxSettings, requestHandler(...))](#fixtureajaxsettings-requesthandler)
-    - [requestHandler(request, response(...), requestHeaders, ajaxSettings)](#requesthandlerrequest-response-requestheaders-ajaxsettings)
-      - [response(status, body, headers, statusText)](#responsestatus-body-headers-statustext)
-  - [fixture(ajaxSettings, url)](#fixtureajaxsettings-url) 
-  - [fixture(ajaxSettings, data)](#fixtureajaxsettings-data)
-  - [fixture(ajaxSettings, null)](#fixtureajaxsettings-null)
-  - [fixture(methodAndUrl, url|data|requestHandler)](#fixturemethodandurl-urldatarequesthandler)
+  - <code>[fixture(ajaxSettings, requestHandler(...))](#fixtureajaxsettings-requesthandler)</code>
+    - <code>[requestHandler(request, response(...), requestHeaders, ajaxSettings)](#requesthandlerrequest-response-requestheaders-ajaxsettings)</code>
+      - <code>[response(status, body, headers, statusText)](#responsestatus-body-headers-statustext)</code>
+  - <code>[fixture(ajaxSettings, url)](#fixtureajaxsettings-url)</code>
+  - <code>[fixture(ajaxSettings, data)](#fixtureajaxsettings-data)</code>
+  - <code>[fixture(ajaxSettings, null)](#fixtureajaxsettings-null)</code>
+  - <code>[fixture(methodAndUrl, url|data|requestHandler)](#fixturemethodandurl-urldatarequesthandler)</code>
 
 
 ## Install
