@@ -36,7 +36,9 @@ Report a feature request as a new [github issue](https://github.com/canjs/can-fi
 2. clone it
 3. install dependencies with `npm install`
 
-At this point you should be able to open `test/test.html` and see everything passing.
+At this point you should be able to open `test/test.html` and see everything passing. You may need
+to host the `can-fixture` folder.  The [http-server](https://www.npmjs.com/package/http-server)
+package makes this easy.
 
 ### Exploring the code structure
 
