@@ -1,6 +1,6 @@
 var core = require("./core");
 var fixture = core.add;
-var helpers = require("can-set").helpers;
+var helpers = require("./helpers/helpers");
 var Store = require("./store");
 require("./xhr");
 // HELPERS START
@@ -63,5 +63,10 @@ helpers.extend(fixture, {
 	store: Store.make,
 	fixtures: core.fixtures
 });
+
+if(typeof window !== "undefined" && !require.resolve) {
+	window.fixture = fixture;
+}
+
 
 module.exports = fixture;

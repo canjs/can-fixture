@@ -3,15 +3,28 @@
 // call the fixture callbacks or create a real XHR request
 // and then respond normally.
 var fixtureCore = require("./core");
-var canSet = require("can-set");
-var helpers = canSet.helpers;
+var helpers = require("./helpers/helpers");
 var deparam = require("./helpers/deparam");
+
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
 // Get a global reference.
 	GLOBAL = typeof global !== "undefined"? global : window;
 
+// Figure out events on XHR object
+// but start with some default events.
+var events = ["abort","error","load","loadend","loadstart","progress"];
+(function(){
+	var x = new XHR();
+	for(var prop in x) {
+		if(prop.indexOf("on") === 0 &&
+			events.indexOf(prop.substr(2)) === -1 &&
+			prop !== "onreadystatechange") {
+			events.push(prop.substr(2));
+		}
+	}
+})();
 // DEFINE HELPERS
 
 // Call all of an event for an XHR object
@@ -35,13 +48,18 @@ var assign = function(dest, source, excluding){
 	}
 };
 
+var propsToIgnore = { onreadystatechange: true, onload: true, __events: true };
+helpers.each(events, function(prop){
+	propsToIgnore["on"+prop] = true;
+});
+
 // Helper that given the mockXHR, creates a real XHR that will call the mockXHR's
 // callbacks when the real XHR's request completes.
 var makeXHR = function(mockXHR){
 	// Make a real XHR
 	var xhr = new XHR();
 	// Copy everything on mock to it.
-	assign(xhr, mockXHR);
+	assign(xhr, mockXHR, propsToIgnore);
 
 	// When the real XHR is called back, update all properties
 	// and call all callbacks on the mock XHR.
@@ -50,18 +68,22 @@ var makeXHR = function(mockXHR){
 		// Copy back everything over because in IE8 defineProperty
 		// doesn't work, so we need to make our shim XHR have the same
 		// values as the real xhr.
-		assign(mockXHR, xhr,{ onreadystatechange: true, onload: true });
+		assign(mockXHR, xhr,propsToIgnore);
 		if(mockXHR.onreadystatechange) {
 			mockXHR.onreadystatechange(ev);
 		}
 	};
 
-	xhr.onload = function(){
-		callEvents(mockXHR, "load");
-		if(mockXHR.onload) {
-			return mockXHR.onload.apply(mockXHR, arguments);
-		}
-	};
+	// wire up events to forward to mock object
+	helpers.each(events, function(eventName){
+		xhr["on"+eventName] = function(){
+			callEvents(mockXHR, eventName);
+			if(mockXHR["on"+eventName]) {
+				return mockXHR["on"+eventName].apply(mockXHR, arguments);
+			}
+		};
+	});
+
 
 	// wire up the mockXHR's getResponseHeader to call the real
 	// XHR's getResponseHeader.
@@ -99,9 +121,10 @@ helpers.extend(XMLHttpRequest.prototype,{
 	setRequestHeader: function(name, value){
 		this._headers[name] = value;
 	},
-	open: function(type, url){
+	open: function(type, url, async){
 		this.type = type;
 		this.url = url;
+		this.async = async === false ? false : true;
 	},
 	getAllResponseHeaders: function(){
 		return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
@@ -138,7 +161,8 @@ helpers.extend(XMLHttpRequest.prototype,{
 			url: this.url,
 			data: data,
 			headers: this._headers,
-			type: this.type.toLowerCase() || 'get'
+			type: this.type.toLowerCase() || 'get',
+			async: this.async
 		};
 		// if get or delete, the url should not include the querystring.
 		// the querystring should be the data.
@@ -170,7 +194,9 @@ helpers.extend(XMLHttpRequest.prototype,{
 					readyState: 4,
 					status: status
 				});
-				if ( (status >= 200 && status < 300 || status === 304) ) {
+
+				var success = (status >= 200 && status < 300 || status === 304);
+				if ( success ) {
 					helpers.extend(mockXHR,{
 						statusText: statusText || "OK",
 						responseText: body
@@ -181,12 +207,35 @@ helpers.extend(XMLHttpRequest.prototype,{
 						responseText: body
 					});
 				}
+
+
 				if(mockXHR.onreadystatechange) {
 					mockXHR.onreadystatechange({ target: mockXHR });
 				}
-				if(mockXHR.onload) {
-					mockXHR.onload();
+
+				// fire progress events
+				callEvents(mockXHR, "progress");
+				if(mockXHR.onprogress) {
+					mockXHR.onprogress();
 				}
+
+				if(success) {
+					callEvents(mockXHR, "load");
+					if(mockXHR.onload) {
+						mockXHR.onload();
+					}
+				} else {
+					callEvents(mockXHR, "error");
+					if(mockXHR.onerror) {
+						mockXHR.onerror();
+					}
+				}
+
+				callEvents(mockXHR, "loadend");
+				if(mockXHR.onloadend) {
+					mockXHR.onloadend();
+				}
+
 			});
 		}
 		// At this point there is either not a fixture or a redirect fixture.
@@ -205,7 +254,7 @@ helpers.extend(XMLHttpRequest.prototype,{
 
 		// Make the request.
 		this._xhr = xhr;
-		xhr.open(xhr.type, xhr.url);
+		xhr.open( xhr.type, xhr.url, xhr.async );
 		return xhr.send(data);
 	}
 });

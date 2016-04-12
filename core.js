@@ -1,8 +1,8 @@
 // Adds
 var canSet = require("can-set");
-var helpers = canSet.helpers;
+var helpers = require("./helpers/helpers");
 var sub = require("./helpers/sub");
-var Store = require("./store");
+require("./store");
 
 
 
@@ -13,7 +13,7 @@ exports.fixtures = fixtures;
 exports.add = function (settings, fixture) {
 	// When a fixture is passed a store like:
 	// `fixture("/things/{id}", store)`
-	if(fixture && fixture instanceof Store) {
+	if(fixture && (fixture.getData || fixture.getListData)) {
 		var root = settings,
 			store = fixture,
 			idProp = store.idProp;
@@ -98,8 +98,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 		var res = exports.extractResponse.apply(xhrSettings, arguments);
 		return cb.apply(this, res);
 	};
-
-	setTimeout(function () {
+	var callFixture = function () {
 		// fall the fixture
 		var result = fixtureSettings.fixture(xhrSettings, response, xhrSettings.headers, fixtureSettings);
 
@@ -107,7 +106,13 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 			// Resolve with fixture results
 			response(200, result );
 		}
-	}, $fixture.delay);
+	};
+	
+	if(!xhrSettings.async) {
+		callFixture();
+	} else {
+		setTimeout(callFixture, $fixture.delay);
+	}
 };
 
 exports.index = function (settings, exact) {

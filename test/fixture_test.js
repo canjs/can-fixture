@@ -1256,3 +1256,57 @@ test("store.getList and store.get", function(){
 	deepEqual(store.get({_id: 5}).name, "2013 Altima", "get");
 
 });
+
+asyncTest("supports addEventListener on shim using fixture", function(){
+	fixture("/addEventListener", function(){
+		return {};
+	});
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports addEventListener");
+		start();
+	});
+
+	xhr.open('GET', "/addEventListener");
+	xhr.send();
+});
+
+test("supports sync on XHR shim (#23)", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports addEventListener");
+	});
+
+	xhr.open('GET', url, false);
+	xhr.send();
+});
+
+test("supports sync fixtures (#23)", function(){
+	fixture("/sync", function(){
+		return {};
+	});
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports sync");
+	});
+
+	xhr.open('GET', "/sync", false);
+	xhr.send();
+});
+
+test("supports sync redirect fixtures (#23)", function(){
+	fixture("/sync_redirect", __dirname+'/fixtures/test.json');
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports sync redirect");
+	});
+
+	xhr.open('GET', "/sync_redirect", false);
+	xhr.send();
+});

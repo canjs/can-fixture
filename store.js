@@ -1,5 +1,5 @@
 var canSet = require("can-set");
-var helpers = canSet.helpers;
+var helpers = require("./helpers/helpers");
 var connect = require("can-connect");
 var legacyStore = require("./helpers/legacyStore");
 require("can-connect/data/memory-cache/");

@@ -1,4 +1,4 @@
-var helpers = require("can-set").helpers;
+var helpers = require("./helpers");
 
 var digitTest = /^\d+$/,
 	keyBreaker = /([^\[\]]+)|(\[\])/g,
