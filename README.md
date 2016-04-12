@@ -11,7 +11,9 @@ the response with a file or function. Use `can-fixture` to:
 - Test code that makes AJAX requests without needing a server.
 - Simulate slow responses or difficult to reproduce error conditions.
 
-`can-fixture` is self contained and can be used without the rest of CanJS.
+`can-fixture` is self contained and can be used without the rest of CanJS. 
+
+[Play around with can-fixture in this JSBin!](https://justinbmeyer.jsbin.com/zixumu/2/edit?html,js,output)
 
 - [Install](#install)
 - [Basic Use](#basic-use)
