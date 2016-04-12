@@ -121,9 +121,10 @@ helpers.extend(XMLHttpRequest.prototype,{
 	setRequestHeader: function(name, value){
 		this._headers[name] = value;
 	},
-	open: function(type, url){
+	open: function(type, url, async){
 		this.type = type;
 		this.url = url;
+		this.async = async === false ? false : true;
 	},
 	getAllResponseHeaders: function(){
 		return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
@@ -160,7 +161,8 @@ helpers.extend(XMLHttpRequest.prototype,{
 			url: this.url,
 			data: data,
 			headers: this._headers,
-			type: this.type.toLowerCase() || 'get'
+			type: this.type.toLowerCase() || 'get',
+			async: this.async
 		};
 		// if get or delete, the url should not include the querystring.
 		// the querystring should be the data.
@@ -252,7 +254,7 @@ helpers.extend(XMLHttpRequest.prototype,{
 
 		// Make the request.
 		this._xhr = xhr;
-		xhr.open(xhr.type, xhr.url);
+		xhr.open( xhr.type, xhr.url, xhr.async );
 		return xhr.send(data);
 	}
 });
