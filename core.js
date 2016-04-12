@@ -1,8 +1,8 @@
 // Adds
 var canSet = require("can-set");
-var helpers = canSet.helpers;
+var helpers = require("./helpers/helpers");
 var sub = require("./helpers/sub");
-var Store = require("./store");
+require("./store");
 
 
 
@@ -13,7 +13,7 @@ exports.fixtures = fixtures;
 exports.add = function (settings, fixture) {
 	// When a fixture is passed a store like:
 	// `fixture("/things/{id}", store)`
-	if(fixture && fixture instanceof Store) {
+	if(fixture && (fixture.getData || fixture.getListData)) {
 		var root = settings,
 			store = fixture,
 			idProp = store.idProp;

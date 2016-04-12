@@ -1256,3 +1256,18 @@ test("store.getList and store.get", function(){
 	deepEqual(store.get({_id: 5}).name, "2013 Altima", "get");
 
 });
+
+asyncTest("supports addEventListener on shim using fixture", function(){
+	fixture("/addEventListener", function(){
+		return {};
+	});
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		ok(true, "our shim supports addEventListener");
+		start();
+	});
+
+	xhr.open('GET', "/addEventListener");
+	xhr.send();
+})
