@@ -11,7 +11,7 @@ the response with a file or function. Use `can-fixture` to:
 - Test code that makes AJAX requests without needing a server.
 - Simulate slow responses or difficult to reproduce error conditions.
 
-`can-fixture` is self contained and can be used without the rest of CanJS. 
+`can-fixture` is self contained and can be used without the rest of CanJS.
 
 [Play around with can-fixture in this JSBin!](https://justinbmeyer.jsbin.com/zixumu/2/edit?html,js,output)
 
@@ -23,6 +23,7 @@ the response with a file or function. Use `can-fixture` to:
       - <code>[response(status, body, headers, statusText)](#responsestatus-body-headers-statustext)</code>
   - <code>[fixture(ajaxSettings, url)](#fixtureajaxsettings-url)</code>
   - <code>[fixture(ajaxSettings, data)](#fixtureajaxsettings-data)</code>
+  - <code>[fixture(ajaxSettings, delay)](#fixtureajaxsettings-delay)</code>
   - <code>[fixture(ajaxSettings, null)](#fixtureajaxsettings-null)</code>
   - <code>[fixture(methodAndUrl, url|data|requestHandler)](#fixturemethodandurl-urldatarequesthandler)</code>
   - <code>[fixture(url, url|data|requestHandler)](#fixtureurl-urldatarequesthandler)</code>
@@ -291,6 +292,16 @@ Responds with the `JSON.stringify` result of `data`.
 ```js
 fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 ```
+
+### `fixture(ajaxSettings, delay)`
+
+Delays the ajax request from being made for `delay` milliseconds.
+
+```js
+fixture({url: "/tasks"}, 2000);
+```
+
+This doesn't simulate a response, but is useful for simulating slow connections.
 
 ### `fixture(ajaxSettings, null)`
 

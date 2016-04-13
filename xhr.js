@@ -242,7 +242,21 @@ helpers.extend(XMLHttpRequest.prototype,{
 		// Either way we are doing a request.
 
 		// Make a realXHR object based around the settings of the mockXHR.
-		var xhr = makeXHR(this);
+		var xhr = makeXHR(this),
+			mockXHR = this,
+			makeRequest = function(){
+				mockXHR._xhr = xhr;
+				xhr.open( xhr.type, xhr.url, xhr.async );
+				return xhr.send(data);
+			};
+
+		if(fixtureSettings && typeof fixtureSettings.fixture === "number") {
+			//!steal-remove-start
+			fixtureCore.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
+			//!steal-remove-end
+			setTimeout(makeRequest, fixtureSettings.fixture)
+			return;
+		}
 
 		// if we do have a fixture, update the real XHR object.
 		if(fixtureSettings) {
@@ -253,8 +267,6 @@ helpers.extend(XMLHttpRequest.prototype,{
 		}
 
 		// Make the request.
-		this._xhr = xhr;
-		xhr.open( xhr.type, xhr.url, xhr.async );
-		return xhr.send(data);
+		return makeRequest();
 	}
 });
