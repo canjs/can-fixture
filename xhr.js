@@ -182,11 +182,11 @@ helpers.extend(XMLHttpRequest.prototype,{
 
 		// See if the XHR settings match a fixture.
 		var fixtureSettings = fixtureCore.get(xhrSettings);
-
+		var mockXHR = this;
 		// If a dynamic fixture is being used, we call the dynamic fixture function and then
 		// copy the response back onto the `mockXHR` in the right places.
 		if(fixtureSettings && typeof fixtureSettings.fixture === "function") {
-			var mockXHR = this;
+
 			return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
 				body = typeof body === "string" ? body :  JSON.stringify(body);
 
@@ -243,7 +243,6 @@ helpers.extend(XMLHttpRequest.prototype,{
 
 		// Make a realXHR object based around the settings of the mockXHR.
 		var xhr = makeXHR(this),
-			mockXHR = this,
 			makeRequest = function(){
 				mockXHR._xhr = xhr;
 				xhr.open( xhr.type, xhr.url, xhr.async );
@@ -254,7 +253,7 @@ helpers.extend(XMLHttpRequest.prototype,{
 			//!steal-remove-start
 			fixtureCore.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
 			//!steal-remove-end
-			setTimeout(makeRequest, fixtureSettings.fixture)
+			setTimeout(makeRequest, fixtureSettings.fixture);
 			return;
 		}
 
