@@ -18,7 +18,6 @@ the response with a file or function. Use `can-fixture` to:
 - [Install](#install)
 - [Basic Use](#basic-use)
 - [API](#api)
-  - <code>[fixture.on](#fixture.on)</code>
   - <code>[fixture(ajaxSettings, requestHandler(...))](#fixtureajaxsettings-requesthandler)</code>
     - <code>[requestHandler(request, response(...), requestHeaders, ajaxSettings)](#requesthandlerrequest-response-requestheaders-ajaxsettings)</code>
       - <code>[response(status, body, headers, statusText)](#responsestatus-body-headers-statustext)</code>
