@@ -1,4 +1,4 @@
-var helpers = require("./helpers");
+var each = require("can-util/js/each/each");
 
 var digitTest = /^\d+$/,
 	keyBreaker = /([^\[\]]+)|(\[\])/g,
@@ -11,7 +11,7 @@ module.exports = function (params) {
 	var data = {}, pairs, lastPart;
 	if (params && paramTest.test(params)) {
 		pairs = params.split('&');
-		helpers.each(pairs, function (pair) {
+		each(pairs, function (pair) {
 			var parts = pair.split('='),
 				key = prep(parts.shift()),
 				value = prep(parts.join('=')),

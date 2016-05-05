@@ -1,6 +1,8 @@
-var helpers = require("./helpers");
 var getId = require("./getid");
 var canSet = require("can-set");
+var isArrayLike = require("can-util/js/is-array-like/is-array-like");
+var each = require("can-util/js/each/each");
+var assign = require("can-util/js/assign/assign");
 
 module.exports = function (count, make, filter) {
 	/*jshint eqeqeq:false */
@@ -19,7 +21,7 @@ module.exports = function (count, make, filter) {
 		types,
 		reset;
 
-	if(helpers.isArrayLike(count) && typeof count[0] === "string" ){
+	if(isArrayLike(count) && typeof count[0] === "string" ){
 		types = count;
 		count = make;
 		make= filter;
@@ -57,7 +59,7 @@ module.exports = function (count, make, filter) {
 
 
 	// make all items
-	helpers.extend(methods, {
+	assign(methods, {
 		getListData: function (request) {
 
 			request = request || {};
@@ -66,7 +68,7 @@ module.exports = function (count, make, filter) {
 			request.data = request.data || {};
 			//sort using order
 			//order looks like ["age ASC","gender DESC"]
-			helpers.each((request.data.order || [])
+			each((request.data.order || [])
 				.slice(0)
 				.reverse(), function (name) {
 					var split = name.split(" ");
@@ -92,7 +94,7 @@ module.exports = function (count, make, filter) {
 				});
 
 			//group is just like a sort
-			helpers.each((request.data.group || [])
+			each((request.data.group || [])
 				.slice(0)
 				.reverse(), function (name) {
 					var split = name.split(" ");
@@ -147,7 +149,7 @@ module.exports = function (count, make, filter) {
 				"count": retArr.length,
 				"data": retArr.slice(offset, offset + limit)
 			};
-			helpers.each(["limit","offset"], function(prop){
+			each(["limit","offset"], function(prop){
 				if(prop in request.data) {
 					responseData[prop] = request.data[prop];
 				}
@@ -196,7 +198,7 @@ module.exports = function (count, make, filter) {
 			}
 
 			// TODO: make it work with non-linear ids ..
-			helpers.extend(item, request.data);
+			assign(item, request.data);
 			response({
 				id: id
 			}, {
@@ -246,7 +248,7 @@ module.exports = function (count, make, filter) {
 		createData: function (settings, response) {
 			var item = typeof make === 'function' ? make(items.length, items) : {};
 
-			helpers.extend(item, settings.data);
+			assign(item, settings.data);
 
 			// If an ID wasn't passed into the request, we give the item
 			// a unique ID.
@@ -266,7 +268,7 @@ module.exports = function (count, make, filter) {
 	reset();
 	// if we have types given add them to fixture
 
-	return helpers.extend({
+	return assign({
 		findAll: methods.getListData,
 		findOne: methods.getData,
 		create: methods.createData,
