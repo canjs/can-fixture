@@ -3,6 +3,8 @@ var fixture = require("can-fixture");
 var core = require("../core");
 var set = require("can-set");
 var $ = require("jquery");
+var each = require("can-util/js/each/each");
+var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 
 var errorCallback = function(xhr, status, error){
 	ok(false);
@@ -187,12 +189,12 @@ test('rand', function () {
 		delete matched[i];
 	}
 
-	set.helpers.each(choices, function(choice){
+	each(choices, function(choice){
 		ok(matched[choice], "has "+choice);
 		delete matched[choice];
 	});
 
-	ok(set.helpers.isEmptyObject(matched), "nothing else unexpected");
+	ok(isEmptyObject(matched), "nothing else unexpected");
 });
 
 test('core.dataFromUrl', function () {

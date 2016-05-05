@@ -16,8 +16,9 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "can-set": "^0.5.5",
-    "can-connect": "^0.5.4"
+    "can-connect": "^0.6.0-pre.1",
+    "can-set": "^0.6.0-pre.3",
+    "can-util": "^3.0.0-pre.12"
   },
   "devDependencies": {
     "steal": "^0.15.3",
@@ -41,12 +42,6 @@
   },
   "homepage": "https://github.com/canjs/can-fixture",
   "system": {
-    "npmDependencies": [
-      "can-set",
-      "steal-qunit",
-      "jquery",
-      "can-connect"
-    ],
     "npmAlgorithm": "flat"
   }
 }

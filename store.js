@@ -1,9 +1,16 @@
 var canSet = require("can-set");
-var helpers = require("./helpers/helpers");
 var connect = require("can-connect");
 var legacyStore = require("./helpers/legacyStore");
+var each = require("can-util/js/each/each");
+var assign = require("can-util/js/assign/assign");
+var isArrayLike = require("can-util/js/is-array-like/is-array-like");
 require("can-connect/data/memory-cache/");
 
+var firstProp = function(obj){
+	for(var prop in obj) {
+		return prop;
+	}
+};
 
 // Returns a function that calls the method on a connection.
 // Wires up fixture signature to a connection signature.
@@ -23,7 +30,7 @@ var makeMakeItems = function(baseItems, idProp){
 		// clone baseItems
 		var items = [],
 			maxId = 0;
-		helpers.each(baseItems, function(item){
+		each(baseItems, function(item){
 			items.push(JSON.parse(JSON.stringify(item)));
 			maxId = Math.max(item[idProp] + 1, maxId + 1) || items.length;
 		});
@@ -46,7 +53,7 @@ var Store = function(connection, makeItems, idProp){
 		this[method] = this[method].bind(this);
 	}
 };
-helpers.extend(Store.prototype,{
+assign(Store.prototype,{
 	getListData: connectToConnection("getListData"),
 	getData: connectToConnection( "getData"),
 
@@ -83,7 +90,7 @@ helpers.extend(Store.prototype,{
 	}
 });
 // legacy methods
-helpers.each({
+each({
 	findAll: "getListData",
 	findOne: "getData",
 	create: "createData",
@@ -116,7 +123,7 @@ Store.make = function (count, make, algebra) {
 	var makeItems,
 		idProp;
 	if(typeof count === "number") {
-		idProp = helpers.firstProp(algebra.clauses.id || {}) || "id";
+		idProp = firstProp(algebra.clauses.id || {}) || "id";
 		makeItems = function () {
 			var items = [];
 			var maxId = 0;
@@ -135,9 +142,9 @@ Store.make = function (count, make, algebra) {
 				items: items
 			};
 		};
-	} else if(helpers.isArrayLike(count)){
+	} else if(isArrayLike(count)){
 		algebra = make;
-		idProp = helpers.firstProp(algebra.clauses.id || {}) || "id";
+		idProp = firstProp(algebra.clauses.id || {}) || "id";
 		makeItems = makeMakeItems(count, idProp);
 	}
 

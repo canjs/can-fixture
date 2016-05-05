@@ -1,13 +1,13 @@
 var core = require("./core");
 var fixture = core.add;
-var helpers = require("./helpers/helpers");
 var Store = require("./store");
 require("./xhr");
+var assign = require("can-util/js/assign/assign");
 // HELPERS START
 
 var noop = function(){};
 
-helpers.extend(fixture, {
+assign(fixture, {
 	rand: function randomize (arr, min, max) {
 		if (typeof arr === 'number') {
 			if (typeof min === 'number') {
@@ -41,7 +41,7 @@ helpers.extend(fixture, {
 		return result;
 	},
 	xhr: function (xhr) {
-		return helpers.extend({}, {
+		return assign({}, {
 			abort: noop,
 			getAllResponseHeaders: function () {
 				return "";

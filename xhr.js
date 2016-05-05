@@ -3,9 +3,9 @@
 // call the fixture callbacks or create a real XHR request
 // and then respond normally.
 var fixtureCore = require("./core");
-var helpers = require("./helpers/helpers");
 var deparam = require("./helpers/deparam");
-
+var each = require("can-util/js/each/each");
+var assign = require("can-util/js/assign/assign");
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
@@ -49,7 +49,7 @@ var assign = function(dest, source, excluding){
 };
 
 var propsToIgnore = { onreadystatechange: true, onload: true, __events: true };
-helpers.each(events, function(prop){
+each(events, function(prop){
 	propsToIgnore["on"+prop] = true;
 });
 
@@ -75,7 +75,7 @@ var makeXHR = function(mockXHR){
 	};
 
 	// wire up events to forward to mock object
-	helpers.each(events, function(eventName){
+	each(events, function(eventName){
 		xhr["on"+eventName] = function(){
 			callEvents(mockXHR, eventName);
 			if(mockXHR["on"+eventName]) {
@@ -117,7 +117,7 @@ GLOBAL.XMLHttpRequest = function(){
 	this.onerror = null;
 };
 // Methods on the mock XHR:
-helpers.extend(XMLHttpRequest.prototype,{
+assign(XMLHttpRequest.prototype,{
 	setRequestHeader: function(name, value){
 		this._headers[name] = value;
 	},
@@ -190,19 +190,19 @@ helpers.extend(XMLHttpRequest.prototype,{
 			return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
 				body = typeof body === "string" ? body :  JSON.stringify(body);
 
-				helpers.extend(mockXHR,{
+				assign(mockXHR,{
 					readyState: 4,
 					status: status
 				});
 
 				var success = (status >= 200 && status < 300 || status === 304);
 				if ( success ) {
-					helpers.extend(mockXHR,{
+					assign(mockXHR,{
 						statusText: statusText || "OK",
 						responseText: body
 					});
 				} else {
-					helpers.extend(mockXHR,{
+					assign(mockXHR,{
 						statusText: statusText || "error",
 						responseText: body
 					});
@@ -262,7 +262,7 @@ helpers.extend(XMLHttpRequest.prototype,{
 			//!steal-remove-start
 			fixtureCore.log(xhrSettings.url+" -> " + fixtureSettings.url);
 			//!steal-remove-end
-			helpers.extend(xhr, fixtureSettings);
+			assign(xhr, fixtureSettings);
 		}
 
 		// Make the request.

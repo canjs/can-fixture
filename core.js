@@ -1,7 +1,9 @@
 // Adds
 var canSet = require("can-set");
-var helpers = require("./helpers/helpers");
-var sub = require("./helpers/sub");
+var sub = require("can-util/js/string/string").sub;
+var each = require("can-util/js/each/each");
+var assign = require("can-util/js/assign/assign");
+var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 require("./store");
 
 
@@ -74,7 +76,7 @@ exports.add = function (settings, fixture) {
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
 	else {
-		helpers.each(settings, function (fixture, url) {
+		each(settings, function (fixture, url) {
 			exports.add(url, fixture);
 		});
 	}
@@ -107,7 +109,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 			response(200, result );
 		}
 	};
-	
+
 	if(!xhrSettings.async) {
 		callFixture();
 	} else {
@@ -135,7 +137,7 @@ exports.get = function(xhrSettings) {
 		index = exports.index(xhrSettings, false);
 	}
 
-	var fixtureSettings = index >=0 ? helpers.extend({},fixtures[index]) : undefined;
+	var fixtureSettings = index >=0 ? assign({},fixtures[index]) : undefined;
 	if(fixtureSettings) {
 		var url = fixtureSettings.fixture,
 			data = exports.dataFromUrl(fixtureSettings.url, xhrSettings.url);
@@ -161,8 +163,8 @@ exports.get = function(xhrSettings) {
 				};
 			}
 		} else {
-			var xhrData = helpers.extend({}, xhrSettings.data || {});
-			fixtureSettings.data = helpers.extend(xhrData, data);
+			var xhrData = assign({}, xhrSettings.data || {});
+			fixtureSettings.data = assign(xhrData, data);
 		}
 	}
 
@@ -178,9 +180,9 @@ exports.matches = function(settings, fixture, exact) {
 	}
 };
 var isEmptyOrNull = function(a, b){
-	if( a == null && helpers.isEmptyObject(b) ) {
+	if( a == null && isEmptyObject(b) ) {
 		return true;
-	} else if( b == null && helpers.isEmptyObject(a) ) {
+	} else if( b == null && isEmptyObject(a) ) {
 		return true;
 	} else {
 		return canSet.equal(a, b);
@@ -230,7 +232,7 @@ exports.dataFromUrl = function (fixtureUrl, url) {
 
 	// Shift off the URL and just keep the data.
 	res.shift();
-	helpers.each(order, function (name) {
+	each(order, function (name) {
 		// Add data from regular expression onto data object.
 		data[name] = res.shift();
 	});
