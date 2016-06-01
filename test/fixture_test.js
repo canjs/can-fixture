@@ -1332,3 +1332,26 @@ asyncTest("slow mode works (#26)", function(){
 	xhr.open('GET', url);
 	xhr.send();
 });
+
+asyncTest('onload should be triggered for HTTP error responses (#36)', function() {
+	fixture('/onload', function(req, res) {
+		res(400);
+	});
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function() {
+		ok(true, 'onload should be invoked');
+		fixture('/onload', null);
+		start();
+	});
+
+	xhr.addEventListener('error', function() {
+		ok(false, 'onerror should not be invoked');
+		fixture('/onload', null);
+		start();
+	})
+
+	xhr.open('GET', '/onload');
+	xhr.send();
+});
