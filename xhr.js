@@ -219,16 +219,9 @@ assign(XMLHttpRequest.prototype,{
 					mockXHR.onprogress();
 				}
 
-				if(success) {
-					callEvents(mockXHR, "load");
-					if(mockXHR.onload) {
-						mockXHR.onload();
-					}
-				} else {
-					callEvents(mockXHR, "error");
-					if(mockXHR.onerror) {
-						mockXHR.onerror();
-					}
+				callEvents(mockXHR, "load");
+				if(mockXHR.onload) {
+					mockXHR.onload();
 				}
 
 				callEvents(mockXHR, "loadend");
