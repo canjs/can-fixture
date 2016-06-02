@@ -43,7 +43,8 @@ var assign = function(dest, source, excluding){
 	// copy everything on this to the xhr object that is not on `this`'s prototype
 	for(var prop in source){
 		if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-			dest[prop] = source[prop];
+			if(source.responseType !== 'arraybuffer' || (prop !== 'responseText' && prop !== 'responseXML'))
+				dest[prop] = source[prop];
 		}
 	}
 };
