@@ -943,6 +943,27 @@ asyncTest("pass return value for fixture", function(){
 	xhr.send();
 });
 
+asyncTest("pass headers in fallthrough", function() {
+	var url = __dirname+'/fixtures/foobar.json';
+	var xhr = new XMLHttpRequest();
+	expect(2);
+
+	xhr.open("GET", url);
+	xhr.setRequestHeader("foo", "bar");
+	xhr.onreadystatechange = function(ev){
+		var originalXhr = ev.target;
+		if(originalXhr.readyState === 1) {
+			originalXhr.setRequestHeader = function(key, val) {
+				equal(key, "foo");
+				equal(val, "bar");
+			}
+		}
+		if(originalXhr.readyState === 4) {
+			start();
+		}
+	}
+	xhr.send();
+});
 
 test("set.Algebra CRUD works (#12)", 5, function(){
 

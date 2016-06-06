@@ -239,6 +239,11 @@ assign(XMLHttpRequest.prototype,{
 			makeRequest = function(){
 				mockXHR._xhr = xhr;
 				xhr.open( xhr.type, xhr.url, xhr.async );
+				if(mockXHR._headers) {
+					Object.keys(mockXHR._headers).forEach(function(key) {
+						xhr.setRequestHeader(key, mockXHR._headers[key]);
+					});
+				}
 				return xhr.send(data);
 			};
 
