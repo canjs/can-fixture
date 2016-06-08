@@ -5,7 +5,6 @@ var set = require("can-set");
 var $ = require("jquery");
 var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-var clone = require('steal-clone');
 
 var errorCallback = function(xhr, status, error){
 	ok(false);
@@ -1358,30 +1357,26 @@ asyncTest('onload should be triggered for HTTP error responses (#36)', function(
 });
 
 asyncTest('responseText & responseXML should not be set for arraybuffer types (#38)', function() {
-	Object.defineProperty(XMLHttpRequest.prototype, "responseText", {
-		get: function() { ok(false, 'should not get responseText'); },
-		set: function() { ok(false, 'should not set responseText'); }
+
+	fixture('/onload', '/test/fixtures/foo.json');
+
+	var oldError = window.onerror;
+
+	window.onerror = function (msg, url, line) {
+	    ok(false, 'There should not be an error');
+	    start();
+	}
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function() {
+		fixture('/onload', null);
+		window.onerror = oldError;
+		ok(true, 'Got here without an error');
+		start();
 	});
-	Object.defineProperty(XMLHttpRequest.prototype, "responseXML", {
-		get: function() { ok(false, 'should not get responseXML'); },
-		set: function() { ok(false, 'should not set responseXML'); }
-	});
 
-	clone({})
-		.import('xhr')
-		.then(function () {
-			fixture('/onload', '/test/fixtures/foo.json');
-
-			var xhr = new XMLHttpRequest();
-
-			xhr.addEventListener('load', function() {
-				fixture('/onload', null);
-				ok(true, 'should not get or set responseText or responseXML');
-				start();
-			});
-
-			xhr.open('GET', '/onload');
-			xhr.responseType = 'arraybuffer';
-			xhr.send();
-		});
+	xhr.responseType = 'arraybuffer';
+	xhr.open('GET', '/onload');
+	xhr.send();
 });

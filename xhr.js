@@ -64,11 +64,21 @@ var makeXHR = function(mockXHR){
 	// When the real XHR is called back, update all properties
 	// and call all callbacks on the mock XHR.
 	xhr.onreadystatechange = function(ev){
+		// If the XHRs responseType is not '' or 'text', browsers will throw an error
+		// when trying to access the `responseText` property so we have to ignore it
+		if(xhr.responseType === '' || xhr.responseType === 'text') {
+			delete propsToIgnore.responseText;
+			delete propsToIgnore.responseXML;
+		} else {
+			propsToIgnore.responseText = true;
+			propsToIgnore.responseXML = true;
+		}
 
 		// Copy back everything over because in IE8 defineProperty
 		// doesn't work, so we need to make our shim XHR have the same
 		// values as the real xhr.
-		assign(mockXHR, xhr,propsToIgnore);
+
+		assign(mockXHR, xhr, propsToIgnore);
 		if(mockXHR.onreadystatechange) {
 			mockXHR.onreadystatechange(ev);
 		}
