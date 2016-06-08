@@ -5,6 +5,7 @@ var set = require("can-set");
 var $ = require("jquery");
 var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var clone = require('steal-clone');
 
 var errorCallback = function(xhr, status, error){
 	ok(false);
@@ -1354,4 +1355,33 @@ asyncTest('onload should be triggered for HTTP error responses (#36)', function(
 
 	xhr.open('GET', '/onload');
 	xhr.send();
+});
+
+asyncTest('responseText & responseXML should not be set for arraybuffer types (#38)', function() {
+	Object.defineProperty(XMLHttpRequest.prototype, "responseText", {
+		get: function() { ok(false, 'should not get responseText'); },
+		set: function() { ok(false, 'should not set responseText'); }
+	});
+	Object.defineProperty(XMLHttpRequest.prototype, "responseXML", {
+		get: function() { ok(false, 'should not get responseXML'); },
+		set: function() { ok(false, 'should not set responseXML'); }
+	});
+
+	clone({})
+		.import('xhr')
+		.then(function () {
+			fixture('/onload', '/test/fixtures/foo.json');
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.addEventListener('load', function() {
+				fixture('/onload', null);
+				ok(true, 'should not get or set responseText or responseXML');
+				start();
+			});
+
+			xhr.open('GET', '/onload');
+			xhr.responseType = 'arraybuffer';
+			xhr.send();
+		});
 });
