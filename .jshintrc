@@ -1,4 +1,3 @@
-
 {
   "globals": {
     "steal": true,
@@ -20,8 +19,7 @@
     "stop": true,
 	"global": true
   },
-
-
+  "strict": false,
   "curly": true,
   "eqeqeq": true,
   "freeze": true,

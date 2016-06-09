@@ -1355,3 +1355,28 @@ asyncTest('onload should be triggered for HTTP error responses (#36)', function(
 	xhr.open('GET', '/onload');
 	xhr.send();
 });
+
+asyncTest('responseText & responseXML should not be set for arraybuffer types (#38)', function() {
+
+	fixture('/onload', '/test/fixtures/foo.json');
+
+	var oldError = window.onerror;
+
+	window.onerror = function (msg, url, line) {
+	    ok(false, 'There should not be an error');
+	    start();
+	}
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function() {
+		fixture('/onload', null);
+		window.onerror = oldError;
+		ok(true, 'Got here without an error');
+		start();
+	});
+
+	xhr.responseType = 'arraybuffer';
+	xhr.open('GET', '/onload');
+	xhr.send();
+});
