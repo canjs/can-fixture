@@ -22,7 +22,7 @@
     "can-util": "^3.0.0-pre.12"
   },
   "devDependencies": {
-    "steal": "^0.15.3",
+    "steal": "^0.16.21",
     "steal-qunit": "0.1.1",
     "testee": "^0.2.5",
     "steal-tools": "^0.16.5",
