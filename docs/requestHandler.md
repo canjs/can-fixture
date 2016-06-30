@@ -1,7 +1,8 @@
 @typedef {function} can-fixture.requestHandler requestHandler
 
 @signature `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
-Defines what can-fixture callback functions are called with.
+
+Defines what can-fixture callback functions are called with.  TODO fix grammar
 
 Example:
 

@@ -1,4 +1,4 @@
-@typedef {function} can-fixture.response response TODO check this name
+@typedef {function} can-fixture.response response
 
 @signature `response(status, body, headers, statusText)`
 

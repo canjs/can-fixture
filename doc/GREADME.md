@@ -38,7 +38,7 @@ can-fixture intercepts an AJAX request and simulates the response with a file or
 ### <code>fixture(ajaxSettings, requestHandler(...))</code>
 
 
-If an XHR request matches ajaxSettings, calls requestHandler with the XHR requests data. Makes the XHR request responds with the return value of requestHandler or the result of calling its response argument.
+If an XHR request matches ajaxSettings, calls requestHandler with the XHR requests data. Makes the XHR request respond with the return value of requestHandler or the result of calling its response argument.
 
 The following traps requests to GET /todos and responds with an array of data:
 
@@ -196,7 +196,8 @@ fixture({
 
 #### <code>requestHandler(request, response(...), requestHeaders, ajaxSettings)</code>
 
-Defines what can-fixture callback functions are called with.
+
+Defines what can-fixture callback functions are called with.  TODO fix grammar
 
 Example:
 
@@ -525,7 +526,7 @@ fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
 ### <code>Store.prototype.reset([baseItems])</code>
 
 
-Sets the items in the store to their original state or to `baseItems` if it's passed.
+Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 
 ```js
 // Creates a store with one item.

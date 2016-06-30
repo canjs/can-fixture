@@ -3,7 +3,7 @@
 
 @signature `Store.prototype.reset([baseItems])`
 
-Sets the items in the store to their original state or to `baseItems` if it's passed.
+Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 
 ```js
 // Creates a store with one item.

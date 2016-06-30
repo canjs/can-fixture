@@ -4,7 +4,7 @@
 
 @signature `fixture(ajaxSettings, requestHandler(...))`
 
-If an XHR request matches ajaxSettings, calls requestHandler with the XHR requests data. Makes the XHR request responds with the return value of requestHandler or the result of calling its response argument.
+If an XHR request matches ajaxSettings, calls requestHandler with the XHR requests data. Makes the XHR request respond with the return value of requestHandler or the result of calling its response argument.
 
 The following traps requests to GET /todos and responds with an array of data:
 
