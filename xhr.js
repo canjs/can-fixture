@@ -1,3 +1,6 @@
+/* global require, window, global */
+/* global setTimeout, clearTimeout, XMLHttpRequest */
+
 // This overwrites the default XHR with a mock XHR object.
 // The mock XHR object's `.send` method is able to
 // call the fixture callbacks or create a real XHR request
@@ -5,7 +8,18 @@
 var fixtureCore = require("./core");
 var deparam = require("./helpers/deparam");
 var each = require("can-util/js/each/each");
-var assign = require("can-util/js/assign/assign");
+// Copy props from source to dest, except those on the XHR prototype and
+// listed as excluding.
+var assign = function(dest, source, excluding){
+       excluding = excluding || {};
+
+       // copy everything on this to the xhr object that is not on `this`'s prototype
+       for(var prop in source){
+               if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+                       dest[prop] = source[prop];
+               }
+       }
+};
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
@@ -35,18 +49,6 @@ function callEvents(xhr, ev) {
 		fn.call(xhr);
 	}
 }
-// Copy props from source to dest, except those on the XHR prototype and
-// listed as excluding.
-var assign = function(dest, source, excluding){
-	excluding = excluding || {};
-
-	// copy everything on this to the xhr object that is not on `this`'s prototype
-	for(var prop in source){
-		if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-			dest[prop] = source[prop];
-		}
-	}
-};
 
 var propsToIgnore = { onreadystatechange: true, onload: true, __events: true };
 each(events, function(prop){
@@ -193,11 +195,13 @@ assign(XMLHttpRequest.prototype,{
 		// See if the XHR settings match a fixture.
 		var fixtureSettings = fixtureCore.get(xhrSettings);
 		var mockXHR = this;
+
+		var timeoutId;
 		// If a dynamic fixture is being used, we call the dynamic fixture function and then
 		// copy the response back onto the `mockXHR` in the right places.
 		if(fixtureSettings && typeof fixtureSettings.fixture === "function") {
 
-			return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
+			timeoutId = fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
 				body = typeof body === "string" ? body :  JSON.stringify(body);
 
 				assign(mockXHR,{
@@ -240,6 +244,28 @@ assign(XMLHttpRequest.prototype,{
 				}
 
 			});
+
+			this.abort = function() {
+				clearTimeout(timeoutId);
+				assign(mockXHR,{
+					readyState: 4,
+					status: 0,
+					statusText: "aborted"
+				});
+				if(mockXHR.onreadystatechange) {
+					mockXHR.onreadystatechange({ target: mockXHR });
+				}
+				callEvents(mockXHR, "error");
+				if(mockXHR.onerror) {
+					mockXHR.onerror();
+				}
+				callEvents(mockXHR, "loadend");
+				if(mockXHR.onloadend) {
+					mockXHR.onloadend();
+				}
+			};
+
+			return timeoutId;
 		}
 		// At this point there is either not a fixture or a redirect fixture.
 		// Either way we are doing a request.
