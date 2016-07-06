@@ -158,6 +158,25 @@ assign(XMLHttpRequest.prototype,{
 	getResponseHeader: function(key){
 		return "";
 	},
+	abort: function() {
+		assign(this,{
+			readyState: 4,
+			status: 0,
+			statusText: "aborted"
+		});
+		clearTimeout(this.timeoutId);
+		if(this.onreadystatechange) {
+			this.onreadystatechange({ target: this });
+		}
+		callEvents(this, "error");
+		if(this.onerror) {
+			this.onerror();
+		}
+		callEvents(this, "loadend");
+		if(this.onloadend) {
+			this.onloadend();
+		}
+	},
 	// This needs to compile the information necessary to see if
 	// there is a corresponding fixture.
 	// If there isn't a fixture, this should create a real XHR object
@@ -201,7 +220,7 @@ assign(XMLHttpRequest.prototype,{
 		// copy the response back onto the `mockXHR` in the right places.
 		if(fixtureSettings && typeof fixtureSettings.fixture === "function") {
 
-			timeoutId = fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
+			this.timeoutId = fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
 				body = typeof body === "string" ? body :  JSON.stringify(body);
 
 				assign(mockXHR,{
@@ -245,26 +264,6 @@ assign(XMLHttpRequest.prototype,{
 
 			});
 
-			this.abort = function() {
-				clearTimeout(timeoutId);
-				assign(mockXHR,{
-					readyState: 4,
-					status: 0,
-					statusText: "aborted"
-				});
-				if(mockXHR.onreadystatechange) {
-					mockXHR.onreadystatechange({ target: mockXHR });
-				}
-				callEvents(mockXHR, "error");
-				if(mockXHR.onerror) {
-					mockXHR.onerror();
-				}
-				callEvents(mockXHR, "loadend");
-				if(mockXHR.onloadend) {
-					mockXHR.onloadend();
-				}
-			};
-
 			return timeoutId;
 		}
 		// At this point there is either not a fixture or a redirect fixture.
@@ -287,7 +286,7 @@ assign(XMLHttpRequest.prototype,{
 			//!steal-remove-start
 			fixtureCore.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
 			//!steal-remove-end
-			setTimeout(makeRequest, fixtureSettings.fixture);
+			this.timeoutId = setTimeout(makeRequest, fixtureSettings.fixture);
 			return;
 		}
 

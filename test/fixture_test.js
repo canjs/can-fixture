@@ -7,7 +7,7 @@ var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 
 var errorCallback = function(xhr, status, error){
-	ok(false);
+	ok(false, error);
 	start();
 };
 
@@ -1400,4 +1400,80 @@ asyncTest('responseText & responseXML should not be set for arraybuffer types (#
 	xhr.responseType = 'arraybuffer';
 	xhr.open('GET', '/onload');
 	xhr.send();
+});
+
+asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
+	fixture('/onload', 1000);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/onload');
+	setTimeout(function() {
+		xhr.abort();
+	}, 50);
+	xhr.send();
+
+	xhr.addEventListener('error', function() {
+		fixture('/onload', null);
+		ok(true, 'Got to the error handler');
+		equal(xhr.statusText, "aborted");
+		equal(xhr.status, "0");
+		start();
+	});
+
+	xhr.addEventListener('load', function() {
+		fixture('/onload', null);
+		ok(false, 'timed out xhr did not abort');
+		start();
+	});
+
+});
+
+asyncTest('dynamic fixture with timeout does not run if xhr timeout less than delay', function() {
+	var delay = fixture.delay;
+	fixture.delay = 1000;
+	fixture('/onload', function() {
+		fixture('/onload', null);
+		ok(false, 'timed out xhr did not abort');
+		start();
+	});
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/onload');
+	setTimeout(function() {
+		xhr.abort();
+	}, 50);
+	xhr.send();
+
+	xhr.addEventListener('error', function() {
+		fixture('/onload', null);
+		ok(true, 'Got to the error handler');
+		equal(xhr.statusText, "aborted");
+		equal(xhr.status, "0");
+		start();
+	});
+	fixture.delay = delay;
+});
+
+asyncTest('fixture with timeout does not run if $.ajax timeout less than delay', function() {
+	var delay = fixture.delay;
+	fixture.delay = 1000;
+	fixture('/onload', function() {
+		fixture('/onload', null);
+		ok(false, 'timed out xhr did not abort');
+		start();
+	});
+
+	var ajax = $.ajax({
+		url: '/onload',
+		timeout: 50,
+		error: function(xhr) {
+			fixture('/onload', null);
+			ok(true, 'Got to the error handler');
+			equal(xhr.statusText, "timeout");
+			equal(xhr.status, "0");
+			start();
+		}
+	})
+
+	fixture.delay = delay;
 });
