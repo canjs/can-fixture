@@ -44,7 +44,30 @@ test('static fixtures', function () {
 				},errorCallback);
 		}, errorCallback);
 });
-
+test('static fixtures (using method signature)', function () {
+	stop();
+	fixture({method: 'get', url: 'method/{id}'}, __dirname+'/fixtures/method.{id}.json');
+	$.ajax({
+		url: 'method/4',
+		dataType: 'json'
+	})
+		.then(function (data) {
+			equal(data.id, 4, 'Got data with proper id using method');
+			start();
+		}, errorCallback);
+});
+test('static fixtures (using type signature)', function () {
+	stop();
+	fixture({type: 'get', url: 'type/{id}'}, __dirname+'/fixtures/type.{id}.json');
+	$.ajax({
+		url: 'type/4',
+		dataType: 'json'
+	})
+		.then(function (data) {
+			equal(data.id, 4, 'Got data with proper id using type');
+			start();
+		}, errorCallback);
+});
 test('templated static fixtures', function () {
 	stop();
 	fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
