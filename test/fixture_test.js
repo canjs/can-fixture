@@ -1424,3 +1424,20 @@ asyncTest('responseText & responseXML should not be set for arraybuffer types (#
 	xhr.open('GET', '/onload');
 	xhr.send();
 });
+
+asyncTest("response headers are set", function(){
+	fixture("GET /todos", function(request, response){
+		response(200, "{}", { foo: "bar"});
+	});
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		var headers = xhr.getAllResponseHeaders();
+		ok(headers.foo === "bar", "header was set");
+		start();
+	});
+
+	xhr.open('GET', "/todos");
+	xhr.send();
+});
