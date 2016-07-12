@@ -1491,7 +1491,7 @@ define('when@3.7.7#es6-shim/Promise', [
     loader.global.define = define;
     return loader.get('@@global-helpers').retrieveGlobal(module.id, undefined);
 });
-/*can-connect@0.5.4#helpers/helpers*/
+/*can-connect@0.5.5#helpers/helpers*/
 define('fixture-can-connect/helpers/helpers', function (require, exports, module) {
     require('when/es6-shim/Promise');
     var strReplacer = /\{([^\}]+)\}/g, isContainer = function (current) {
@@ -1625,7 +1625,7 @@ define('fixture-can-connect/helpers/helpers', function (require, exports, module
         }()
     };
 });
-/*can-connect@0.5.4#can-connect*/
+/*can-connect@0.5.5#can-connect*/
 define('fixture-can-connect/can-connect', function (require, exports, module) {
     var helpers = require('fixture-can-connect/helpers/helpers');
     var connect = function (behaviors, options) {
@@ -1937,7 +1937,7 @@ define('can-fixture/helpers/legacyStore', function (require, exports, module) {
         }, methods);
     };
 });
-/*can-connect@0.5.4#helpers/get-items*/
+/*can-connect@0.5.5#helpers/get-items*/
 define('fixture-can-connect/helpers/get-items', function (require, exports, module) {
     var isArray = require('fixture-can-connect/helpers/helpers').isArray;
     module.exports = function (data) {
@@ -1948,7 +1948,7 @@ define('fixture-can-connect/helpers/get-items', function (require, exports, modu
         }
     };
 });
-/*can-connect@0.5.4#helpers/sorted-set-json*/
+/*can-connect@0.5.5#helpers/sorted-set-json*/
 define('fixture-can-connect/helpers/sorted-set-json', function (require, exports, module) {
     var helpers = require('fixture-can-connect/helpers/helpers');
     var forEach = helpers.forEach;
@@ -1965,7 +1965,7 @@ define('fixture-can-connect/helpers/sorted-set-json', function (require, exports
         }
     };
 });
-/*can-connect@0.5.4#helpers/overwrite*/
+/*can-connect@0.5.5#helpers/overwrite*/
 define('fixture-can-connect/helpers/overwrite', function (require, exports, module) {
     module.exports = function (d, s, id) {
         for (var prop in d) {
@@ -1979,7 +1979,7 @@ define('fixture-can-connect/helpers/overwrite', function (require, exports, modu
         return d;
     };
 });
-/*can-connect@0.5.4#helpers/set-add*/
+/*can-connect@0.5.5#helpers/set-add*/
 define('fixture-can-connect/helpers/set-add', function (require, exports, module) {
     var canSet = require('fixture-can-set/src/set');
     module.exports = function (connection, setItems, items, item, algebra) {
@@ -1992,7 +1992,20 @@ define('fixture-can-connect/helpers/set-add', function (require, exports, module
         return copy;
     };
 });
-/*can-connect@0.5.4#data/memory-cache/memory-cache*/
+/*can-connect@0.5.5#helpers/get-index-by-id*/
+define('fixture-can-connect/helpers/get-index-by-id', function (require, exports, module) {
+    module.exports = function (connection, props, items) {
+        var id = connection.id(props);
+        for (var i = 0; i < items.length; i++) {
+            var connId = connection.id(items[i]);
+            if (id == connId) {
+                return i;
+            }
+        }
+        return -1;
+    };
+});
+/*can-connect@0.5.5#data/memory-cache/memory-cache*/
 define('fixture-can-connect/data/memory-cache/memory-cache', function (require, exports, module) {
     var getItems = require('fixture-can-connect/helpers/get-items');
     require('when/es6-shim/Promise');
@@ -2002,16 +2015,7 @@ define('fixture-can-connect/data/memory-cache/memory-cache', function (require, 
     var overwrite = require('fixture-can-connect/helpers/overwrite');
     var helpers = require('fixture-can-connect/helpers/helpers');
     var setAdd = require('fixture-can-connect/helpers/set-add');
-    var indexOf = function (connection, props, items) {
-        var id = parseInt(connection.id(props), 10);
-        for (var i = 0; i < items.length; i++) {
-            var connId = parseInt(connection.id(items[i]), 10);
-            if (id === connId) {
-                return i;
-            }
-        }
-        return -1;
-    };
+    var indexOf = require('fixture-can-connect/helpers/get-index-by-id');
     module.exports = connect.behavior('data-memory-cache', function (baseConnect) {
         var behavior = {
             _sets: {},
@@ -2545,195 +2549,202 @@ define('can-fixture/helpers/deparam', function (require, exports, module) {
 });
 /*xhr*/
 define('can-fixture/xhr', function (require, exports, module) {
-    var fixtureCore = require('can-fixture/core');
-    var helpers = require('can-fixture/helpers/helpers');
-    var deparam = require('can-fixture/helpers/deparam');
-    var XHR = XMLHttpRequest, GLOBAL = typeof global !== 'undefined' ? global : window;
-    var events = [
-        'abort',
-        'error',
-        'load',
-        'loadend',
-        'loadstart',
-        'progress'
-    ];
-    (function () {
-        var x = new XHR();
-        for (var prop in x) {
-            if (prop.indexOf('on') === 0 && events.indexOf(prop.substr(2)) === -1 && prop !== 'onreadystatechange') {
-                events.push(prop.substr(2));
+    (function (global) {
+        var fixtureCore = require('can-fixture/core');
+        var helpers = require('can-fixture/helpers/helpers');
+        var deparam = require('can-fixture/helpers/deparam');
+        var XHR = XMLHttpRequest, GLOBAL = typeof global !== 'undefined' ? global : window;
+        var events = [
+            'abort',
+            'error',
+            'load',
+            'loadend',
+            'loadstart',
+            'progress'
+        ];
+        (function () {
+            var x = new XHR();
+            for (var prop in x) {
+                if (prop.indexOf('on') === 0 && events.indexOf(prop.substr(2)) === -1 && prop !== 'onreadystatechange') {
+                    events.push(prop.substr(2));
+                }
+            }
+        }());
+        function callEvents(xhr, ev) {
+            var evs = xhr.__events[ev] || [], fn;
+            for (var i = 0, len = evs.length; i < len; i++) {
+                fn = evs[i];
+                fn.call(xhr);
             }
         }
-    }());
-    function callEvents(xhr, ev) {
-        var evs = xhr.__events[ev] || [], fn;
-        for (var i = 0, len = evs.length; i < len; i++) {
-            fn = evs[i];
-            fn.call(xhr);
-        }
-    }
-    var assign = function (dest, source, excluding) {
-        excluding = excluding || {};
-        for (var prop in source) {
-            if (!(prop in XMLHttpRequest.prototype) && !excluding[prop]) {
-                dest[prop] = source[prop];
-            }
-        }
-    };
-    var propsToIgnore = {
-        onreadystatechange: true,
-        onload: true,
-        __events: true
-    };
-    helpers.each(events, function (prop) {
-        propsToIgnore['on' + prop] = true;
-    });
-    var makeXHR = function (mockXHR) {
-        var xhr = new XHR();
-        assign(xhr, mockXHR, propsToIgnore);
-        xhr.onreadystatechange = function (ev) {
-            assign(mockXHR, xhr, propsToIgnore);
-            if (mockXHR.onreadystatechange) {
-                mockXHR.onreadystatechange(ev);
+        var assign = function (dest, source, excluding) {
+            excluding = excluding || {};
+            for (var prop in source) {
+                if (!(prop in XMLHttpRequest.prototype) && !excluding[prop]) {
+                    dest[prop] = source[prop];
+                }
             }
         };
-        helpers.each(events, function (eventName) {
-            xhr['on' + eventName] = function () {
-                callEvents(mockXHR, eventName);
-                if (mockXHR['on' + eventName]) {
-                    return mockXHR['on' + eventName].apply(mockXHR, arguments);
-                }
-            };
+        var propsToIgnore = {
+            onreadystatechange: true,
+            onload: true,
+            __events: true
+        };
+        helpers.each(events, function (prop) {
+            propsToIgnore['on' + prop] = true;
         });
-        if (xhr.getResponseHeader) {
-            mockXHR.getResponseHeader = function () {
-                return xhr.getResponseHeader.apply(xhr, arguments);
-            };
-        }
-        if (mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
-            xhr.setDisableHeaderCheck(true);
-        }
-        return xhr;
-    };
-    GLOBAL.XMLHttpRequest = function () {
-        var headers = this._headers = {};
-        this._xhr = {
-            getAllResponseHeaders: function () {
-                return headers;
-            }
-        };
-        this.__events = {};
-        this.onload = null;
-        this.onerror = null;
-    };
-    helpers.extend(XMLHttpRequest.prototype, {
-        setRequestHeader: function (name, value) {
-            this._headers[name] = value;
-        },
-        open: function (type, url, async) {
-            this.type = type;
-            this.url = url;
-            this.async = async === false ? false : true;
-        },
-        getAllResponseHeaders: function () {
-            return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
-        },
-        addEventListener: function (ev, fn) {
-            var evs = this.__events[ev] = this.__events[ev] || [];
-            evs.push(fn);
-        },
-        removeEventListener: function (ev, fn) {
-            var evs = this.__events[ev] = this.__events[ev] || [];
-            var idx = evs.indexOf(fn);
-            if (idx >= 0) {
-                evs.splice(idx, 1);
-            }
-        },
-        setDisableHeaderCheck: function (val) {
-            this._disableHeaderCheck = !!val;
-        },
-        getResponseHeader: function (key) {
-            return '';
-        },
-        send: function (data) {
-            var xhrSettings = {
-                url: this.url,
-                data: data,
-                headers: this._headers,
-                type: this.type.toLowerCase() || 'get',
-                async: this.async
-            };
-            if (!xhrSettings.data && xhrSettings.type === 'get' || xhrSettings.type === 'delete') {
-                xhrSettings.data = deparam(xhrSettings.url.split('?')[1]);
-                xhrSettings.url = xhrSettings.url.split('?')[0];
-            }
-            if (typeof xhrSettings.data === 'string') {
-                try {
-                    xhrSettings.data = JSON.parse(xhrSettings.data);
-                } catch (e) {
-                    xhrSettings.data = deparam(xhrSettings.data);
+        var makeXHR = function (mockXHR) {
+            var xhr = new XHR();
+            assign(xhr, mockXHR, propsToIgnore);
+            xhr.onreadystatechange = function (ev) {
+                assign(mockXHR, xhr, propsToIgnore);
+                if (mockXHR.onreadystatechange) {
+                    mockXHR.onreadystatechange(ev);
                 }
-            }
-            var fixtureSettings = fixtureCore.get(xhrSettings);
-            var mockXHR = this;
-            if (fixtureSettings && typeof fixtureSettings.fixture === 'function') {
-                return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function (status, body, headers, statusText) {
-                    body = typeof body === 'string' ? body : JSON.stringify(body);
-                    helpers.extend(mockXHR, {
-                        readyState: 4,
-                        status: status
-                    });
-                    var success = status >= 200 && status < 300 || status === 304;
-                    if (success) {
-                        helpers.extend(mockXHR, {
-                            statusText: statusText || 'OK',
-                            responseText: body
-                        });
-                    } else {
-                        helpers.extend(mockXHR, {
-                            statusText: statusText || 'error',
-                            responseText: body
-                        });
+            };
+            helpers.each(events, function (eventName) {
+                xhr['on' + eventName] = function () {
+                    callEvents(mockXHR, eventName);
+                    if (mockXHR['on' + eventName]) {
+                        return mockXHR['on' + eventName].apply(mockXHR, arguments);
                     }
-                    if (mockXHR.onreadystatechange) {
-                        mockXHR.onreadystatechange({ target: mockXHR });
-                    }
-                    callEvents(mockXHR, 'progress');
-                    if (mockXHR.onprogress) {
-                        mockXHR.onprogress();
-                    }
-                    if (success) {
-                        callEvents(mockXHR, 'load');
-                        if (mockXHR.onload) {
-                            mockXHR.onload();
-                        }
-                    } else {
-                        callEvents(mockXHR, 'error');
-                        if (mockXHR.onerror) {
-                            mockXHR.onerror();
-                        }
-                    }
-                    callEvents(mockXHR, 'loadend');
-                    if (mockXHR.onloadend) {
-                        mockXHR.onloadend();
-                    }
-                });
-            }
-            var xhr = makeXHR(this), makeRequest = function () {
-                    mockXHR._xhr = xhr;
-                    xhr.open(xhr.type, xhr.url, xhr.async);
-                    return xhr.send(data);
                 };
-            if (fixtureSettings && typeof fixtureSettings.fixture === 'number') {
-                setTimeout(makeRequest, fixtureSettings.fixture);
-                return;
+            });
+            if (xhr.getResponseHeader) {
+                mockXHR.getResponseHeader = function () {
+                    return xhr.getResponseHeader.apply(xhr, arguments);
+                };
             }
-            if (fixtureSettings) {
-                helpers.extend(xhr, fixtureSettings);
+            if (mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
+                xhr.setDisableHeaderCheck(true);
             }
-            return makeRequest();
-        }
-    });
+            return xhr;
+        };
+        GLOBAL.XMLHttpRequest = function () {
+            var headers = this._headers = {};
+            this._xhr = {
+                getAllResponseHeaders: function () {
+                    return headers;
+                }
+            };
+            this.__events = {};
+            this.onload = null;
+            this.onerror = null;
+        };
+        helpers.extend(XMLHttpRequest.prototype, {
+            setRequestHeader: function (name, value) {
+                this._headers[name] = value;
+            },
+            open: function (type, url, async) {
+                this.type = type;
+                this.url = url;
+                this.async = async === false ? false : true;
+            },
+            getAllResponseHeaders: function () {
+                return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
+            },
+            addEventListener: function (ev, fn) {
+                var evs = this.__events[ev] = this.__events[ev] || [];
+                evs.push(fn);
+            },
+            removeEventListener: function (ev, fn) {
+                var evs = this.__events[ev] = this.__events[ev] || [];
+                var idx = evs.indexOf(fn);
+                if (idx >= 0) {
+                    evs.splice(idx, 1);
+                }
+            },
+            setDisableHeaderCheck: function (val) {
+                this._disableHeaderCheck = !!val;
+            },
+            getResponseHeader: function (key) {
+                return '';
+            },
+            send: function (data) {
+                var xhrSettings = {
+                    url: this.url,
+                    data: data,
+                    headers: this._headers,
+                    type: this.type.toLowerCase() || 'get',
+                    async: this.async
+                };
+                if (!xhrSettings.data && xhrSettings.type === 'get' || xhrSettings.type === 'delete') {
+                    xhrSettings.data = deparam(xhrSettings.url.split('?')[1]);
+                    xhrSettings.url = xhrSettings.url.split('?')[0];
+                }
+                if (typeof xhrSettings.data === 'string') {
+                    try {
+                        xhrSettings.data = JSON.parse(xhrSettings.data);
+                    } catch (e) {
+                        xhrSettings.data = deparam(xhrSettings.data);
+                    }
+                }
+                var fixtureSettings = fixtureCore.get(xhrSettings);
+                var mockXHR = this;
+                if (fixtureSettings && typeof fixtureSettings.fixture === 'function') {
+                    return fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function (status, body, headers, statusText) {
+                        body = typeof body === 'string' ? body : JSON.stringify(body);
+                        helpers.extend(mockXHR, {
+                            readyState: 4,
+                            status: status
+                        });
+                        var success = status >= 200 && status < 300 || status === 304;
+                        if (success) {
+                            helpers.extend(mockXHR, {
+                                statusText: statusText || 'OK',
+                                responseText: body
+                            });
+                        } else {
+                            helpers.extend(mockXHR, {
+                                statusText: statusText || 'error',
+                                responseText: body
+                            });
+                        }
+                        helpers.each(headers || {}, function (value, key) {
+                            mockXHR._headers[key] = value;
+                        });
+                        if (mockXHR.onreadystatechange) {
+                            mockXHR.onreadystatechange({ target: mockXHR });
+                        }
+                        callEvents(mockXHR, 'progress');
+                        if (mockXHR.onprogress) {
+                            mockXHR.onprogress();
+                        }
+                        if (success) {
+                            callEvents(mockXHR, 'load');
+                            if (mockXHR.onload) {
+                                mockXHR.onload();
+                            }
+                        } else {
+                            callEvents(mockXHR, 'error');
+                            if (mockXHR.onerror) {
+                                mockXHR.onerror();
+                            }
+                        }
+                        callEvents(mockXHR, 'loadend');
+                        if (mockXHR.onloadend) {
+                            mockXHR.onloadend();
+                        }
+                    });
+                }
+                var xhr = makeXHR(this), makeRequest = function () {
+                        mockXHR._xhr = xhr;
+                        xhr.open(xhr.type, xhr.url, xhr.async);
+                        return xhr.send(data);
+                    };
+                if (fixtureSettings && typeof fixtureSettings.fixture === 'number') {
+                    setTimeout(makeRequest, fixtureSettings.fixture);
+                    return;
+                }
+                if (fixtureSettings) {
+                    helpers.extend(xhr, fixtureSettings);
+                }
+                return makeRequest();
+            }
+        });
+    }(function () {
+        return this;
+    }()));
 });
 /*fixture*/
 define('can-fixture', function (require, exports, module) {
