@@ -221,6 +221,11 @@ assign(XMLHttpRequest.prototype,{
 				}
 
 
+
+				each(headers || {}, function(value, key){
+					mockXHR._headers[key] = value;
+				});
+
 				if(mockXHR.onreadystatechange) {
 					mockXHR.onreadystatechange({ target: mockXHR });
 				}
