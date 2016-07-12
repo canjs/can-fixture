@@ -1330,3 +1330,20 @@ asyncTest("slow mode works (#26)", function(){
 	xhr.open('GET', url);
 	xhr.send();
 });
+
+asyncTest("response headers are set", function(){
+	fixture("GET /todos", function(request, response){
+		response(200, "{}", { foo: "bar"});
+	});
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		var headers = xhr.getAllResponseHeaders();
+		ok(headers.foo === "bar", "header was set");
+		start();
+	});
+
+	xhr.open('GET', "/todos");
+	xhr.send();
+});
