@@ -1368,7 +1368,7 @@ asyncTest("slow mode works (#26)", function(){
 	var startTime = new Date();
 
 	xhr.addEventListener('load', function(){
-		ok(Math.abs(new Date() - startTime - 1000) < 300, "within 300 ms of 1 second delay");
+		ok(Math.abs(new Date() - startTime - 1000) < 500, "within 500 ms of 1 second delay");
 		fixture({url: url}, null);
 		start();
 	});

@@ -17,7 +17,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "can-connect": "^0.6.0-pre.1",
+    "can-connect": "^0.6.0-pre.11",
     "can-set": "^0.6.0-pre.3",
     "can-util": "^3.0.0-pre.12"
   },
