@@ -113,8 +113,9 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 
 	if(!xhrSettings.async) {
 		callFixture();
+		return null;
 	} else {
-		setTimeout(callFixture, $fixture.delay);
+		return setTimeout(callFixture, $fixture.delay);
 	}
 };
 
