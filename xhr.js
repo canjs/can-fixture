@@ -188,11 +188,13 @@ assign(XMLHttpRequest.prototype,{
 	send: function(data) {
 
 		// derive the XHR settings object from the XHR object
+		var type = this.type.toLowerCase() || 'get';
 		var xhrSettings = {
 			url: this.url,
 			data: data,
 			headers: this._headers,
-			type: this.type.toLowerCase() || 'get',
+			type: type,
+			method: type,
 			async: this.async
 		};
 		// if get or delete, the url should not include the querystring.
@@ -241,6 +243,11 @@ assign(XMLHttpRequest.prototype,{
 					});
 				}
 
+
+
+				each(headers || {}, function(value, key){
+					mockXHR._headers[key] = value;
+				});
 
 				if(mockXHR.onreadystatechange) {
 					mockXHR.onreadystatechange({ target: mockXHR });

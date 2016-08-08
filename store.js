@@ -4,7 +4,7 @@ var legacyStore = require("./helpers/legacyStore");
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isArrayLike = require("can-util/js/is-array-like/is-array-like");
-require("can-connect/data/memory-cache/");
+var dataMemoryCache = require("can-connect/data/memory-cache/memory-cache");
 
 var firstProp = function(obj){
 	for(var prop in obj) {
@@ -148,7 +148,7 @@ Store.make = function (count, make, algebra) {
 		makeItems = makeMakeItems(count, idProp);
 	}
 
-	var connection = connect(["data-memory-cache"],{
+	var connection = connect([dataMemoryCache],{
 		algebra: algebra,
 		idProp: idProp
 	});

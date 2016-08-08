@@ -1,4 +1,4 @@
-var Qunit = require('steal-qunit');
+var QUnit = require('steal-qunit');
 var fixture = require("can-fixture");
 var core = require("../core");
 var set = require("can-set");
@@ -44,7 +44,30 @@ test('static fixtures', function () {
 				},errorCallback);
 		}, errorCallback);
 });
-
+test('static fixtures (using method signature)', function () {
+	stop();
+	fixture({method: 'get', url: 'method/{id}'}, __dirname+'/fixtures/method.{id}.json');
+	$.ajax({
+		url: 'method/4',
+		dataType: 'json'
+	})
+		.then(function (data) {
+			equal(data.id, 4, 'Got data with proper id using method');
+			start();
+		}, errorCallback);
+});
+test('static fixtures (using type signature)', function () {
+	stop();
+	fixture({type: 'get', url: 'type/{id}'}, __dirname+'/fixtures/type.{id}.json');
+	$.ajax({
+		url: 'type/4',
+		dataType: 'json'
+	})
+		.then(function (data) {
+			equal(data.id, 4, 'Got data with proper id using type');
+			start();
+		}, errorCallback);
+});
 test('templated static fixtures', function () {
 	stop();
 	fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
@@ -178,7 +201,7 @@ test('rand', function () {
 
 	// makes sure we have the right length arrays and
 	// every item can be first
-	for(var i = 0; i < 100; i++) {
+	for(i = 0; i < 100; i++) {
 		result = rand(choices);
 		matched[result.length] = true;
 		matched[result[0]] = true;
@@ -601,10 +624,12 @@ test("create a store with array and comparison object",function(){
 		{id: 2, modelId: 4, year: 2014, name: "2014 Leaf", thumb: "http://images.thecarconnection.com/med/2013-nissan-leaf_100414473_m.jpg"}
 	],{
 		year: function(a, b){
+			/* jshint eqeqeq:false */
 			return a == b;
 
 		},
 		modelId: function(a, b){
+			/* jshint eqeqeq:false */
 			return a == b;
 		}
 	});
@@ -702,7 +727,7 @@ test("filtering works", function() {
 		next();
 	}, function(e){
 		ok(false, ""+e);
-		start()
+		start();
 	});
 
 	function next(){
@@ -866,7 +891,6 @@ asyncTest("supports removeEventListener on XHR shim", function(){
 });
 
 test("supports setDisableHeaderCheck", function(){
-	var url = __dirname + '/fixtures/test.json';
 	var xhr = new XMLHttpRequest();
 
 	try {
@@ -956,12 +980,12 @@ asyncTest("pass headers in fallthrough", function() {
 			originalXhr.setRequestHeader = function(key, val) {
 				equal(key, "foo");
 				equal(val, "bar");
-			}
+			};
 		}
 		if(originalXhr.readyState === 4) {
 			start();
 		}
-	}
+	};
 	xhr.send();
 });
 
@@ -1031,7 +1055,7 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 	}).then(function(car){
-		equal(car.name, "2013 Altima", "get a single car works")
+		equal(car.name, "2013 Altima", "get a single car works");
 		start();
 	});
 });
@@ -1102,7 +1126,7 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 	}).then(function(car){
-		equal(car.name, "2013 Altima", "get a single car works")
+		equal(car.name, "2013 Altima", "get a single car works");
 		start();
 	});
 });
@@ -1213,7 +1237,7 @@ test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
 		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
 	], algebra);
 
-	fixture('/cars/{_id}', store)
+	fixture('/cars/{_id}', store);
 
 	var findAll = function(){
 		return $.ajax({ url: "/cars", dataType: "json" });
@@ -1251,7 +1275,7 @@ test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
 		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 	}).then(function(car){
-		equal(car.name, "2013 Altima", "get a single car works")
+		equal(car.name, "2013 Altima", "get a single car works");
 		start();
 	});
 });
@@ -1345,7 +1369,7 @@ asyncTest("slow mode works (#26)", function(){
 	var startTime = new Date();
 
 	xhr.addEventListener('load', function(){
-		ok(Math.abs(new Date() - startTime - 1000) < 300, "within 300 ms of 1 second delay");
+		ok(Math.abs(new Date() - startTime - 1000) < 500, "within 500 ms of 1 second delay");
 		fixture({url: url}, null);
 		start();
 	});
@@ -1371,7 +1395,7 @@ asyncTest('onload should be triggered for HTTP error responses (#36)', function(
 		ok(false, 'onerror should not be invoked');
 		fixture('/onload', null);
 		start();
-	})
+	});
 
 	xhr.open('GET', '/onload');
 	xhr.send();
@@ -1386,7 +1410,7 @@ asyncTest('responseText & responseXML should not be set for arraybuffer types (#
 	window.onerror = function (msg, url, line) {
 	    ok(false, 'There should not be an error');
 	    start();
-	}
+	};
 
 	var xhr = new XMLHttpRequest();
 
@@ -1463,7 +1487,7 @@ asyncTest('fixture with timeout does not run if $.ajax timeout less than delay',
 		start();
 	});
 
-	var ajax = $.ajax({
+	$.ajax({
 		url: '/onload',
 		timeout: 50,
 		error: function(xhr) {
@@ -1473,7 +1497,24 @@ asyncTest('fixture with timeout does not run if $.ajax timeout less than delay',
 			equal(xhr.status, "0");
 			start();
 		}
-	})
+	});
 
 	fixture.delay = delay;
+});
+
+asyncTest("response headers are set", function(){
+	fixture("GET /todos", function(request, response){
+		response(200, "{}", { foo: "bar"});
+	});
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		var headers = xhr.getAllResponseHeaders();
+		ok(headers.foo === "bar", "header was set");
+		start();
+	});
+
+	xhr.open('GET', "/todos");
+	xhr.send();
 });
