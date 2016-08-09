@@ -190,6 +190,15 @@ var isEmptyOrNull = function(a, b){
 		return canSet.equal(a, b);
 	}
 };
+var isEmptyOrSubset = function(a, b) {
+	if( a == null && isEmptyObject(b) ) {
+		return true;
+	} else if( b == null && isEmptyObject(a) ) {
+		return true;
+	} else {
+		return canSet.subset(a, b);
+	}
+};
 
 // Comparator object used to find a similar fixture.
 exports.defaultCompare = {
@@ -199,14 +208,20 @@ exports.defaultCompare = {
 	fixture: function(){
 		return true;
 	},
+	xhr: function(){
+		return true;
+	},
 	type: function(a,b){
+		return b && a ? a.toLowerCase() === b.toLowerCase() : b === a;
+	},
+	method: function(a,b){
 		return b && a ? a.toLowerCase() === b.toLowerCase() : b === a;
 	},
 	helpers: function(){
 		return true;
 	},
 	headers: isEmptyOrNull,
-	data: isEmptyOrNull
+	data: isEmptyOrSubset
 };
 
 var replacer =  /\{([^\}]+)\}/g;
@@ -214,6 +229,11 @@ var replacer =  /\{([^\}]+)\}/g;
 // "todo/{id}" and "todo/5", it will return an object with an id property
 // equal to 5.
 exports.dataFromUrl = function (fixtureUrl, url) {
+	if(!fixtureUrl) {
+		// if there's no url, it's a match
+		return {};
+	}
+
 	var order = [],
 		// Sanitizes fixture URL
 		fixtureUrlAdjusted = fixtureUrl.replace('.', '\\.')

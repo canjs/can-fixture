@@ -1,8 +1,7 @@
 @property {Boolean} can-fixture.on on
+@parent can-fixture.properties
 
 @signature `fixture.on`
-
-<a id="fixture.on"/>
 
 Turns the fixtures on or off. Defaults to `true` for on.
 

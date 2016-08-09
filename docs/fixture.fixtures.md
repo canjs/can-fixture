@@ -1,4 +1,4 @@
-@function can-fixture.fixtures fixtures
+@property {Array} can-fixture.fixtures fixtures
 
 @signature `fixture.fixtures`
 

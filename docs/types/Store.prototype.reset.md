@@ -1,5 +1,5 @@
-@function Store.prototype.reset reset
-@parent Store.prototype
+@function can-fixture/StoreType.prototype.reset reset
+@parent can-fixture/StoreType.prototype
 
 @signature `Store.prototype.reset([baseItems])`
 
@@ -22,4 +22,5 @@ $.ajax({url: "todos/1", method: "delete"}).then(function(){
     todoStore.getList({}).length //-> 1
 });
 ```
-  @param {Array} TODO describe
+  @param {Array} baseItems If provided, adds these items to the store.  
+  This can be useful for setting up particular testing scenarios.

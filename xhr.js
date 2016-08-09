@@ -195,7 +195,8 @@ assign(XMLHttpRequest.prototype,{
 			headers: this._headers,
 			type: type,
 			method: type,
-			async: this.async
+			async: this.async,
+            xhr: this
 		};
 		// if get or delete, the url should not include the querystring.
 		// the querystring should be the data.

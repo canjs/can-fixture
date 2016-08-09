@@ -1,4 +1,5 @@
 @function can-fixture.store store
+@parent can-fixture.properties
 
 @signature `fixture.store(baseItems, algebra)`
 
@@ -8,10 +9,10 @@ described by `algebra`.
 ```js
 // Describe the services parameters:
 var todoAlgebra = new set.Algebra({
-    set.comparators.id("_id"),
-    set.comparators.boolean("completed"),
-    set.comparators.rangeInclusive("start","end"),
-    set.comparators.sort("orderBy"),
+    set.props.id("_id"),
+    set.props.boolean("completed"),
+    set.props.rangeInclusive("start","end"),
+    set.props.sort("orderBy"),
 });
 
 // Create a store with initial data.
@@ -31,8 +32,12 @@ var todoStore = fixture.store([
 // Hookup urls to the store:
 fixture("/todos/{_id}", todoStore);
 ```
-  @param baseItems {Array} An array of items that will populate the store.
-  @param algebra {can-set.Algebra} A description of the service layer's parameters.
+  @param {Array} baseItems An array of items that will populate the store.
+  @param {can-set.Algebra} algebra A description of the service layer's parameters.
+  @return {can-fixture/StoreType} A store that can be used to simulate
+  a restful service layer that supports filtering, pagination, and
+  more.  
+
 
 @signature `fixture.store(count, makeItems, algebra)`
 
@@ -59,6 +64,9 @@ var todoStore = fixture.store(
 // Hookup urls to the store:
 fixture("/todos/{_id}", todoStore);
 ```
-  @param count {Number} TODO describe
-  @param makeItems {function} A function that will generate `baseItems`
-  @param algebra {can-set.Algebra} A description of the service layer's parameters.
+  @param {Number} count TODO describe
+  @param {function} makeItems A function that will generate `baseItems`
+  @param {can-set.Algebra} algebra A description of the service layer's parameters.
+  @return {can-fixture/StoreType} A store that can be used to simulate
+  a restful service layer that supports filtering, pagination, and
+  more.  
