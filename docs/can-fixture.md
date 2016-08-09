@@ -1,4 +1,7 @@
 @module {function} can-fixture
+@parent can-ecosystem
+@group can-fixture.properties properties
+@group can-fixture.types types
 
 @description can-fixture intercepts an AJAX request and simulates the response with a file or function.
 
@@ -22,7 +25,7 @@ fixture({method: "get", url: "/todos"},
 
 When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
 
-  @param {Object} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like /todos/{_id}.
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like /todos/{_id}.
   @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response. The next section details this function's use.
 
 @signature `fixture(ajaxSettings, url)`
@@ -73,7 +76,7 @@ $.get("/tasks") // requests /tasks
 
 @signature `fixture(methodAndUrl, url|data|requestHandler)`
 
-A short hand for creating an `ajaxSetting` with a `method` and `url`.
+A short hand for creating an [can-fixture/types/ajaxSettings] with a `method` and `url`.
 
 ```js
 fixture("GET /tasks", requestHandler );
@@ -87,7 +90,7 @@ The format is `METHOD URL`.
 
 @signature `fixture(url, url|data|requestHandler)`
 
-A short hand for creating an `ajaxSetting` with just a `url`.
+A short hand for creating an [can-fixture/types/ajaxSettings] with just a `url`.
 
 ```js
 fixture("/tasks", requestHandler);
@@ -101,9 +104,6 @@ fixture({url: "/tasks"}, requestHandler);
 
 Create multiple fixtures at once.
 
-- fixtures `{Object<methodAndUrl,url|data|requestHandler|store>}` - A mapping of methodAndUrl to
-  some response argument type.
-
 ```js
 fixture({
     "POST /tasks": function(){
@@ -114,12 +114,19 @@ fixture({
 });
 ```
 
+  @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to
+  some response argument type.
+
+
+
 @signature `fixture(restfulUrl, store)`
 
 Wire up a restful API scheme to a store.
 
 ```js
-var todoAlgebra = new set.Algebra();
+var todoAlgebra = new set.Algebra(
+    set.props.id("id")
+);
 var todoStore = fixture.store([
   { id: 1, name: 'Do the dishes'},
   { id: 2, name: 'Walk the dog'}
@@ -139,3 +146,6 @@ fixture({
     "DELETE /api/todos/{id}": todos.destroyData
 });
 ```
+
+  @param {String} restfulUrl The `instance` url that should include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed.
+  @param {can-fixture/StoreType} store A store produced by [can-fixture.store].

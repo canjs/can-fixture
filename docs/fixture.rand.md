@@ -1,4 +1,5 @@
 @function can-fixture.rand rand
+@parent can-fixture.properties
 
 @signature `fixture.rand(min, max)`
 
@@ -9,8 +10,8 @@ returns a random integer from [0, max].
 fixture.rand(1, 10) //-> Random number between 1 and 10 inclusive.
 fixture.rand(10) //-> Random number between 0 and 10 inclusive.
 ```
-  @param min {Number} TODO describe
-  @param max {Number} TODO describe
+  @param {Number} [min] The lower limit of values that will be returned.
+  @param {Number} max The upper limit of values that will be returned.  `max` is valid return value.
 
 @signature `fixture.rand(choices, min, max)`
 
@@ -32,6 +33,6 @@ fixture.rand(["a","b","c"],1)[0] //-> "b"
 // get 2 or 3 items from the array
 fixture.rand(["a","b","c"],2,3) //-> ["c","a","b"]
 ```
-  @param choices {Array} TODO describe
-  @param min {Number} TODO describe
-  @param max {Number} TODO describe
+  @param {Array} choices An array of values to chose from. The returned array will only include a value once.
+  @param {Number} [min] The minimum number of items to be in the returned array.
+  @param {Number} [max] The maximum number of items in the returned array.

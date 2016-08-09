@@ -1518,3 +1518,39 @@ asyncTest("response headers are set", function(){
 	xhr.open('GET', "/todos");
 	xhr.send();
 });
+
+asyncTest("match values in get data", function(){
+	fixture({
+		method: "GET",
+		url: "/data-value",
+		data: {name: "justin"}
+	}, function(request, response){
+		QUnit.ok(true, "got it");
+		return {};
+	});
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		QUnit.start();
+	});
+
+	xhr.open('GET', "/data-value?name=justin&age=22");
+	xhr.send();
+});
+
+asyncTest("universal match (#2000)", function(){
+	fixture({},function(){
+		ok(true, "got hit");
+		return {};
+	});
+	var xhr = new XMLHttpRequest();
+
+	xhr.addEventListener('load', function(){
+		QUnit.start();
+		fixture.fixtures.splice(0, fixture.fixtures.length);
+	});
+
+	xhr.open('GET', "/something-totally-unexpected-62");
+	xhr.send();
+});

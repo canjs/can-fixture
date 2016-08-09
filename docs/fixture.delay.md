@@ -1,5 +1,5 @@
-@property can-fixture.delay delay
-
+@property {Number} can-fixture.delay delay
+@parent can-fixture.properties
 @signature `fixture.delay`
 
 Sets the delay until a response is fired in milliseconds.

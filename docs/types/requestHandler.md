@@ -1,10 +1,9 @@
-@typedef {function} can-fixture.requestHandler requestHandler
+@typedef {function(can-fixture/types/request,can-fixture.response,Object,Object)} can-fixture.requestHandler(request,response,requestHeaders,ajaxSettings) requestHandler
+@parent can-fixture.types
 
 @signature `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
-Defines what can-fixture callback functions are called with.  TODO fix grammar
-
-Example:
+Defines the XHR response for a given trapped request.
 
 ```js
 fixture({method: "get", url: "/todos"},
@@ -36,7 +35,8 @@ fixture({url: "/todos/{action}"},
 
 $.post("/todos/delete");
 ```
-  @param {Object} request Information about the request. The request's data property will contain data from the request's querystring or request body.
-  @param {can-fixture.requestHandler.response} response A callback function that provides response information. The next section details this function's use.
+  @param {can-fixture/types/request} request Information about the request. The request's data property will contain data from the request's querystring or request body. Also
+  any templated values in the [can-fixture/types/ajaxSettings]'s `url` will be added. 
+  @param {can-fixture.response} response A callback function that provides response information.
   @param {Object} requestHeaders Headers used to make the request.
   @param {Object} ajaxSettings The settings object used to match this request.
