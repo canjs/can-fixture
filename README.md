@@ -116,10 +116,10 @@ Finally, use `fixture.store` to create a [can-connect](http://connect.canjs.com/
 ```js
 // Describe the services parameters:
 var todoAlgebra = new set.Algebra({
-    set.comparators.id("_id"),
-    set.comparators.boolean("completed"),
-    set.comparators.rangeInclusive("start","end"),
-    set.comparators.sort("orderBy"),
+    set.props.id("_id"),
+    set.props.boolean("completed"),
+    set.props.rangeInclusive("start","end"),
+    set.props.sort("orderBy"),
 });
 
 // Create a store:
@@ -397,10 +397,10 @@ described by `algebra`.
 ```js
 // Describe the services parameters:
 var todoAlgebra = new set.Algebra({
-    set.comparators.id("_id"),
-    set.comparators.boolean("completed"),
-    set.comparators.rangeInclusive("start","end"),
-    set.comparators.sort("orderBy"),
+    set.props.id("_id"),
+    set.props.boolean("completed"),
+    set.props.rangeInclusive("start","end"),
+    set.props.sort("orderBy"),
 });
 
 // Create a store with initial data.

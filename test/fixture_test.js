@@ -993,10 +993,10 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
-		set.comparators.id("_id"),
-		set.comparators.sort('orderBy'),
-		set.comparators.enum("type", ["used","new","certified"]),
-		set.comparators.rangeInclusive("start","end")
+		set.props.id("_id"),
+		set.props.sort('orderBy'),
+		set.props.enum("type", ["used","new","certified"]),
+		set.props.rangeInclusive("start","end")
 	);
 
 	var store = fixture.store([
@@ -1064,10 +1064,10 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
-		set.comparators.id("_id"),
-		set.comparators.sort('orderBy'),
-		set.comparators.enum("type", ["used","new","certified"]),
-		set.comparators.rangeInclusive("start","end")
+		set.props.id("_id"),
+		set.props.sort('orderBy'),
+		set.props.enum("type", ["used","new","certified"]),
+		set.props.rangeInclusive("start","end")
 	);
 
 	var store = fixture.store([
@@ -1134,10 +1134,10 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 asyncTest("set.Algebra clauses work", function(){
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
-		set.comparators.id("_id"),
-		set.comparators.sort('orderBy'),
-		set.comparators.enum("type", ["used","new","certified"]),
-		set.comparators.rangeInclusive("start","end"),
+		set.props.id("_id"),
+		set.props.sort('orderBy'),
+		set.props.enum("type", ["used","new","certified"]),
+		set.props.rangeInclusive("start","end"),
 		{
 			year: function(a, b){
 				if(a === b) {
@@ -1186,7 +1186,7 @@ test("storeConnection reset", function(){
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
-		set.comparators.id("_id")
+		set.props.id("_id")
 	);
 
 	var store = fixture.store([
@@ -1220,10 +1220,10 @@ test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
-		set.comparators.id("_id"),
-		set.comparators.sort('orderBy'),
-		set.comparators.enum("type", ["used","new","certified"]),
-		set.comparators.rangeInclusive("start","end")
+		set.props.id("_id"),
+		set.props.sort('orderBy'),
+		set.props.enum("type", ["used","new","certified"]),
+		set.props.rangeInclusive("start","end")
 	);
 
 	var store = fixture.store([
@@ -1284,7 +1284,7 @@ test("set.Algebra CRUD works with easy hookup (#12)", 5, function(){
 test("store.getList and store.get", function(){
 
 	var algebra = new set.Algebra(
-		set.comparators.id("_id")
+		set.props.id("_id")
 	);
 
 	var store = fixture.store([
