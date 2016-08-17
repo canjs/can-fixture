@@ -358,7 +358,6 @@ test('fixture.store with can.Model', function () {
 
 	stop();
 	function errorAndStart(e){
-		debugger;
 		ok(false, "borked"+e);
 		start();
 	}
@@ -705,7 +704,7 @@ test("store with objects allows .create, .update and .destroy (#1471)", 4, funct
 
 
 test("filtering works", function() {
-
+	var next;
 	var store = fixture.store(
 		[	{ state : 'CA', name : 'Casadina' },
 			{ state : 'NT', name : 'Alberny' }],
@@ -730,7 +729,7 @@ test("filtering works", function() {
 		start();
 	});
 
-	function next(){
+	next = function (){
 
 		var store =fixture.store([{
 			_id : 1,
@@ -773,10 +772,9 @@ test("filtering works", function() {
 
 		}, function(e){
 			ok(false);
-			debugger;
 			start();
 		});
-	}
+	};
 	function last(){
 		var store =fixture.store([{
 			_id : 1,
@@ -1553,4 +1551,40 @@ asyncTest("universal match (#2000)", function(){
 
 	xhr.open('GET', "/something-totally-unexpected-62");
 	xhr.send();
+});
+
+
+test("set.Algebra stores provide a count (#58)", function(){
+
+	var algebra = new set.Algebra(
+		new set.Translate("where","where"),
+		set.props.id("_id"),
+		set.props.sort('orderBy'),
+		set.props.enum("type", ["used","new","certified"]),
+		set.props.rangeInclusive("start","end")
+	);
+
+	var store = fixture.store([
+		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
+		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
+		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
+		{_id: 4, modelId: 2, year: 2014, name: "2014 Focus", type: "certified"},
+		{_id: 5, modelId: 3, year: 2013, name: "2013 Altima", type: "used"},
+		{_id: 6, modelId: 3, year: 2014, name: "2014 Altima", type: "certified"},
+		{_id: 7, modelId: 4, year: 2013, name: "2013 Leaf", type: "used"},
+		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
+	], algebra);
+
+	fixture('/cars/{_id}', store);
+
+	stop();
+
+	$.ajax({ url: "/cars", dataType: "json", data: {start: 2, end: 3} }).then(function(carsData) {
+		equal(carsData.data.length, 2, 'Got 2 cars');
+		equal(carsData.count, 8, "got the count");
+		QUnit.start();
+	}, function(){
+		QUnit.ok(false, "borked");
+		QUnit.start();
+	});
 });
