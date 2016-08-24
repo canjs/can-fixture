@@ -1588,3 +1588,28 @@ test("set.Algebra stores provide a count (#58)", function(){
 		QUnit.start();
 	});
 });
+
+test("fixture matches when headers are part of the request", function(){
+	fixture({
+		type: "get",
+		url: "/foo-bar"
+	}, function(){
+		return [
+			{ foo: "bar" }
+		];
+	});
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "/foo-bar");
+	xhr.setRequestHeader("FOO", "bar");
+
+	xhr.onload = function(){
+		var data = JSON.parse(xhr.responseText);
+		equal(data[0].foo, "bar");
+		start();
+	};
+
+	xhr.send();
+
+	stop();
+});
