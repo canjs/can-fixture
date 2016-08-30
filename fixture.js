@@ -3,6 +3,7 @@ var fixture = core.add;
 var Store = require("./store");
 require("./xhr");
 var assign = require("can-util/js/assign/assign");
+var ns = require("can-util/namespace");
 // HELPERS START
 
 var noop = function(){};
@@ -69,4 +70,4 @@ if(typeof window !== "undefined" && !require.resolve) {
 }
 
 
-module.exports = fixture;
+module.exports = ns.fixture = fixture;
