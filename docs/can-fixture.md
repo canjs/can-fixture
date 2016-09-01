@@ -132,7 +132,7 @@ var todoStore = fixture.store([
   { id: 2, name: 'Walk the dog'}
 ], todoAlgebra);
 
-fixture("/api/todos/{id}", todoStore);
+fixture("/api/todos/{id}", todoStore); // can also be written fixture("/api/todos", todoStore);
 ```
 
 This is a shorthand for wiring up the `todoStore` as follows:
@@ -147,5 +147,5 @@ fixture({
 });
 ```
 
-  @param {String} restfulUrl The `instance` url that should include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed.
+  @param {String} restfulUrl The url that may include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed, if provided; otherwise the `item` url is assumed to have the `/{ID_PROP}` part appended to the end.
   @param {can-fixture/StoreType} store A store produced by [can-fixture.store].
