@@ -18,13 +18,16 @@ exports.add = function (settings, fixture) {
 	if(fixture && (fixture.getData || fixture.getListData)) {
 		var root = settings,
 			store = fixture,
-			idProp = store.idProp;
+			idProp = store.idProp,
+			itemRegex = new RegExp('\\/\\{' + idProp+"\\}.*" ),
+			rootIsItemUrl = itemRegex.test(root),
+			getListUrl = rootIsItemUrl ? root.replace(itemRegex, "") : root,
+			getItemUrl = rootIsItemUrl ? root : (root.trim() + "/{" + idProp + "}");
 		fixture = undefined;
 		settings = {};
-		settings["GET "+root] = store.getData;
-		settings["DELETE "+root] = store.destroyData;
-		settings["PUT "+root] = store.updateData;
-		var getListUrl = root.replace( new RegExp('\\/\\{' + idProp+"\\}.*" ),"");
+		settings["GET "+getItemUrl] = store.getData;
+		settings["DELETE "+getItemUrl] = store.destroyData;
+		settings["PUT "+getItemUrl] = store.updateData;
 		settings["GET "+getListUrl] = store.getListData;
 		settings["POST "+getListUrl] = store.createData;
 	}
