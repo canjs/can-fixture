@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "bit-docs": "0.0.7",
-    "jquery": "^1.11.0",
+    "jquery": "^3.1.1",
     "jshint": "^2.7.0",
     "steal": "^0.16.21",
     "steal-qunit": "0.1.1",
