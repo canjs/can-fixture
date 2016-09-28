@@ -118,7 +118,11 @@ GLOBAL.XMLHttpRequest = function(){
 	var headers = this._headers = {};
 	this._xhr = {
 		getAllResponseHeaders: function(){
-			return headers;
+			var ret = [];
+			each(headers, function(value, name) {
+				Array.prototype.push.apply(ret, [name, ': ', value, '\r\n']);
+			});
+			return ret.join('');
 		}
 	};
 	this.__events = {};
