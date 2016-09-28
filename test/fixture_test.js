@@ -11,6 +11,27 @@ var errorCallback = function(xhr, status, error){
 	start();
 };
 
+var parseHeaders = function(str) {
+  var lines = str.split(/\r?\n/);
+  var fields = {};
+  var index;
+  var line;
+  var field;
+  var val;
+
+  lines.pop(); // trailing CRLF
+
+  for (var i = 0, len = lines.length; i < len; ++i) {
+    line = lines[i];
+    index = line.indexOf(':');
+    field = line.slice(0, index).toLowerCase();
+    val = line.slice(index + 1).replace(/(^\s*|\s*$)/g, '');
+    fields[field] = val;
+  }
+
+  return fields;
+}
+
 QUnit.module('can-fixture');
 test('static fixtures', function () {
 
@@ -932,6 +953,25 @@ asyncTest("supports getResponseHeader", function(){
 	xhr.send();
 });
 
+asyncTest("supports getAllResponseHeaders", function(){
+	var url = __dirname + '/fixtures/test.json';
+	var xhr = new XMLHttpRequest();
+	xhr.setRequestHeader("foo", "bar");
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4) {
+			var headers = xhr.getAllResponseHeaders();
+			var parsed = parseHeaders(headers);
+			ok(typeof headers === "string", "got headers back");
+			ok(parsed.foo === "bar", "got proper values");
+			start();
+		}
+	};
+
+	xhr.open("GET", url);
+	xhr.send();
+});
+
 asyncTest("pass data to response handler (#13)", function(){
 	fixture("GET something", function(req,res){
 		res(403, {
@@ -1513,7 +1553,8 @@ asyncTest("response headers are set", function(){
 	var xhr = new XMLHttpRequest();
 
 	xhr.addEventListener('load', function(){
-		var headers = xhr.getAllResponseHeaders();
+		var headers = parseHeaders(xhr.getAllResponseHeaders());
+		
 		ok(headers.foo === "bar", "header was set");
 		start();
 	});
