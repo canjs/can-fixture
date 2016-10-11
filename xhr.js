@@ -115,16 +115,8 @@ var makeXHR = function(mockXHR){
 
 
 GLOBAL.XMLHttpRequest = function(){
-	var headers = this._headers = {};
-	this._xhr = {
-		getAllResponseHeaders: function(){
-			var ret = [];
-			each(headers, function(value, name) {
-				Array.prototype.push.apply(ret, [name, ': ', value, '\r\n']);
-			});
-			return ret.join('');
-		}
-	};
+	this._requestHeaders = {};
+	this._xhr = new XHR();
 	this.__events = {};
 	// The way code detects if the browser supports onload is to check
 	// if a new XHR object has the onload property, so setting it to null
@@ -135,7 +127,7 @@ GLOBAL.XMLHttpRequest = function(){
 // Methods on the mock XHR:
 assign(XMLHttpRequest.prototype,{
 	setRequestHeader: function(name, value){
-		this._headers[name] = value;
+		this._requestHeaders[name] = value;
 	},
 	open: function(type, url, async){
 		this.type = type;
@@ -196,7 +188,7 @@ assign(XMLHttpRequest.prototype,{
 		var xhrSettings = {
 			url: this.url,
 			data: data,
-			headers: this._headers,
+			headers: this._requestHeaders,
 			type: type,
 			method: type,
 			async: this.async,
@@ -248,11 +240,13 @@ assign(XMLHttpRequest.prototype,{
 					});
 				}
 
-
-
-				each(headers || {}, function(value, key){
-					mockXHR._headers[key] = value;
-				});
+				mockXHR.getAllResponseHeaders = function() {
+					var ret = [];
+					each(headers || {}, function(value, name) {
+						Array.prototype.push.apply(ret, [name, ': ', value, '\r\n']);
+					});
+					return ret.join('');
+				};
 
 				if(mockXHR.onreadystatechange) {
 					mockXHR.onreadystatechange({ target: mockXHR });
@@ -286,9 +280,9 @@ assign(XMLHttpRequest.prototype,{
 			makeRequest = function(){
 				mockXHR._xhr = xhr;
 				xhr.open( xhr.type, xhr.url, xhr.async );
-				if(mockXHR._headers) {
-					Object.keys(mockXHR._headers).forEach(function(key) {
-						xhr.setRequestHeader(key, mockXHR._headers[key]);
+				if(mockXHR._requestHeaders) {
+					Object.keys(mockXHR._requestHeaders).forEach(function(key) {
+						xhr.setRequestHeader(key, mockXHR._requestHeaders[key]);
 					});
 				}
 				return xhr.send(data);
