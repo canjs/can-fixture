@@ -928,7 +928,7 @@ asyncTest("supports setRequestHeader", function(){
 
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState === 4) {
-			equal(xhr._headers.foo, "bar", "header was set");
+			equal(xhr._requestHeaders.foo, "bar", "header was set");
 			start();
 		}
 	};
@@ -954,9 +954,15 @@ asyncTest("supports getResponseHeader", function(){
 });
 
 asyncTest("supports getAllResponseHeaders", function(){
-	var url = __dirname + '/fixtures/test.json';
+	fixture("GET something", function(req,res){
+		res(200, {
+			message: 'this is the body'
+		}, {
+			foo: 'bar'
+		});
+	});
+
 	var xhr = new XMLHttpRequest();
-	xhr.setRequestHeader("foo", "bar");
 
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState === 4) {
@@ -968,7 +974,7 @@ asyncTest("supports getAllResponseHeaders", function(){
 		}
 	};
 
-	xhr.open("GET", url);
+	xhr.open("GET", "something");
 	xhr.send();
 });
 
@@ -1633,4 +1639,27 @@ test("set.Algebra stores provide a count (#58)", function(){
 		QUnit.ok(false, "borked");
 		QUnit.start();
 	});
+});
+
+test("abort() sets readyState correctly", function(){
+	stop();
+	fixture('/foo', 1000);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/foo');
+
+	xhr.addEventListener('error', function() {
+		fixture('/foo', null);
+		ok(true, 'Got to the error handler');
+		equal(xhr.status, "0");
+		equal(xhr.statusText, "aborted");
+
+		setTimeout(function(){
+			equal(xhr.readyState, 0);
+			start();
+		});
+	});
+
+	xhr.send();
+	xhr.abort();
 });
