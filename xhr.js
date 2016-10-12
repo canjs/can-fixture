@@ -155,9 +155,11 @@ assign(XMLHttpRequest.prototype,{
 		return "";
 	},
 	abort: function() {
-		assign(this,{
+		this._xhr.abort();
+		// set readyState to 4 to trigger promise rejection in onreadystatechange
+		assign(this, {
 			readyState: 4,
-			status: 0,
+			status: this._xhr.status,
 			statusText: "aborted"
 		});
 		clearTimeout(this.timeoutId);
@@ -172,6 +174,8 @@ assign(XMLHttpRequest.prototype,{
 		if(this.onloadend) {
 			this.onloadend();
 		}
+		// set readyState to 0 to signal xhr is aborted
+		this.readyState = this._xhr.readyState;
 	},
 	// This needs to compile the information necessary to see if
 	// there is a corresponding fixture.

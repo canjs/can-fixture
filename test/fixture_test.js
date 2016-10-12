@@ -1640,3 +1640,26 @@ test("set.Algebra stores provide a count (#58)", function(){
 		QUnit.start();
 	});
 });
+
+test("abort() sets readyState correctly", function(){
+	stop();
+	fixture('/foo', 1000);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/foo');
+
+	xhr.addEventListener('error', function() {
+		fixture('/foo', null);
+		ok(true, 'Got to the error handler');
+		equal(xhr.status, "0");
+		equal(xhr.statusText, "aborted");
+
+		setTimeout(function(){
+			equal(xhr.readyState, 0);
+			start();
+		});
+	});
+
+	xhr.send();
+	xhr.abort();
+});
