@@ -58,7 +58,6 @@ each(events, function(prop){
 // Helper that given the mockXHR, creates a real XHR that will call the mockXHR's
 // callbacks when the real XHR's request completes.
 var makeXHR = function(mockXHR){
-	// Make a real XHR
 	var xhr = mockXHR._xhr;
 	// Copy everything on mock to it.
 	assign(xhr, mockXHR, propsToIgnore);
@@ -278,8 +277,6 @@ assign(XMLHttpRequest.prototype,{
 		}
 		// At this point there is either not a fixture or a redirect fixture.
 		// Either way we are doing a request.
-
-		// Make a realXHR object based around the settings of the mockXHR.
 		var xhr = makeXHR(this),
 			makeRequest = function(){
 				xhr.open( xhr.type, xhr.url, xhr.async );
