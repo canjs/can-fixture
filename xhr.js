@@ -59,7 +59,7 @@ each(events, function(prop){
 // callbacks when the real XHR's request completes.
 var makeXHR = function(mockXHR){
 	// Make a real XHR
-	var xhr = new XHR();
+	var xhr = mockXHR._xhr;
 	// Copy everything on mock to it.
 	assign(xhr, mockXHR, propsToIgnore);
 
@@ -155,7 +155,6 @@ assign(XMLHttpRequest.prototype,{
 		return "";
 	},
 	abort: function() {
-		this._xhr.abort();
 		// set readyState to 4 to trigger promise rejection in onreadystatechange
 		assign(this, {
 			readyState: 4,
@@ -174,7 +173,8 @@ assign(XMLHttpRequest.prototype,{
 		if(this.onloadend) {
 			this.onloadend();
 		}
-		// set readyState to 0 to signal xhr is aborted
+		// abort and set readyState to 0 to signal xhr is aborted
+		this._xhr.abort();
 		this.readyState = this._xhr.readyState;
 	},
 	// This needs to compile the information necessary to see if
@@ -282,7 +282,6 @@ assign(XMLHttpRequest.prototype,{
 		// Make a realXHR object based around the settings of the mockXHR.
 		var xhr = makeXHR(this),
 			makeRequest = function(){
-				mockXHR._xhr = xhr;
 				xhr.open( xhr.type, xhr.url, xhr.async );
 				if(mockXHR._requestHeaders) {
 					Object.keys(mockXHR._requestHeaders).forEach(function(key) {
