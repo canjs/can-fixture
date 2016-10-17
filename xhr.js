@@ -75,6 +75,16 @@ var makeXHR = function(mockXHR){
 			propsToIgnore.responseXML = true;
 		}
 
+		// If the XHRs readyState is not 2, 3 or 4 accessing status or statusText
+		// will throw an InvalidStateError in Webkit
+		if(xhr.readyState <= 1) {
+			propsToIgnore.status = true;
+			propsToIgnore.statusText = true;
+		} else {
+			delete propsToIgnore.status;
+			delete propsToIgnore.statusText;
+		}
+
 		// Copy back everything over because in IE8 defineProperty
 		// doesn't work, so we need to make our shim XHR have the same
 		// values as the real xhr.
