@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "can-connect": "^0.6.0-pre.20",
-    "can-set": "^0.6.0-pre.9",
+    "can-set": "^1.0.0",
     "can-util": "^3.0.0-pre.50"
   },
   "devDependencies": {
