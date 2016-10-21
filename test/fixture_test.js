@@ -867,22 +867,6 @@ asyncTest("doesn't break onreadystatechange (#3)", function () {
 	xhr.send();
 });
 
-asyncTest("doesn't copy status or statusText when readyState <= 1", function () {
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
-
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 1) {
-			ok(typeof xhr.status === 'undefined', "did not copy status");
-			ok(typeof xhr.statusText === 'undefined', "did not copy statusText");
-			start();
-		}
-	};
-
-	xhr.open('GET', url);
-	xhr.send();
-});
-
 QUnit.module("XHR Shim");
 
 test("Supports onload", function(){
@@ -1659,16 +1643,15 @@ test("set.Algebra stores provide a count (#58)", function(){
 
 test("abort() sets readyState correctly", function(){
 	stop();
-	fixture('/foo', 1000);
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/foo');
 
-	xhr.addEventListener('error', function() {
+	xhr.addEventListener('abort', function() {
 		fixture('/foo', null);
 		ok(true, 'Got to the error handler');
 		equal(xhr.status, "0");
-		equal(xhr.statusText, "aborted");
+		equal(xhr.statusText, "");
 
 		setTimeout(function(){
 			equal(xhr.readyState, 0);
