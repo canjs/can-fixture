@@ -168,8 +168,18 @@ assign(XMLHttpRequest.prototype,{
 		return "";
 	},
 	abort: function() {
-		// clearTimeout(this.timeoutId);
-		return this._xhr.abort();
+		var xhr = this._xhr;
+
+		// If we are aborting a delayed fixture we have to make the fake
+		// steps that are expected for `abort` to
+		if(this.timeoutId !== undefined) {
+			clearTimeout(this.timeoutId);
+			xhr = makeXHR(this);
+			xhr.open(this.type, this.url, this.async === false ? false : true);
+			xhr.send();
+		}
+
+		return xhr.abort();
 	},
 	// This needs to compile the information necessary to see if
 	// there is a corresponding fixture.
@@ -273,7 +283,7 @@ assign(XMLHttpRequest.prototype,{
 		// At this point there is either not a fixture or a redirect fixture.
 		// Either way we are doing a request.
 		var xhr = makeXHR(this),
-			makeRequest = function(){
+			makeRequest = function() {
 				xhr.open( xhr.type, xhr.url, xhr.async );
 				if(mockXHR._requestHeaders) {
 					Object.keys(mockXHR._requestHeaders).forEach(function(key) {

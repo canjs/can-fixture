@@ -1490,8 +1490,8 @@ asyncTest('fixture with timeout aborts if xhr timeout less than delay', function
 	xhr.addEventListener('abort', function() {
 		fixture('/onload', null);
 		ok(true, 'Got to the error handler');
-		equal(xhr.statusText, "aborted");
-		equal(xhr.status, "0");
+		equal(xhr.statusText, '');
+		equal(xhr.status, 0);
 		start();
 	});
 
@@ -1646,6 +1646,10 @@ test("set.Algebra stores provide a count (#58)", function(){
 
 test("abort() sets readyState correctly", function(){
 	stop();
+
+	fixture('/foo', function() {
+		return {};
+	});
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/foo');
