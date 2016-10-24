@@ -19,9 +19,11 @@ var assign = function(dest, source, excluding){
 		if(typeof source.responseType === 'undefined' || source.responseType === '' || source.responseType === 'text') {
 			delete excluding.responseText;
 			delete excluding.responseXML;
+			delete excluding.responseType;
 		} else {
 			excluding.responseText = true;
 			excluding.responseXML = true;
+			excluding.responseType = true;
 		}
 
 		// copy everything on this to the xhr object that is not on `this`'s prototype
@@ -76,7 +78,7 @@ var makeXHR = function(mockXHR){
 
 	// When the real XHR is called back, update all properties
 	// and call all callbacks on the mock XHR.
-	xhr.onreadystatechange = function(ev){
+	xhr.onreadystatechange = function(ev) {
 		if(xhr.readyState <= 1) {
 			if(typeof xhr.status !== 'number') {
 				mockXHR.status = undefined;

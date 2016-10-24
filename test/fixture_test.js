@@ -1475,61 +1475,6 @@ asyncTest('responseText & responseXML should not be set for arraybuffer types (#
 	xhr.send();
 });
 
-asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
-	fixture('/onload', 1000);
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/onload');
-	xhr.send();
-
-	setTimeout(function() {
-		xhr.abort();
-	}, 50);
-	
-
-	xhr.addEventListener('abort', function() {
-		fixture('/onload', null);
-		ok(true, 'Got to the error handler');
-		equal(xhr.statusText, '');
-		equal(xhr.status, 0);
-		start();
-	});
-
-	xhr.addEventListener('load', function() {
-		fixture('/onload', null);
-		ok(false, 'timed out xhr did not abort');
-		start();
-	});
-
-});
-
-asyncTest('dynamic fixture with timeout does not run if xhr timeout less than delay', function() {
-	var delay = fixture.delay;
-	fixture.delay = 1000;
-	fixture('/onload', function() {
-		fixture('/onload', null);
-		ok(false, 'timed out xhr did not abort');
-		start();
-	});
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/onload');
-	setTimeout(function() {
-		xhr.abort();
-	}, 50);
-	xhr.send();
-
-	xhr.addEventListener('abort', function() {
-		fixture('/onload', null);
-		ok(true, 'Got to the error handler');
-		equal(xhr.statusText, '');
-		equal(xhr.status, 0);
-		start();
-	});
-
-	fixture.delay = delay;
-});
-
 asyncTest('fixture with timeout does not run if $.ajax timeout less than delay', function() {
 	var delay = fixture.delay;
 	fixture.delay = 1000;
@@ -1644,28 +1589,105 @@ test("set.Algebra stores provide a count (#58)", function(){
 	});
 });
 
-test("abort() sets readyState correctly", function(){
-	stop();
+if ("onabort" in XMLHttpRequest._XHR.prototype) {
+	asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
+		fixture('/onload', 1000);
 
-	fixture('/foo', function() {
-		return {};
-	});
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/onload');
+		xhr.send();
 
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/foo');
+		setTimeout(function() {
+			xhr.abort();
+		}, 50);
+		
 
-	xhr.addEventListener('abort', function() {
-		fixture('/foo', null);
-		ok(true, 'Got to the error handler');
-		equal(xhr.status, 0);
-		equal(xhr.statusText, '');
-
-		setTimeout(function(){
-			equal(xhr.readyState, 0);
+		xhr.addEventListener('abort', function() {
+			fixture('/onload', null);
+			ok(true, 'Got to the error handler');
+			equal(xhr.statusText, '');
+			equal(xhr.status, 0);
 			start();
 		});
+
+		xhr.addEventListener('load', function() {
+			fixture('/onload', null);
+			ok(false, 'timed out xhr did not abort');
+			start();
+		});
+
 	});
 
-	xhr.send();
-	xhr.abort();
-});
+	asyncTest('dynamic fixture with timeout does not run if xhr timeout less than delay', function() {
+		var delay = fixture.delay;
+		fixture.delay = 1000;
+		fixture('/onload', function() {
+			fixture('/onload', null);
+			ok(false, 'timed out xhr did not abort');
+			start();
+		});
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/onload');
+		setTimeout(function() {
+			xhr.abort();
+		}, 50);
+		xhr.send();
+
+		xhr.addEventListener('abort', function() {
+			fixture('/onload', null);
+			ok(true, 'Got to the error handler');
+			equal(xhr.statusText, '');
+			equal(xhr.status, 0);
+			start();
+		});
+
+		fixture.delay = delay;
+	});
+
+	test("abort() sets readyState correctly", function(){
+		stop();
+
+		fixture('/foo', function() {
+			return {};
+		});
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/foo');
+
+		xhr.addEventListener('abort', function() {
+			fixture('/foo', null);
+			ok(true, 'Got to the error handler');
+			equal(xhr.status, 0);
+			equal(xhr.statusText, '');
+
+			setTimeout(function(){
+				equal(xhr.readyState, 0);
+				start();
+			});
+		});
+
+		xhr.send();
+		xhr.abort();
+	});
+
+	test("abort() of already completed fixture", function(){
+		stop();
+
+		fixture('/foo', function() {
+			return {};
+		});
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/foo');
+
+		xhr.addEventListener('load', function() {
+			fixture('/foo', null);
+			equal(xhr.readyState, 4);
+			xhr.abort();
+			start();
+		});
+
+		xhr.send();	
+	});
+}
