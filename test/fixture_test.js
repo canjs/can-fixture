@@ -873,7 +873,6 @@ asyncTest("doesn't copy status or statusText when readyState <= 1", function () 
 
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 1) {
-			delete xhr.onreadystatechange;
 			ok(typeof xhr.status === 'undefined', "did not copy status");
 			ok(typeof xhr.statusText === 'undefined', "did not copy statusText");
 			start();
