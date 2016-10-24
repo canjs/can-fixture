@@ -142,7 +142,6 @@ assign(XMLHttpRequest.prototype,{
 		this.type = type;
 		this.url = url;
 		this.async = async === false ? false : true;
-		this._xhr.open.apply(this._xhr, arguments);
 	},
 	getAllResponseHeaders: function(){
 		return this._xhr.getAllResponseHeaders.apply(this._xhr, arguments);
