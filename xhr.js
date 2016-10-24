@@ -12,13 +12,23 @@ var setImmediate = require("can-util/js/set-immediate/set-immediate");
 // Copy props from source to dest, except those on the XHR prototype and
 // listed as excluding.
 var assign = function(dest, source, excluding){
-       excluding = excluding || {};
+		excluding = excluding || {};
 
-       // copy everything on this to the xhr object that is not on `this`'s prototype
-       for(var prop in source){
-               if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-                       dest[prop] = source[prop];
-               }
+		// If the XHRs responseType is not '' or 'text', browsers will throw an error
+		// when trying to access the `responseText` property so we have to ignore it
+		if(typeof source.responseType === 'undefined' || source.responseType === '' || source.responseType === 'text') {
+			delete excluding.responseText;
+			delete excluding.responseXML;
+		} else {
+			excluding.responseText = true;
+			excluding.responseXML = true;
+		}
+
+		// copy everything on this to the xhr object that is not on `this`'s prototype
+		for(var prop in source) {
+			if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
+				dest[prop] = source[prop];
+			}
        }
 };
 
@@ -60,6 +70,7 @@ each(events, function(prop){
 // callbacks when the real XHR's request completes.
 var makeXHR = function(mockXHR){
 	var xhr = mockXHR._xhr;
+
 	// Copy everything on mock to it.
 	assign(xhr, mockXHR, propsToIgnore);
 
@@ -70,47 +81,21 @@ var makeXHR = function(mockXHR){
 			if(typeof xhr.status !== 'number') {
 				mockXHR.status = undefined;
 			}
-
-			if(mockXHR.onreadystatechange) {
-				mockXHR.onreadystatechange(ev);
-			}
-
-			return;
-		}
-
-		// If the XHRs responseType is not '' or 'text', browsers will throw an error
-		// when trying to access the `responseText` property so we have to ignore it
-		if(typeof xhr.responseType === 'undefined' || xhr.responseType === '' || xhr.responseType === 'text') {
-			delete propsToIgnore.responseText;
-			delete propsToIgnore.responseXML;
 		} else {
-			propsToIgnore.responseText = true;
-			propsToIgnore.responseXML = true;
+			// Copy back everything over because in IE8 defineProperty
+			// doesn't work, so we need to make our shim XHR have the same
+			// values as the real xhr.
+			assign(mockXHR, xhr, propsToIgnore);
 		}
 
-		// If the XHRs readyState is not 2, 3 or 4 accessing status or statusText
-		// will throw an InvalidStateError in Webkit
-		if(xhr.readyState <= 1) {
-			propsToIgnore.status = true;
-			propsToIgnore.statusText = true;
-		} else {
-			delete propsToIgnore.status;
-			delete propsToIgnore.statusText;
-		}
-
-		// Copy back everything over because in IE8 defineProperty
-		// doesn't work, so we need to make our shim XHR have the same
-		// values as the real xhr.
-
-		assign(mockXHR, xhr, propsToIgnore);
 		if(mockXHR.onreadystatechange) {
 			mockXHR.onreadystatechange(ev);
 		}
 	};
 
 	// wire up events to forward to mock object
-	each(events, function(eventName){
-		xhr["on"+eventName] = function(){
+	each(events, function(eventName) {
+		xhr["on"+eventName] = function() {
 			setImmediate(function() {
 				assign(mockXHR, xhr, propsToIgnore);
 			});
@@ -183,6 +168,7 @@ assign(XMLHttpRequest.prototype,{
 		return "";
 	},
 	abort: function() {
+		// clearTimeout(this.timeoutId);
 		return this._xhr.abort();
 	},
 	// This needs to compile the information necessary to see if

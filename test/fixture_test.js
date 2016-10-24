@@ -1480,12 +1480,14 @@ asyncTest('fixture with timeout aborts if xhr timeout less than delay', function
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/onload');
+	xhr.send();
+
 	setTimeout(function() {
 		xhr.abort();
 	}, 50);
-	xhr.send();
+	
 
-	xhr.addEventListener('error', function() {
+	xhr.addEventListener('abort', function() {
 		fixture('/onload', null);
 		ok(true, 'Got to the error handler');
 		equal(xhr.statusText, "aborted");
@@ -1517,13 +1519,14 @@ asyncTest('dynamic fixture with timeout does not run if xhr timeout less than de
 	}, 50);
 	xhr.send();
 
-	xhr.addEventListener('error', function() {
+	xhr.addEventListener('abort', function() {
 		fixture('/onload', null);
 		ok(true, 'Got to the error handler');
-		equal(xhr.statusText, "aborted");
-		equal(xhr.status, "0");
+		equal(xhr.statusText, '');
+		equal(xhr.status, 0);
 		start();
 	});
+
 	fixture.delay = delay;
 });
 
@@ -1650,8 +1653,8 @@ test("abort() sets readyState correctly", function(){
 	xhr.addEventListener('abort', function() {
 		fixture('/foo', null);
 		ok(true, 'Got to the error handler');
-		equal(xhr.status, "0");
-		equal(xhr.statusText, "");
+		equal(xhr.status, 0);
+		equal(xhr.statusText, '');
 
 		setTimeout(function(){
 			equal(xhr.readyState, 0);
