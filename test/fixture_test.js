@@ -1408,8 +1408,6 @@ test("supports sync redirect fixtures (#23)", function(){
 });
 
 asyncTest("slow mode works (#26)", function(){
-
-
 	var url = __dirname + '/fixtures/test.json';
 	fixture({url: url}, 1000);
 
@@ -1418,7 +1416,7 @@ asyncTest("slow mode works (#26)", function(){
 	var startTime = new Date();
 
 	xhr.addEventListener('load', function(){
-		ok(Math.abs(new Date() - startTime - 1000) < 500, "within 500 ms of 1 second delay");
+		ok((new Date() - startTime) >= 1000, "takes at least 1 second delay");
 		fixture({url: url}, null);
 		start();
 	});
