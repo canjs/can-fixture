@@ -1662,7 +1662,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 			setTimeout(function(){
 				equal(xhr.readyState, 0);
 				start();
-			});
+			}, 50);
 		});
 
 		xhr.send();
