@@ -33,74 +33,86 @@ var parseHeaders = function(str) {
 }
 
 QUnit.module('can-fixture');
-test('static fixtures', function () {
 
-	stop();
-	fixture('GET something', __dirname+'/fixtures/test.json');
-	fixture('POST something', __dirname+'/fixtures/test.json');
-	fixture('PATCH something', __dirname+'/fixtures/test.json');
+if (__dirname !== '/') {
+	test('static fixtures', function () {
+		stop();
+		fixture('GET something', __dirname+'/fixtures/test.json');
+		fixture('POST something', __dirname+'/fixtures/test.json');
+		fixture('PATCH something', __dirname+'/fixtures/test.json');
 
-	$.ajax({
-		url: 'something',
-		dataType: 'json'
-	})
-		.then(function (data) {
-			equal(data.sweet, 'ness', 'can.get works');
-			$.ajax({
-				url: 'something',
-				method: 'POST',
-				dataType: 'json'
-			})
-				.then(function (data) {
-					equal(data.sweet, 'ness', 'can.post works');
-						$.ajax({
+		$.ajax({
+			url: 'something',
+			dataType: 'json'
+		})
+			.then(function (data) {
+				equal(data.sweet, 'ness', 'can.get works');
+				$.ajax({
 					url: 'something',
-					method: 'PATCH',
+					method: 'POST',
 					dataType: 'json'
 				})
 					.then(function (data) {
-						equal(data.sweet, 'ness', 'can.patch works');
-						start();
+						equal(data.sweet, 'ness', 'can.post works');
+							$.ajax({
+						url: 'something',
+						method: 'PATCH',
+						dataType: 'json'
+					})
+						.then(function (data) {
+							equal(data.sweet, 'ness', 'can.patch works');
+							start();
+						},errorCallback);
 					},errorCallback);
-				},errorCallback);
-		}, errorCallback);
-});
-test('static fixtures (using method signature)', function () {
-	stop();
-	fixture({method: 'get', url: 'method/{id}'}, __dirname+'/fixtures/method.{id}.json');
-	$.ajax({
-		url: 'method/4',
-		dataType: 'json'
-	})
-		.then(function (data) {
-			equal(data.id, 4, 'Got data with proper id using method');
-			start();
-		}, errorCallback);
-});
-test('static fixtures (using type signature)', function () {
-	stop();
-	fixture({type: 'get', url: 'type/{id}'}, __dirname+'/fixtures/type.{id}.json');
-	$.ajax({
-		url: 'type/4',
-		dataType: 'json'
-	})
-		.then(function (data) {
-			equal(data.id, 4, 'Got data with proper id using type');
-			start();
-		}, errorCallback);
-});
-test('templated static fixtures', function () {
-	stop();
-	fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
-	$.ajax({
-		url: 'some/3',
-		dataType: 'json'
-	})
-		.then(function (data) {
-			equal(data.id, 3, 'Got data with proper id');
-			start();
-		}, errorCallback);
-});
+			}, errorCallback);
+	});
+}
+
+if (__dirname !== '/') {
+	test('static fixtures (using method signature)', function () {
+		stop();
+		fixture({method: 'get', url: 'method/{id}'}, __dirname+'/fixtures/method.{id}.json');
+		$.ajax({
+			url: 'method/4',
+			dataType: 'json'
+		})
+			.then(function (data) {
+				equal(data.id, 4, 'Got data with proper id using method');
+				start();
+			}, errorCallback);
+	});
+}
+
+if (__dirname !== '/') {
+	test('static fixtures (using type signature)', function () {
+		stop();
+		fixture({type: 'get', url: 'type/{id}'}, __dirname+'/fixtures/type.{id}.json');
+		$.ajax({
+			url: 'type/4',
+			dataType: 'json'
+		})
+			.then(function (data) {
+				equal(data.id, 4, 'Got data with proper id using type');
+				start();
+			}, errorCallback);
+	});
+}
+
+if (__dirname !== '/') {
+	test('templated static fixtures', function () {
+		stop();
+		fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
+		$.ajax({
+			url: 'some/3',
+			dataType: 'json'
+		})
+			.then(function (data) {
+				equal(data.id, 3, 'Got data with proper id');
+				start();
+			}, errorCallback);
+	});
+}
+
 test('dynamic fixtures', function () {
 	stop();
 	fixture.delay = 10;
@@ -118,36 +130,38 @@ test('dynamic fixtures', function () {
 			start();
 		});
 });
-test('fixture function', 3, function () {
-	stop();
-	var url = __dirname+'/fixtures/foo.json';
-	fixture(url, __dirname+'/fixtures/foobar.json');
-	$.ajax({
-		url: url,
-		dataType: 'json'
-	})
-		.done(function (data) {
-			equal(data.sweet, 'ner', 'url passed works');
-			fixture(url, __dirname+'/fixtures/test.json');
-			$.ajax({
-				url: url,
-				dataType: 'json'
-			})
-				.done(function (data) {
-					equal(data.sweet, 'ness', 'replaced');
-					fixture(url, null);
-					$.ajax({
-						url: url,
-						dataType: 'json'
-					})
-						.done(function (data) {
-							equal(data.a, 'b', 'removed');
-							start();
-						});
-				});
-		});
-});
 
+if (__dirname !== '/') {
+	test('fixture function', 3, function () {
+		stop();
+		var url = __dirname+'/fixtures/foo.json';
+		fixture(url, __dirname+'/fixtures/foobar.json');
+		$.ajax({
+			url: url,
+			dataType: 'json'
+		})
+			.done(function (data) {
+				equal(data.sweet, 'ner', 'url passed works');
+				fixture(url, __dirname+'/fixtures/test.json');
+				$.ajax({
+					url: url,
+					dataType: 'json'
+				})
+					.done(function (data) {
+						equal(data.sweet, 'ness', 'replaced');
+						fixture(url, null);
+						$.ajax({
+							url: url,
+							dataType: 'json'
+						})
+							.done(function (data) {
+								equal(data.a, 'b', 'removed');
+								start();
+							});
+					});
+			});
+	});
+}
 
 test('fixture.store fixtures', function () {
 	stop();
@@ -318,43 +332,45 @@ test('fixture function gets id', function () {
 		});
 });
 
-test('replacing and removing a fixture', function () {
-	var url = __dirname+'/fixtures/remove.json';
-	fixture('GET ' + url, function () {
-		return {
-			weird: 'ness!'
-		};
-	});
-	stop();
-	$.ajax({
-		url: url,
-		dataType: 'json'
-	})
-		.done(function (json) {
-			equal(json.weird, 'ness!', 'fixture set right');
-			fixture('GET ' + url, function () {
-				return {
-					weird: 'ness?'
-				};
-			});
-			$.ajax({
-				url: url,
-				dataType: 'json'
-			})
-				.done(function (json) {
-					equal(json.weird, 'ness?', 'fixture set right');
-					fixture('GET ' + url, null);
-					$.ajax({
-						url: url,
-						dataType: 'json'
-					})
-						.done(function (json) {
-							equal(json.weird, 'ness', 'fixture set right');
-							start();
-						});
-				});
+if (__dirname !== '/') {
+	test('replacing and removing a fixture', function () {
+		var url = __dirname+'/fixtures/remove.json';
+		fixture('GET ' + url, function () {
+			return {
+				weird: 'ness!'
+			};
 		});
-});
+		stop();
+		$.ajax({
+			url: url,
+			dataType: 'json'
+		})
+			.done(function (json) {
+				equal(json.weird, 'ness!', 'fixture set right');
+				fixture('GET ' + url, function () {
+					return {
+						weird: 'ness?'
+					};
+				});
+				$.ajax({
+					url: url,
+					dataType: 'json'
+				})
+					.done(function (json) {
+						equal(json.weird, 'ness?', 'fixture set right');
+						fixture('GET ' + url, null);
+						$.ajax({
+							url: url,
+							dataType: 'json'
+						})
+							.done(function (json) {
+								equal(json.weird, 'ness', 'fixture set right');
+								start();
+							});
+					});
+			});
+	});
+}
 
 test('fixture.store with can.Model', function () {
 	var store = fixture.store(100, function (i) {
@@ -852,20 +868,22 @@ QUnit.test("onreadystatechange, event is passed", function(){
 	stop();
 });
 
-asyncTest("doesn't break onreadystatechange (#3)", function () {
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
+if (__dirname !== '/') {
+	asyncTest("doesn't break onreadystatechange (#3)", function () {
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
 
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			ok(true, "we made a successful request");
-			start();
-		}
-	};
+		xhr.onreadystatechange = function () {
+			if (xhr.readyState === 4) {
+				ok(true, "we made a successful request");
+				start();
+			}
+		};
 
-	xhr.open('GET', url);
-	xhr.send();
-});
+		xhr.open('GET', url);
+		xhr.send();
+	});
+}
 
 QUnit.module("XHR Shim");
 
@@ -874,40 +892,44 @@ test("Supports onload", function(){
 	QUnit.ok(("onload" in xhr), "shim passes onload detection");
 });
 
-asyncTest("supports addEventListener on XHR shim", function(){
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
+if (__dirname !== '/') {
+	asyncTest("supports addEventListener on XHR shim", function(){
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		ok(true, "our shim supports addEventListener");
-		start();
-	});
-
-	xhr.open('GET', url);
-	xhr.send();
-});
-
-asyncTest("supports removeEventListener on XHR shim", function(){
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
-
-	var onload = function(){
-		ok(false, "this should not be called");
-	};
-
-	xhr.addEventListener('load', onload);
-	xhr.removeEventListener("load", onload);
-
-	xhr.onload = function(){
-		setTimeout(function(){
-			ok(true, 'didn\'t call the event listener');
+		xhr.addEventListener('load', function(){
+			ok(true, "our shim supports addEventListener");
 			start();
 		});
-	};
 
-	xhr.open('GET', url);
-	xhr.send();
-});
+		xhr.open('GET', url);
+		xhr.send();
+	});
+}
+
+if (__dirname !== '/') {
+	asyncTest("supports removeEventListener on XHR shim", function(){
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
+
+		var onload = function(){
+			ok(false, "this should not be called");
+		};
+
+		xhr.addEventListener('load', onload);
+		xhr.removeEventListener("load", onload);
+
+		xhr.onload = function(){
+			setTimeout(function(){
+				ok(true, 'didn\'t call the event listener');
+				start();
+			});
+		};
+
+		xhr.open('GET', url);
+		xhr.send();
+	});
+}
 
 test("supports setDisableHeaderCheck", function(){
 	var xhr = new XMLHttpRequest();
@@ -920,38 +942,42 @@ test("supports setDisableHeaderCheck", function(){
 	}
 });
 
-asyncTest("supports setRequestHeader", function(){
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
+if (__dirname !== '/') {
+	asyncTest("supports setRequestHeader", function(){
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
 
-	xhr.setRequestHeader("foo", "bar");
+		xhr.setRequestHeader("foo", "bar");
 
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState === 4) {
-			equal(xhr._requestHeaders.foo, "bar", "header was set");
-			start();
-		}
-	};
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState === 4) {
+				equal(xhr._requestHeaders.foo, "bar", "header was set");
+				start();
+			}
+		};
 
-	xhr.open("GET", url);
-	xhr.send();
-});
+		xhr.open("GET", url);
+		xhr.send();
+	});
+}
 
-asyncTest("supports getResponseHeader", function(){
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
+if (__dirname !== '/') {
+	asyncTest("supports getResponseHeader", function(){
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
 
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState === 4) {
-			var header = xhr.getResponseHeader("Content-Type");
-			ok(typeof header === "string", "did get a header back");
-			start();
-		}
-	};
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState === 4) {
+				var header = xhr.getResponseHeader("Content-Type");
+				ok(typeof header === "string", "did get a header back");
+				start();
+			}
+		};
 
-	xhr.open("GET", url);
-	xhr.send();
-});
+		xhr.open("GET", url);
+		xhr.send();
+	});
+}
 
 asyncTest("supports getAllResponseHeaders", function(){
 	fixture("GET something", function(req,res){
@@ -1011,27 +1037,29 @@ asyncTest("pass return value for fixture", function(){
 	xhr.send();
 });
 
-asyncTest("pass headers in fallthrough", function() {
-	var url = __dirname+'/fixtures/foobar.json';
-	var xhr = new XMLHttpRequest();
-	expect(2);
+if (__dirname !== '/') {
+	asyncTest("pass headers in fallthrough", function() {
+		var url = __dirname+'/fixtures/foobar.json';
+		var xhr = new XMLHttpRequest();
+		expect(2);
 
-	xhr.open("GET", url);
-	xhr.setRequestHeader("foo", "bar");
-	xhr.onreadystatechange = function(ev){
-		var originalXhr = ev.target;
-		if(originalXhr.readyState === 1) {
-			originalXhr.setRequestHeader = function(key, val) {
-				equal(key, "foo");
-				equal(val, "bar");
-			};
-		}
-		if(originalXhr.readyState === 4) {
-			start();
-		}
-	};
-	xhr.send();
-});
+		xhr.open("GET", url);
+		xhr.setRequestHeader("foo", "bar");
+		xhr.onreadystatechange = function(ev){
+			var originalXhr = ev.target;
+			if(originalXhr.readyState === 1) {
+				originalXhr.setRequestHeader = function(key, val) {
+					equal(key, "foo");
+					equal(val, "bar");
+				};
+			}
+			if(originalXhr.readyState === 4) {
+				start();
+			}
+		};
+		xhr.send();
+	});
+}
 
 test("set.Algebra CRUD works (#12)", 5, function(){
 
@@ -1368,17 +1396,19 @@ asyncTest("supports addEventListener on shim using fixture", function(){
 	xhr.send();
 });
 
-test("supports sync on XHR shim (#23)", function(){
-	var url = __dirname + '/fixtures/test.json';
-	var xhr = new XMLHttpRequest();
+if (__dirname !== '/') {
+	test("supports sync on XHR shim (#23)", function(){
+		var url = __dirname + '/fixtures/test.json';
+		var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		ok(true, "our shim supports addEventListener");
+		xhr.addEventListener('load', function(){
+			ok(true, "our shim supports addEventListener");
+		});
+
+		xhr.open('GET', url, false);
+		xhr.send();
 	});
-
-	xhr.open('GET', url, false);
-	xhr.send();
-});
+}
 
 test("supports sync fixtures (#23)", function(){
 	fixture("/sync", function(){
@@ -1394,36 +1424,40 @@ test("supports sync fixtures (#23)", function(){
 	xhr.send();
 });
 
-test("supports sync redirect fixtures (#23)", function(){
-	fixture("/sync_redirect", __dirname+'/fixtures/test.json');
+if (__dirname !== '/') {
+	test("supports sync redirect fixtures (#23)", function(){
+		fixture("/sync_redirect", __dirname+'/fixtures/test.json');
 
-	var xhr = new XMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		ok(true, "our shim supports sync redirect");
+		xhr.addEventListener('load', function(){
+			ok(true, "our shim supports sync redirect");
+		});
+
+		xhr.open('GET', "/sync_redirect", false);
+		xhr.send();
 	});
+}
 
-	xhr.open('GET', "/sync_redirect", false);
-	xhr.send();
-});
+if (__dirname !== '/') {
+	asyncTest("slow mode works (#26)", function(){
+		var url = __dirname + '/fixtures/test.json';
+		fixture({url: url}, 1000);
 
-asyncTest("slow mode works (#26)", function(){
-	var url = __dirname + '/fixtures/test.json';
-	fixture({url: url}, 1000);
+		var xhr = new XMLHttpRequest();
 
-	var xhr = new XMLHttpRequest();
+		var startTime = new Date();
 
-	var startTime = new Date();
+		xhr.addEventListener('load', function(){
+			ok((new Date() - startTime) >= 1000, "takes at least 1 second delay");
+			fixture({url: url}, null);
+			start();
+		});
 
-	xhr.addEventListener('load', function(){
-		ok((new Date() - startTime) >= 1000, "takes at least 1 second delay");
-		fixture({url: url}, null);
-		start();
+		xhr.open('GET', url);
+		xhr.send();
 	});
-
-	xhr.open('GET', url);
-	xhr.send();
-});
+}
 
 asyncTest('onload should be triggered for HTTP error responses (#36)', function() {
 	fixture('/onload', function(req, res) {
