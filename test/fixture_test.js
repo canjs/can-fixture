@@ -1450,7 +1450,7 @@ if (__dirname !== '/') {
 
 		xhr.addEventListener('load', function(){
 			var delay = new Date() - startTime;
-			ok(delay >= 1000, delay + "ms >= 1000ms delay");
+			ok(delay >= 900, delay + "ms >= 900ms");
 			fixture({url: url}, null);
 			start();
 		});
