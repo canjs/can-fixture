@@ -65,7 +65,7 @@ assign(fixture, {
 	fixtures: core.fixtures
 });
 
-if(typeof window !== "undefined" && !require.resolve) {
+if(typeof window !== "undefined" && typeof require.resolve !== "function") {
 	window.fixture = fixture;
 }
 
