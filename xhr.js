@@ -7,48 +7,30 @@
 // and then respond normally.
 var fixtureCore = require("./core");
 var deparam = require("./helpers/deparam");
-var each = require("can-util/js/each/each");
-var setImmediate = require("can-util/js/set-immediate/set-immediate");
-// Copy props from source to dest, except those on the XHR prototype and
-// listed as excluding.
-var assign = function(dest, source, excluding){
-		excluding = excluding || {};
-
-		// If the XHRs responseType is not '' or 'text', browsers will throw an error
-		// when trying to access the `responseText` property so we have to ignore it
-		if(typeof source.responseType === 'undefined' || source.responseType === '' || source.responseType === 'text') {
-			delete excluding.responseText;
-			delete excluding.responseXML;
-			delete excluding.responseType;
-		} else {
-			excluding.responseText = true;
-			excluding.responseXML = true;
-			excluding.responseType = true;
-		}
-
-		// copy everything on this to the xhr object that is not on `this`'s prototype
-		for(var prop in source) {
-			if(!( prop in XMLHttpRequest.prototype) && !excluding[prop] ) {
-				dest[prop] = source[prop];
-			}
-       }
-};
+var assign = require('can-util/js/assign/assign');
+var each = require('can-util/js/each/each');
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
 // Get a global reference.
 	GLOBAL = typeof global !== "undefined"? global : window;
 
-// Figure out events on XHR object
-// but start with some default events.
-var events = ["abort","error","load","loadend","loadstart","progress"];
+// Figure out props and events on XHR object
+// but start with some defaults
+var props = [
+	"type", "url", "async", "response", "responseText", "responseType",
+	"responseXML", "responseURL", "status", "statusText", "readyState"
+];
+var events = ["abort", "error", "load", "loadend", "loadstart",  "progress", "readystatechange"];
 (function(){
 	var x = new XHR();
 	for(var prop in x) {
-		if(prop.indexOf("on") === 0 &&
-			events.indexOf(prop.substr(2)) === -1 &&
-			prop !== "onreadystatechange") {
-			events.push(prop.substr(2));
+		if(prop.indexOf("on") === 0) {
+			if (events.indexOf(prop.substr(2)) === -1) {
+				events.push(prop.substr(2));
+			}
+		} else if (props.indexOf(prop) === -1 && typeof x[prop] !== 'function') {
+			props.push(prop);
 		}
 	}
 })();
@@ -63,45 +45,20 @@ function callEvents(xhr, ev) {
 	}
 }
 
-var propsToIgnore = { onreadystatechange: true, onload: true, __events: true };
-each(events, function(prop){
-	propsToIgnore["on"+prop] = true;
-});
+GLOBAL.XMLHttpRequest = function() {
+	var mockXHR = this;
+	var realXHR = new XHR();
 
-// Helper that given the mockXHR, creates a real XHR that will call the mockXHR's
-// callbacks when the real XHR's request completes.
-var makeXHR = function(mockXHR){
-	var xhr = mockXHR._xhr;
+	// store real xhr on mockXHR
+	this._xhr = realXHR;
 
-	// Copy everything on mock to it.
-	assign(xhr, mockXHR, propsToIgnore);
+	// create other properties needed by prototype functions
+	this._requestHeaders = {};
+	this.__events = {};
 
-	// When the real XHR is called back, update all properties
-	// and call all callbacks on the mock XHR.
-	xhr.onreadystatechange = function(ev) {
-		if(xhr.readyState <= 1) {
-			if(typeof xhr.status !== 'number') {
-				mockXHR.status = undefined;
-			}
-		} else {
-			// Copy back everything over because in IE8 defineProperty
-			// doesn't work, so we need to make our shim XHR have the same
-			// values as the real xhr.
-			assign(mockXHR, xhr, propsToIgnore);
-		}
-
-		if(mockXHR.onreadystatechange) {
-			mockXHR.onreadystatechange(ev);
-		}
-	};
-
-	// wire up events to forward to mock object
+	// wire up events to forward from real xhr to fake xhr
 	each(events, function(eventName) {
-		xhr["on"+eventName] = function() {
-			setImmediate(function() {
-				assign(mockXHR, xhr, propsToIgnore);
-			});
-			
+		realXHR["on" + eventName] = function() {
 			callEvents(mockXHR, eventName);
 			if(mockXHR["on"+eventName]) {
 				return mockXHR["on"+eventName].apply(mockXHR, arguments);
@@ -109,33 +66,10 @@ var makeXHR = function(mockXHR){
 		};
 	});
 
-
-	// wire up the mockXHR's getResponseHeader to call the real
-	// XHR's getResponseHeader.
-	if(xhr.getResponseHeader) {
-		mockXHR.getResponseHeader = function(){
-			return xhr.getResponseHeader.apply(xhr, arguments);
-		};
-	}
-
-	// Call any additional methods that need to be called on the mock.
-	if(mockXHR._disableHeaderCheck && xhr.setDisableHeaderCheck) {
-		xhr.setDisableHeaderCheck(true);
-	}
-
-	return xhr;
-};
-
-
-GLOBAL.XMLHttpRequest = function(){
-	this._requestHeaders = {};
-	this._xhr = new XHR();
-	this.__events = {};
 	// The way code detects if the browser supports onload is to check
 	// if a new XHR object has the onload property, so setting it to null
 	// passes that check.
 	this.onload = null;
-	this.onerror = null;
 };
 GLOBAL.XMLHttpRequest._XHR = XHR;
 
@@ -167,7 +101,7 @@ assign(XMLHttpRequest.prototype,{
 		this._disableHeaderCheck = !!val;
 	},
 	getResponseHeader: function(key){
-		return "";
+		return this._xhr.getResponseHeader(key);
 	},
 	abort: function() {
 		var xhr = this._xhr;
@@ -176,7 +110,6 @@ assign(XMLHttpRequest.prototype,{
 		// steps that are expected for `abort` to
 		if(this.timeoutId !== undefined) {
 			clearTimeout(this.timeoutId);
-			xhr = makeXHR(this);
 			xhr.open(this.type, this.url, this.async === false ? false : true);
 			xhr.send();
 		}
@@ -192,7 +125,6 @@ assign(XMLHttpRequest.prototype,{
 	//   mock XHR object and trigger its callbacks.
 	// - redirect fixtures - create a real XHR linked to the mock XHR for the new url.
 	send: function(data) {
-
 		// derive the XHR settings object from the XHR object
 		var type = this.type.toLowerCase() || 'get';
 		var xhrSettings = {
@@ -202,7 +134,7 @@ assign(XMLHttpRequest.prototype,{
 			type: type,
 			method: type,
 			async: this.async,
-            xhr: this
+			xhr: this
 		};
 		// if get or delete, the url should not include the querystring.
 		// the querystring should be the data.
@@ -224,7 +156,6 @@ assign(XMLHttpRequest.prototype,{
 		var fixtureSettings = fixtureCore.get(xhrSettings);
 		var mockXHR = this;
 
-		var timeoutId;
 		// If a dynamic fixture is being used, we call the dynamic fixture function and then
 		// copy the response back onto the `mockXHR` in the right places.
 		if(fixtureSettings && typeof fixtureSettings.fixture === "function") {
@@ -232,7 +163,15 @@ assign(XMLHttpRequest.prototype,{
 			this.timeoutId = fixtureCore.callDynamicFixture(xhrSettings, fixtureSettings, function(status, body, headers, statusText){
 				body = typeof body === "string" ? body :  JSON.stringify(body);
 
-				assign(mockXHR,{
+				// we are no longer using the real XHR
+				// set it to an object so that props like readyState can be set
+				mockXHR._xhr = {
+					open: function(){},
+					send: function() {},
+					abort: function(){}
+				};
+
+				assign(mockXHR, {
 					readyState: 4,
 					status: status
 				});
@@ -277,23 +216,21 @@ assign(XMLHttpRequest.prototype,{
 				if(mockXHR.onloadend) {
 					mockXHR.onloadend();
 				}
-
 			});
 
-			return timeoutId;
+			return;
 		}
 		// At this point there is either not a fixture or a redirect fixture.
 		// Either way we are doing a request.
-		var xhr = makeXHR(this),
-			makeRequest = function() {
-				xhr.open( xhr.type, xhr.url, xhr.async );
-				if(mockXHR._requestHeaders) {
-					Object.keys(mockXHR._requestHeaders).forEach(function(key) {
-						xhr.setRequestHeader(key, mockXHR._requestHeaders[key]);
-					});
-				}
-				return xhr.send(data);
-			};
+		var makeRequest = function() {
+			mockXHR._xhr.open(mockXHR._xhr.type, mockXHR._xhr.url, mockXHR._xhr.async);
+			if(mockXHR._requestHeaders) {
+				Object.keys(mockXHR._requestHeaders).forEach(function(key) {
+					mockXHR._xhr.setRequestHeader(key, mockXHR._requestHeaders[key]);
+				});
+			}
+			return mockXHR._xhr.send(data);
+		};
 
 		if(fixtureSettings && typeof fixtureSettings.fixture === "number") {
 			//!steal-remove-start
@@ -308,10 +245,24 @@ assign(XMLHttpRequest.prototype,{
 			//!steal-remove-start
 			fixtureCore.log(xhrSettings.url+" -> " + fixtureSettings.url);
 			//!steal-remove-end
-			assign(xhr, fixtureSettings);
+			assign(mockXHR, fixtureSettings);
 		}
 
 		// Make the request.
 		return makeRequest();
 	}
+});
+
+// when props of mockXHR are get/set, return the prop from the real XHR
+each(props, function(prop) {
+	Object.defineProperty(XMLHttpRequest.prototype, prop, {
+		get: function(){
+			return this._xhr[prop];
+		},
+		set: function(newVal){
+			if(this._xhr[prop] !== newVal) {
+				this._xhr[prop] = newVal;
+			}
+		}
+	});
 });
