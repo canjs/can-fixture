@@ -969,7 +969,7 @@ if (__dirname !== '/') {
 		xhr.onreadystatechange = function(){
 			if(xhr.readyState === 4) {
 				var header = xhr.getResponseHeader("Content-Type");
-				equal(header, "application/json", "got correct header back");
+				ok(header.indexOf("application/json") >= 0, "got correct header back");
 				start();
 			}
 		};
