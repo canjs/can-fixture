@@ -101,7 +101,7 @@ assign(XMLHttpRequest.prototype,{
 		this._disableHeaderCheck = !!val;
 	},
 	getResponseHeader: function(key){
-		return "";
+		return this._xhr.getResponseHeader(key);
 	},
 	abort: function() {
 		var xhr = this._xhr;
