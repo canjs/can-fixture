@@ -260,9 +260,9 @@ each(props, function(prop) {
 			return this._xhr[prop];
 		},
 		set: function(newVal){
-			if(this._xhr[prop] !== newVal) {
+			try {
 				this._xhr[prop] = newVal;
-			}
+			} catch(e) {}
 		}
 	});
 });
