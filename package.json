@@ -44,9 +44,6 @@
     "url": "https://github.com/canjs/can-fixture/issues"
   },
   "homepage": "https://github.com/canjs/can-fixture",
-  "system": {
-    "npmAlgorithm": "flat"
-  },
   "bit-docs": {
     "dependencies": {
       "bit-docs-glob-finder": "^0.0.5",
