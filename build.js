@@ -6,7 +6,7 @@ var baseHelpers = require("steal-tools/lib/build/helpers/base");
 var baseNormalize = globalJS.normalize();
 
 stealTools.export({
-	system: {
+	steal: {
 		config: __dirname+"/package.json!npm"
 	},
 	options: {
