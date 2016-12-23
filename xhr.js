@@ -168,7 +168,8 @@ assign(XMLHttpRequest.prototype,{
 				mockXHR._xhr = {
 					open: function(){},
 					send: function() {},
-					abort: function(){}
+					abort: function(){},
+					getResponseHeader: function(){}
 				};
 
 				assign(mockXHR, {

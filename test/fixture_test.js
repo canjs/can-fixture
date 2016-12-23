@@ -1723,4 +1723,22 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 		xhr.send();	
 	});
+
+	asyncTest('should be able to call getResponseHeader onload', function() {
+		fixture('/onload', function(req, res) {
+			res(400);
+		});
+
+		var xhr = new XMLHttpRequest();
+
+		xhr.addEventListener('load', function() {
+			fixture('/onload', null);
+			xhr.getResponseHeader('Set-Cookie');
+			ok(true, 'should not throw when calling getResponseHeader');
+			start();
+		});
+
+		xhr.open('GET', '/onload');
+		xhr.send();
+	});
 }
