@@ -4,9 +4,8 @@ var sub = require("can-util/js/string/string").sub;
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var canLog = require("can-util/js/log/log");
 require("./store");
-
-
 
 var fixtures = [];
 exports.fixtures = fixtures;
@@ -97,7 +96,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 
 	//!steal-remove-start
 	var json = JSON.stringify(xhrSettings.data);
-	exports.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
+	canLog.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
 	//!steal-remove-end
 
 	var response = function(){
@@ -281,12 +280,4 @@ exports.extractResponse = function (status, response, headers, statusText) {
 		headers = {};
 	}
 	return [status, response, headers, statusText];
-};
-
-// A simple wrapper for logging fixture.js.
-exports.log = function () {
-	//!steal-remove-start
-	console.log('can-fixture: ' + Array.prototype.slice.call(arguments)
-		.join(' '));
-	//!steal-remove-end
 };

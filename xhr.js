@@ -9,6 +9,7 @@ var fixtureCore = require("./core");
 var deparam = require("./helpers/deparam");
 var assign = require('can-util/js/assign/assign');
 var each = require('can-util/js/each/each');
+var canLog = require('can-util/js/log/log');
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
@@ -234,18 +235,14 @@ assign(XMLHttpRequest.prototype,{
 		};
 
 		if(fixtureSettings && typeof fixtureSettings.fixture === "number") {
-			//!steal-remove-start
-			fixtureCore.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
-			//!steal-remove-end
+			canLog.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
 			this.timeoutId = setTimeout(makeRequest, fixtureSettings.fixture);
 			return;
 		}
 
 		// if we do have a fixture, update the real XHR object.
 		if(fixtureSettings) {
-			//!steal-remove-start
-			fixtureCore.log(xhrSettings.url+" -> " + fixtureSettings.url);
-			//!steal-remove-end
+			canLog.log(xhrSettings.url+" -> " + fixtureSettings.url);
 			assign(mockXHR, fixtureSettings);
 		}
 
