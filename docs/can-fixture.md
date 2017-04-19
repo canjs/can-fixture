@@ -142,9 +142,9 @@ This is a shorthand for wiring up the `todoStore` as follows:
 fixture({
     "GET /api/todos": todoStore.getListData,
     "GET /api/todos/{id}": todoStore.getData,
-    "POST /api/todos": todosStore.createData,
-    "PUT /api/todos/{id}": todos.updateData,
-    "DELETE /api/todos/{id}": todos.destroyData
+    "POST /api/todos": todoStore.createData,
+    "PUT /api/todos/{id}": todoStore.updateData,
+    "DELETE /api/todos/{id}": todoStore.destroyData
 });
 ```
 
