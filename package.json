@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "can-connect": "^1.0.0",
+    "can-deparam": "^1.0.1",
     "can-namespace": "1.0.0",
     "can-set": "^1.0.0",
     "can-util": "^3.0.1"

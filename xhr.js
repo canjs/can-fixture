@@ -6,7 +6,7 @@
 // call the fixture callbacks or create a real XHR request
 // and then respond normally.
 var fixtureCore = require("./core");
-var deparam = require("./helpers/deparam");
+var deparam = require("can-deparam");
 var assign = require('can-util/js/assign/assign');
 var each = require('can-util/js/each/each');
 var canLog = require('can-util/js/log/log');
