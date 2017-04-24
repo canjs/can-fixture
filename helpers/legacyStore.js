@@ -6,10 +6,14 @@ var assign = require("can-util/js/assign/assign");
 
 module.exports = function (count, make, filter) {
 	/*jshint eqeqeq:false */
-	// check
-	// the currentId to use when a new instance is created.
-	var	currentId = 0,
-		items,
+	var getUniqueId = (function () {
+		var i = 0;
+		return function () {
+			return i++;
+		}
+	})();
+
+	var items,
 		findOne = function (id) {
 			for (var i = 0; i < items.length; i++) {
 				if (id == items[i].id) {
@@ -43,9 +47,8 @@ module.exports = function (count, make, filter) {
 				var item = make(i, items);
 
 				if (!item.id) {
-					item.id = i;
+					item.id = getUniqueId();
 				}
-				currentId = Math.max(item.id + 1, currentId + 1) || items.length;
 				items.push(item);
 			}
 		};
@@ -253,7 +256,7 @@ module.exports = function (count, make, filter) {
 			// If an ID wasn't passed into the request, we give the item
 			// a unique ID.
 			if (!item.id) {
-				item.id = currentId++;
+				item.id = getUniqueId();
 			}
 
 			// Push the new item into the store.

@@ -195,6 +195,36 @@ test('fixture.store fixtures', function () {
 	});
 });
 
+test('fixture.store fixtures should have unique IDs', function () {
+	stop();
+	var store = fixture.store('thing', 100, function (i) {
+		return {name: 'Test ' + i};
+	});
+	fixture('things', store.findAll);
+
+	$.ajax({
+		url: 'things',
+		dataType: 'json',
+		data: {
+			offset: 0,
+			limit: 200,
+			order: ['name ASC'],
+			searchText: 'thing 2'
+		},
+		success: function (result) {
+			debugger;
+			var seenIds = [];
+			var things = result.data;
+			for (var thingKey in things) {
+				var thing = things[thingKey];
+				ok(seenIds.indexOf(thing.id) === -1);
+				seenIds.push(thing.id);
+			}
+			start();
+		}
+	});
+});
+
 test('simulating an error', function () {
 
 	fixture('/foo', function (request, response) {
@@ -1541,7 +1571,7 @@ asyncTest("response headers are set", function(){
 
 	xhr.addEventListener('load', function(){
 		var headers = parseHeaders(xhr.getAllResponseHeaders());
-		
+
 		ok(headers.foo === "bar", "header was set");
 		start();
 	});
@@ -1633,7 +1663,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		setTimeout(function() {
 			xhr.abort();
 		}, 50);
-		
+
 
 		xhr.addEventListener('abort', function() {
 			fixture('/onload', null);
@@ -1721,7 +1751,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 			start();
 		});
 
-		xhr.send();	
+		xhr.send();
 	});
 
 	asyncTest('should be able to call getResponseHeader onload', function() {
