@@ -6,12 +6,30 @@ var assign = require("can-util/js/assign/assign");
 
 module.exports = function (count, make, filter) {
 	/*jshint eqeqeq:false */
-	var getUniqueId = (function () {
+	var nextUniqueId = (function () {
 		var i = 0;
 		return function () {
 			return i++;
 		}
 	})();
+
+	// Check to see if an existing item has the ID we want to assign
+	var isIdUnique = function (items, id) {
+		for (var key in items) {
+			if (items[key].id === id) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	var getUniqueId = function (items) {
+		var id = nextUniqueId();
+		while (!isIdUnique(items, id)) {
+			id = nextUniqueId();
+		}
+		return id;
+	}
 
 	var items,
 		findOne = function (id) {
@@ -47,7 +65,7 @@ module.exports = function (count, make, filter) {
 				var item = make(i, items);
 
 				if (!item.id) {
-					item.id = getUniqueId();
+					item.id = getUniqueId(items);
 				}
 				items.push(item);
 			}
@@ -256,7 +274,7 @@ module.exports = function (count, make, filter) {
 			// If an ID wasn't passed into the request, we give the item
 			// a unique ID.
 			if (!item.id) {
-				item.id = getUniqueId();
+				item.id = getUniqueId(items);
 			}
 
 			// Push the new item into the store.
