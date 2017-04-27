@@ -212,7 +212,6 @@ test('fixture.store fixtures should have unique IDs', function () {
 			searchText: 'thing 2'
 		},
 		success: function (result) {
-			debugger;
 			var seenIds = [];
 			var things = result.data;
 			for (var thingKey in things) {
@@ -574,6 +573,30 @@ test('fixture.store can use id of different type (#742)', function () {
 		.then(function (models) {
 			equal(models.data.length, 1, 'Got one model');
 			deepEqual(models.data[0], { id: 2, parentId: 4, name: 'Object 2' });
+			start();
+		});
+});
+
+test('fixture("METHOD /path", store) should use the right method', function () {
+	/*
+		Examples:
+			fixture("GET /path", store) => fixture("GET /path", store.getData)
+			fixture("POST /path", store) => fixture("GET /path", store.createData)
+	*/
+
+	// NOTE: this is a copy-paste of the test case
+	//       "fixture.store can use id of different type (#742)"
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	fixture('GET /models', store); // <- CHANGE
+	stop();
+	$.ajax({url: "/models", dataType: "json"})
+		.then(function (models) {
+			equal(models.data.length, 100, 'Gotta catch up all!');
 			start();
 		});
 });
