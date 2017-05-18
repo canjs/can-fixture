@@ -30,7 +30,7 @@
     "steal": "^1.0.0",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.0",
-    "testee": "^0.4.0"
+    "testee": "^0.5.1"
   },
   "repository": {
     "type": "git",
