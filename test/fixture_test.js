@@ -5,6 +5,7 @@ var set = require("can-set");
 var $ = require("jquery");
 var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var canDev = require('can-util/js/dev/dev');
 
 var errorCallback = function(xhr, status, error){
 	ok(false, error);
@@ -600,6 +601,24 @@ test('fixture("METHOD /path", store) should use the right method', function () {
 			start();
 		});
 });
+
+//!steal-remove-start
+test('fixture("METHOD /path", store) should warn when correcting to the right method', function (assert) {
+	assert.expect(1);
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	var oldWarn = canDev.warn;
+	canDev.warn = function (message) {
+		assert.ok(typeof message === 'string');
+	};
+	fixture('GET /models', store); // <- CHANGE
+	canDev.warn = oldWarn;
+});
+//!steal-remove-end
 
 test('fixture with response callback', 4, function () {
 	fixture.delay = 10;
