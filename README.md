@@ -3,6 +3,8 @@
 
 # can-fixture
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-fixture.svg)](https://greenkeeper.io/)
+
 
 `can-fixture` intercepts an AJAX request and simulates
 the response with a file or function. Use `can-fixture` to:
