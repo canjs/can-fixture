@@ -5,6 +5,7 @@ var set = require("can-set");
 var $ = require("jquery");
 var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var canDev = require('can-util/js/dev/dev');
 
 var errorCallback = function(xhr, status, error){
 	ok(false, error);
@@ -212,7 +213,6 @@ test('fixture.store fixtures should have unique IDs', function () {
 			searchText: 'thing 2'
 		},
 		success: function (result) {
-			debugger;
 			var seenIds = [];
 			var things = result.data;
 			for (var thingKey in things) {
@@ -222,6 +222,57 @@ test('fixture.store fixtures should have unique IDs', function () {
 			}
 			start();
 		}
+	});
+});
+
+test('fixture.store should assign unique IDs when fixtures provide IDs', function () {
+	/* NOTE: We are testing whether the unique ID we are assigning to a new
+	         item will account for IDs which the user has provided.
+	*/
+
+	/* NOTE: These integers are used because IDs are created sequentially from 0.
+	         Here, 0 1 and 2 must be skipped because they exist already.
+	         If the implementation is changed this test will need updated.
+	*/
+	var store = fixture.store([
+		{id: 0, name: 'Object 0'},
+		{id: 1, name: 'Object 1'},
+		{id: 2, name: 'Object 2'}
+	]);
+
+	fixture('POST /models', store.createData);
+
+	function then (ajax, callback) {
+		ajax.then(callback, function (error) {
+			ok(false, 'ajax failure: ' + error);
+			start();
+		});
+	}
+
+	var request = $.ajax({
+		url: '/models',
+		dataType: 'json',
+		type: 'post',
+		data: {
+			name: 'My test object'
+		}
+	});
+
+	stop();
+	then(request, function (response) {
+		notEqual(response.id, 0);
+		notEqual(response.id, 1);
+		notEqual(response.id, 2);
+
+		/* NOTE: This check will fail if the underlying implementation changes.
+		         This 3 is tightly coupled to the implementation.
+		         If this is the only breaking assertion, update the provided IDs to
+		         properly test the edge-case and update these assertions.
+		         This check only serves to notify you to update the checks.
+		*/
+		equal(response.id, 3);
+
+		start();
 	});
 });
 
@@ -577,6 +628,48 @@ test('fixture.store can use id of different type (#742)', function () {
 			start();
 		});
 });
+
+test('fixture("METHOD /path", store) should use the right method', function () {
+	/*
+		Examples:
+			fixture("GET /path", store) => fixture("GET /path", store.getData)
+			fixture("POST /path", store) => fixture("GET /path", store.createData)
+	*/
+
+	// NOTE: this is a copy-paste of the test case
+	//       "fixture.store can use id of different type (#742)"
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	fixture('GET /models', store); // <- CHANGE
+	stop();
+	$.ajax({url: "/models", dataType: "json"})
+		.then(function (models) {
+			equal(models.data.length, 100, 'Gotta catch up all!');
+			start();
+		});
+});
+
+//!steal-remove-start
+test('fixture("METHOD /path", store) should warn when correcting to the right method', function (assert) {
+	assert.expect(1);
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	var oldWarn = canDev.warn;
+	canDev.warn = function (message) {
+		assert.ok(typeof message === 'string');
+	};
+	fixture('GET /models', store); // <- CHANGE
+	canDev.warn = oldWarn;
+});
+//!steal-remove-end
 
 test('fixture with response callback', 4, function () {
 	fixture.delay = 10;

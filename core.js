@@ -5,83 +5,165 @@ var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
 var canLog = require("can-util/js/log/log");
+var canDev = require("can-util/js/dev/dev");
 require("./store");
 
 var fixtures = [];
 exports.fixtures = fixtures;
 
-// Adds a fixture to the list of fixtures.
-exports.add = function (settings, fixture) {
-	// When a fixture is passed a store like:
-	// `fixture("/things/{id}", store)`
-	if(fixture && (fixture.getData || fixture.getListData)) {
-		var root = settings,
-			store = fixture,
-			idProp = store.idProp,
-			itemRegex = new RegExp('\\/\\{' + idProp+"\\}.*" ),
-			rootIsItemUrl = itemRegex.test(root),
-			getListUrl = rootIsItemUrl ? root.replace(itemRegex, "") : root,
-			getItemUrl = rootIsItemUrl ? root : (root.trim() + "/{" + idProp + "}");
-		fixture = undefined;
-		settings = {};
-		settings["GET "+getItemUrl] = store.getData;
-		settings["DELETE "+getItemUrl] = store.destroyData;
-		settings["PUT "+getItemUrl] = store.updateData;
-		settings["GET "+getListUrl] = store.getListData;
-		settings["POST "+getListUrl] = store.createData;
+function isStoreLike (fixture) {
+	return fixture && (fixture.getData || fixture.getListData);
+}
+
+var methodMapping = {
+	item: {
+		'GET': 'getData',
+		'PUT': 'updateData',
+		'DELETE': 'destroyData',
+	},
+	list: {
+		'GET': 'getListData',
+		'POST': 'createData'
 	}
+};
 
-	// If fixture is provided, set up a new fixture.
-	if (fixture !== undefined) {
+function getMethodAndPath (route) {
+	// Match URL if it has GET, POST, PUT, DELETE or PATCH.
+	var matches = route.match(/(GET|POST|PUT|DELETE|PATCH) (.+)/i);
+	if (!matches) {
+		return [undefined, route];
+	}
+	var method = matches[1];
+	var path = matches[2];
+	return [method, path];
+}
 
-		if (typeof settings === 'string') {
+function inferIdProp (url) {
+	var wrappedInBraces = /\{(.*)\}/;
+	var matches = url.match(wrappedInBraces);
+	var isUniqueMatch = matches && matches.length === 2;
+	if (isUniqueMatch) {
+		return matches[1];
+	}
+}
 
-			// Match URL if it has GET, POST, PUT, DELETE or PATCH.
-			var matches = settings.match(/(GET|POST|PUT|DELETE|PATCH) (.+)/i);
-			// If not, we don't set the type, which eventually defaults to GET
-			if (!matches) {
-				settings = {
-					url: settings
-				};
-				// If it does match, we split the URL in half and create an object with
-				// each half as the url and type properties.
-			} else {
-				settings = {
-					url: matches[2],
-					type: matches[1]
-				};
+function getItemAndListUrls (url, idProp) {
+	idProp = idProp || inferIdProp(url);
+	if (!idProp) {
+		return [undefined, url];
+	}
+	var itemRegex = new RegExp('\\/\\{' + idProp+"\\}.*" );
+	var rootIsItemUrl = itemRegex.test(url);
+	var listUrl = rootIsItemUrl ? url.replace(itemRegex, "") : url;
+	var itemUrl = rootIsItemUrl ? url : (url.trim() + "/{" + idProp + "}");
+	return [itemUrl, listUrl];
+}
+
+function addStoreFixture (root, store) {
+	var settings = {};
+	var typeAndUrl = getMethodAndPath(root);
+	var type = typeAndUrl[0];
+	var url = typeAndUrl[1];
+
+	var itemAndListUrls = getItemAndListUrls(url, store.idProp);
+	var itemUrl = itemAndListUrls[0];
+	var listUrl = itemAndListUrls[1];
+
+	if (type) {
+		var warning = [
+			'fixture("' + root + '", fixture) must use a store method, not a store directly.',
+		];
+		if (itemUrl) {
+			var itemAction = methodMapping.item[type];
+			if (itemAction) {
+				settings[type + ' ' + itemUrl] = store[itemAction];
+				var itemWarning = 'Replace with fixture("' + type + ' ' + itemUrl + '", fixture.' + itemAction + ') for items.';
+				warning.push(itemWarning);
 			}
 		}
-
-
-		// Check if the same fixture was previously added, if so, we remove it
-		// from our array of fixture overwrites.
-		var index = exports.index(settings, true);
-
-		if (index > -1) {
-			fixtures.splice(index, 1);
+		var listAction = methodMapping.list[type];
+		if (listAction) {
+			settings[type + ' ' + listUrl] = store[listAction];
+			var listWarning = 'Replace with fixture("' + type + ' ' + listUrl + '", fixture.' + listAction + ') for lists.';
+			warning.push(listWarning);
 		}
-		if (fixture == null) {
-			return;
+		var message = warning.join(' ');
+		canDev.warn(message);
+	} else {
+		var itemMapping = methodMapping.item;
+		for (var itemMethod in itemMapping) {
+			var storeItemMethod = itemMapping[itemMethod];
+			settings[itemMethod + ' ' + itemUrl] = store[storeItemMethod];
 		}
-		if(typeof fixture === "object") {
-			var data = fixture;
-			fixture = function(){
-				return data;
-			};
+		var listMapping = methodMapping.list;
+		for (var listMethod in listMapping) {
+			var storeListMethod = listMapping[listMethod];
+			settings[listMethod + ' ' + listUrl] = store[storeListMethod];
 		}
-		settings.fixture = fixture;
-		fixtures.unshift(settings);
-
 	}
+
+	return settings;
+}
+
+function getSettingsFromString (route) {
+	var typeAndUrl = getMethodAndPath(route);
+	var type = typeAndUrl[0];
+	var url = typeAndUrl[1];
+	if (type) {
+		return {
+			type: type,
+			url: url
+		};
+	}
+	return {
+		url: url
+	};
+}
+
+// Check if the same fixture was previously added, if so, we remove it
+// from our array of fixture overwrites.
+function upsertFixture (fixtureList, settings, fixture) {
+	var index = exports.index(settings, true);
+	if (index > -1) {
+		fixtures.splice(index, 1);
+	}
+	if (fixture == null) {
+		return;
+	}
+	if(typeof fixture === "object") {
+		var data = fixture;
+		fixture = function(){
+			return data;
+		};
+	}
+	settings.fixture = fixture;
+	fixtures.unshift(settings);
+}
+
+// Adds a fixture to the list of fixtures.
+exports.add = function (settings, fixture) {
 	// If a fixture isn't provided, we assume that settings is
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
-	else {
+	if (fixture === undefined) {
 		each(settings, function (fixture, url) {
 			exports.add(url, fixture);
 		});
+		return;
 	}
+
+	// When a fixture is passed a store like:
+	// `fixture("/things/{id}", store)`
+	if (isStoreLike(fixture)) {
+		settings = addStoreFixture(settings, fixture);
+		exports.add(settings);
+		return;
+	}
+
+	if (typeof settings === 'string') {
+		settings = getSettingsFromString(settings);
+	}
+	upsertFixture(fixtures, settings, fixture);
 };
 
 var $fixture = exports.add;

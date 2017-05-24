@@ -4,14 +4,26 @@ var isArrayLike = require("can-util/js/is-array-like/is-array-like");
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 
+/*
+Returns the initial ID all new item IDs will start from.
+Assumption: the list items passed will not have their IDs modified.
+*/
+function getStartingId(items) {
+	var startingId = 0;
+	each(items, function (item) {
+		if (typeof item.id === 'number') {
+			startingId = Math.max(startingId, item.id + 1);
+		}
+	});
+	return startingId;
+}
+
 module.exports = function (count, make, filter) {
 	/*jshint eqeqeq:false */
-	var getUniqueId = (function () {
-		var i = 0;
-		return function () {
-			return i++;
-		}
-	})();
+	var nextItemId;
+	var getNextItemId = function () {
+		return nextItemId++;
+	}
 
 	var items,
 		findOne = function (id) {
@@ -25,20 +37,20 @@ module.exports = function (count, make, filter) {
 		types,
 		reset;
 
-	if(isArrayLike(count) && typeof count[0] === "string" ){
+	if (isArrayLike(count) && typeof count[0] === "string") {
 		types = count;
 		count = make;
-		make= filter;
+		make = filter;
 		filter = arguments[3];
-	} else if(typeof count === "string") {
+	} else if (typeof count === "string") {
 		types = [count + "s", count];
 		count = make;
-		make= filter;
+		make = filter;
 		filter = arguments[3];
 	}
 
-
-	if(typeof count === "number") {
+	if (typeof count === "number") {
+		nextItemId = 0;
 		items = [];
 		reset = function () {
 			items = [];
@@ -47,7 +59,7 @@ module.exports = function (count, make, filter) {
 				var item = make(i, items);
 
 				if (!item.id) {
-					item.id = getUniqueId();
+					item.id = getNextItemId();
 				}
 				items.push(item);
 			}
@@ -55,7 +67,8 @@ module.exports = function (count, make, filter) {
 	} else {
 		filter = make;
 		var initialItems = count;
-		reset = function(){
+		nextItemId = getStartingId(initialItems);
+		reset = function () {
 			items = initialItems.slice(0);
 		};
 	}
@@ -126,7 +139,7 @@ module.exports = function (count, make, filter) {
 				}
 			}
 
-			if ( typeof filter === "function" ) {
+			if (typeof filter === "function") {
 				i = 0;
 				while (i < retArr.length) {
 					if (!filter(retArr[i], request)) {
@@ -135,11 +148,11 @@ module.exports = function (count, make, filter) {
 						i++;
 					}
 				}
-			} else if( typeof filter === "object" ) {
+			} else if (typeof filter === "object") {
 				i = 0;
 				while (i < retArr.length) {
 					var subset = canSet.subset(retArr[i], request.data, filter);
-					if ( !subset ) {
+					if (!subset) {
 						retArr.splice(i, 1);
 					} else {
 						i++;
@@ -152,8 +165,8 @@ module.exports = function (count, make, filter) {
 				"count": retArr.length,
 				"data": retArr.slice(offset, offset + limit)
 			};
-			each(["limit","offset"], function(prop){
-				if(prop in request.data) {
+			each(["limit", "offset"], function (prop) {
+				if (prop in request.data) {
 					responseData[prop] = request.data[prop];
 				}
 			});
@@ -184,7 +197,7 @@ module.exports = function (count, make, filter) {
 		getData: function (request, response) {
 			var item = findOne(getId(request));
 
-			if(typeof item === "undefined") {
+			if (typeof item === "undefined") {
 				return response(404, 'Requested resource not found');
 			}
 
@@ -196,7 +209,7 @@ module.exports = function (count, make, filter) {
 			var id = getId(request),
 				item = findOne(id);
 
-			if(typeof item === "undefined") {
+			if (typeof item === "undefined") {
 				return response(404, 'Requested resource not found');
 			}
 
@@ -205,8 +218,8 @@ module.exports = function (count, make, filter) {
 			response({
 				id: id
 			}, {
-				location: request.url || "/" + getId(request)
-			});
+					location: request.url || "/" + getId(request)
+				});
 		},
 
 		/**
@@ -231,7 +244,7 @@ module.exports = function (count, make, filter) {
 			var id = getId(request),
 				item = findOne(id);
 
-			if(typeof item === "undefined") {
+			if (typeof item === "undefined") {
 				return response(404, 'Requested resource not found');
 			}
 
@@ -256,7 +269,7 @@ module.exports = function (count, make, filter) {
 			// If an ID wasn't passed into the request, we give the item
 			// a unique ID.
 			if (!item.id) {
-				item.id = getUniqueId();
+				item.id = getNextItemId();
 			}
 
 			// Push the new item into the store.
@@ -264,8 +277,8 @@ module.exports = function (count, make, filter) {
 			response({
 				id: item.id
 			}, {
-				location: settings.url + "/" + item.id
-			});
+					location: settings.url + "/" + item.id
+				});
 		}
 	});
 	reset();
