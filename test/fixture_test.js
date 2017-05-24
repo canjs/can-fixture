@@ -225,6 +225,57 @@ test('fixture.store fixtures should have unique IDs', function () {
 	});
 });
 
+test('fixture.store should assign unique IDs when fixtures provide IDs', function () {
+	/* NOTE: We are testing whether the unique ID we are assigning to a new
+	         item will account for IDs which the user has provided.
+	*/
+
+	/* NOTE: These integers are used because IDs are created sequentially from 0.
+	         Here, 0 1 and 2 must be skipped because they exist already.
+	         If the implementation is changed this test will need updated.
+	*/
+	var store = fixture.store([
+		{id: 0, name: 'Object 0'},
+		{id: 1, name: 'Object 1'},
+		{id: 2, name: 'Object 2'}
+	]);
+
+	fixture('POST /models', store.createData);
+
+	function then (ajax, callback) {
+		ajax.then(callback, function (error) {
+			ok(false, 'ajax failure: ' + error);
+			start();
+		});
+	}
+
+	var request = $.ajax({
+		url: '/models',
+		dataType: 'json',
+		type: 'post',
+		data: {
+			name: 'My test object'
+		}
+	});
+
+	stop();
+	then(request, function (response) {
+		notEqual(response.id, 0);
+		notEqual(response.id, 1);
+		notEqual(response.id, 2);
+
+		/* NOTE: This check will fail if the underlying implementation changes.
+		         This 3 is tightly coupled to the implementation.
+		         If this is the only breaking assertion, update the provided IDs to
+		         properly test the edge-case and update these assertions.
+		         This check only serves to notify you to update the checks.
+		*/
+		equal(response.id, 3);
+
+		start();
+	});
+});
+
 test('simulating an error', function () {
 
 	fixture('/foo', function (request, response) {
