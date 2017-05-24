@@ -5,6 +5,7 @@ var set = require("can-set");
 var $ = require("jquery");
 var each = require("can-util/js/each/each");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var canDev = require('can-util/js/dev/dev');
 
 var errorCallback = function(xhr, status, error){
 	ok(false, error);
@@ -212,7 +213,6 @@ test('fixture.store fixtures should have unique IDs', function () {
 			searchText: 'thing 2'
 		},
 		success: function (result) {
-			debugger;
 			var seenIds = [];
 			var things = result.data;
 			for (var thingKey in things) {
@@ -577,6 +577,48 @@ test('fixture.store can use id of different type (#742)', function () {
 			start();
 		});
 });
+
+test('fixture("METHOD /path", store) should use the right method', function () {
+	/*
+		Examples:
+			fixture("GET /path", store) => fixture("GET /path", store.getData)
+			fixture("POST /path", store) => fixture("GET /path", store.createData)
+	*/
+
+	// NOTE: this is a copy-paste of the test case
+	//       "fixture.store can use id of different type (#742)"
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	fixture('GET /models', store); // <- CHANGE
+	stop();
+	$.ajax({url: "/models", dataType: "json"})
+		.then(function (models) {
+			equal(models.data.length, 100, 'Gotta catch up all!');
+			start();
+		});
+});
+
+//!steal-remove-start
+test('fixture("METHOD /path", store) should warn when correcting to the right method', function (assert) {
+	assert.expect(1);
+	var store = fixture.store(100, function (i) {
+		return {
+			id: i,
+			name: 'Object ' + i
+		};
+	});
+	var oldWarn = canDev.warn;
+	canDev.warn = function (message) {
+		assert.ok(typeof message === 'string');
+	};
+	fixture('GET /models', store); // <- CHANGE
+	canDev.warn = oldWarn;
+});
+//!steal-remove-end
 
 test('fixture with response callback', 4, function () {
 	fixture.delay = 10;
