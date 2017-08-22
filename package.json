@@ -27,7 +27,7 @@
     "bit-docs": "0.0.7",
     "jquery": "^3.1.1",
     "jshint": "^2.7.0",
-    "steal": "^1.0.0",
+    "steal": "^1.5.9",
     "steal-qunit": "^1.0.0",
     "steal-tools": "^1.0.0",
     "testee": "^0.7.0"
