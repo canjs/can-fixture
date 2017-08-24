@@ -44,21 +44,5 @@
   "bugs": {
     "url": "https://github.com/canjs/can-fixture/issues"
   },
-  "homepage": "https://github.com/canjs/can-fixture",
-  "bit-docs": {
-    "dependencies": {
-      "bit-docs-glob-finder": "^0.0.5",
-      "bit-docs-dev": "^0.0.3",
-      "bit-docs-js": "^0.0.4",
-      "bit-docs-generate-readme": "^0.0.10"
-    },
-    "glob": {
-      "pattern": "**/*.{js,md}",
-      "ignore": "node_modules/**/*"
-    },
-    "parent": "can-fixture",
-    "readme": {
-      "apis": "./docs/apis.json"
-    }
-  }
+  "homepage": "https://github.com/canjs/can-fixture"
 }
