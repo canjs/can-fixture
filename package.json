@@ -5,7 +5,7 @@
   "main": "fixture.js",
   "scripts": {
     "preversion": "npm test && npm run build",
-    "version": "git commit -am \"Update version number\" && git checkout -b release && git add -f dist/",
+    "version": "git commit -am \"Update dist for release\" && git checkout -b release && git add -f dist/",
     "postpublish": "git push --tags && git checkout master && git branch -D release && git push",
     "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
@@ -14,7 +14,8 @@
     "testee": "testee --browsers firefox test/test.html",
     "test": "npm run jshint && npm run testee",
     "jshint": "jshint fixture.js core.js store.js xhr.js --config",
-    "build": "node build.js"
+    "build": "node build.js",
+    "postversion": "git push --tags && git checkout master && git branch -D release && git push"
   },
   "dependencies": {
     "can-connect": "^1.5.4",
