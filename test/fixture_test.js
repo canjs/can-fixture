@@ -1864,4 +1864,22 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		xhr.open('GET', '/onload');
 		xhr.send();
 	});
+
+	asyncTest('should not process FormData type #133', function() {
+
+		fixture('/upload', function(req, res) {
+			ok(req.data instanceof FormData, 'data returned should be instance of formdata');
+			res(400);
+		});
+
+		var data = new FormData();
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener('load', function() {
+			fixture('/upload', null);
+			ok(true, 'should not throw when sending FormData');
+			start();
+		});
+		xhr.open('POST', '/upload', true);
+		xhr.send(data);
+	});
 }
