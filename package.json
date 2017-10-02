@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "bit-docs": "0.0.7",
-    "detect-cyclic-packages": "^1.0.0",
+    "detect-cyclic-packages": "^1.0.1",
     "jquery": "^3.1.1",
     "jshint": "^2.7.0",
     "steal": "^1.0.0",
