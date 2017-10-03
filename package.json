@@ -12,9 +12,10 @@
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "testee": "testee --browsers firefox test/test.html",
-    "test": "npm run jshint && npm run testee",
+    "test": "npm run detect-cycle && npm run jshint && npm run testee",
     "jshint": "jshint fixture.js core.js store.js xhr.js --config",
-    "build": "node build.js"
+    "build": "node build.js",
+    "detect-cycle": "detect-cyclic-packages --ignore done-serve"
   },
   "dependencies": {
     "can-connect": "^1.5.4",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "bit-docs": "0.0.7",
+    "detect-cyclic-packages": "^1.1.0",
     "jquery": "^3.1.1",
     "jshint": "^2.7.0",
     "steal": "^1.0.0",
