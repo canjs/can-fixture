@@ -1,10 +1,9 @@
 var canSet = require("can-set");
-var connect = require("can-connect");
 var legacyStore = require("./helpers/legacyStore");
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isArrayLike = require("can-util/js/is-array-like/is-array-like");
-var dataMemoryCache = require("can-connect/data/memory-cache/memory-cache");
+var memoryConnection = require("./memoryConnectionStandalone");
 
 var firstProp = function(obj){
 	for(var prop in obj) {
@@ -148,7 +147,7 @@ Store.make = function (count, make, algebra) {
 		makeItems = makeMakeItems(count, idProp);
 	}
 
-	var connection = connect([dataMemoryCache],{
+	var connection = memoryConnection({
 		algebra: algebra,
 		idProp: idProp
 	});
