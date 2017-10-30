@@ -1,5 +1,6 @@
 @module {function} can-fixture
-@parent can-ecosystem
+@parent can-data-modeling
+@collection can-ecosystem
 @group can-fixture.properties properties
 @group can-fixture.types types
 @package ../package.json
