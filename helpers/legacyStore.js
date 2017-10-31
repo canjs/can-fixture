@@ -182,6 +182,7 @@ module.exports = function (count, make, filter) {
 		 * @signature `store.findOne(request, response)`
 		 * @param {Object} request Parameters for the request.
 		 * @param {Function} response A function to call with the retrieved item.
+		 * @hide
 		 *
 		 * @body
 		 * `store.findOne(request, response(item))` simulates a request to
@@ -229,6 +230,7 @@ module.exports = function (count, make, filter) {
 		 * @signature `store.destroy(request, callback)`
 		 * @param {Object} request Parameters for the request.
 		 * @param {Function} callback A function to call after destruction.
+		 * @hide
 		 *
 		 * @body
 		 * `store.destroy(request, response())` simulates
