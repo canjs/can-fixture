@@ -116,6 +116,7 @@ Store.make = function (count, make, algebra) {
 		isNew = true;
 	}
 	if(!isNew) {
+		console.warn("can-fixture: This form ( `fixture(count, make, filter)` ) of making a store is deprecated.  Please use the algebra-based form.");
 		return legacyStore.apply(this, arguments);
 	}
 
