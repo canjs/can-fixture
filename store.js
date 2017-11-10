@@ -1,6 +1,5 @@
 var canSet = require("can-set");
 var connect = require("can-connect");
-var legacyStore = require("./helpers/legacyStore");
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isArrayLike = require("can-util/js/is-array-like/is-array-like");
@@ -110,16 +109,9 @@ each({
 // Make a store of objects to use when making requests against fixtures.
 Store.make = function (count, make, algebra) {
 	/*jshint eqeqeq:false */
-	// check if algebra was passed
-	var isNew = false;
-	if( count instanceof canSet.Algebra || make instanceof canSet.Algebra || algebra instanceof canSet.Algebra ) {
-		isNew = true;
-	}
-	if(!isNew) {
-		console.warn("can-fixture: This form ( `fixture(count, make, filter)` ) of making a store is deprecated.  Please use the algebra-based form.");
-		return legacyStore.apply(this, arguments);
-	}
-
+	algebra = algebra || new canSet.Algebra(
+		canSet.props.offsetLimit("offset","limit"),
+		canSet.props.sort("order") )
 	// Figure out makeItems which populates data
 	var makeItems,
 		idProp;
