@@ -216,7 +216,7 @@ test('fixture.store fixtures should have unique IDs', function () {
 		data: {
 			offset: 0,
 			limit: 200,
-			order: 'name ASC'
+			order: ['name ASC']
 		},
 		success: function (result) {
 			var seenIds = [];
@@ -487,9 +487,9 @@ test('fixture.store with can.Model', function () {
 	}
 
 
-	var check101Updated = function(){
+	var check100Updated = function(){
 		return $.ajax({
-			url: "/models/101",
+			url: "/models/100",
 			dataType: 'json'
 		}).then(function(model){
 			equal(model.name, 'Updated test object', 'Successfully updated object');
@@ -521,16 +521,16 @@ test('fixture.store with can.Model', function () {
 						}
 					})
 					.then(function (newmodel) {
-						equal(newmodel.id, 101, 'Id got incremented');
+						equal(newmodel.id, 100, 'Id got incremented');
 						// Tests creating, deleting, updating
 						return $.ajax({
-								url: "/models/101",
+								url: "/models/100",
 								dataType: 'json'
 							})
 							.then(function (model) {
-								equal(model.id, 101, 'Loaded new object');
+								equal(model.id, 100, 'Loaded new object');
 								return $.ajax({
-										url: "/models/101",
+										url: "/models/100",
 										dataType: 'json',
 										type: 'put',
 										data: {
@@ -539,10 +539,10 @@ test('fixture.store with can.Model', function () {
 									})
 									.then(function (model) {
 
-										return check101Updated().then(function(){
+										return check100Updated().then(function(){
 
 											return $.ajax({
-													url: "/models/101",
+													url: "/models/100",
 													dataType: 'json',
 													type: 'delete'
 												})
@@ -588,12 +588,11 @@ test('fixture.store returns 404 on update with a bad id (#803)', function () {
 	});
 
 	stop();
-	debugger;
 	fixture('POST /models/{id}', store.updateData);
 
 	$.ajax({url: "/models/6", dataType: "json", data: {'jedan': 'dva'}, type: 'POST'})
 		.then(function(){
-			
+
 		},function (data) {
 			equal(data.statusText, 'error', 'Got an error');
 			equal(data.responseText, 'Requested resource not found', 'Got correct status message');
