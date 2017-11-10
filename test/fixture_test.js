@@ -166,17 +166,24 @@ if (__dirname !== '/') {
 
 test('fixture.store fixtures', function () {
 	stop();
-	var store = fixture.store('thing', 1000, function (i) {
+	var algebra = new set.Algebra({
+		searchText: function(searchTextProp, querySearchText, data, query){
+			if(querySearchText && data.name) {
+				var regex = new RegExp('^' + querySearchText);
+				return regex.test(data.name);
+			} else {
+				return true;
+			}
+		}
+	},
+		set.props.offsetLimit("offset","limit"),
+		set.props.sort("order"));
+	var store = fixture.store(1000, function (i) {
 		return {
 			id: i,
 			name: 'thing ' + i
 		};
-	}, function (item, settings) {
-		if (settings.data.searchText) {
-			var regex = new RegExp('^' + settings.data.searchText);
-			return regex.test(item.name);
-		}
-	});
+	}, algebra);
 	fixture('things', store.findAll);
 
 	$.ajax({
@@ -185,7 +192,7 @@ test('fixture.store fixtures', function () {
 		data: {
 			offset: 100,
 			limit: 200,
-			order: ['name ASC'],
+			order: 'name ASC',
 			searchText: 'thing 2'
 		},
 		success: function (things) {
@@ -198,7 +205,7 @@ test('fixture.store fixtures', function () {
 
 test('fixture.store fixtures should have unique IDs', function () {
 	stop();
-	var store = fixture.store('thing', 100, function (i) {
+	var store = fixture.store(100, function (i) {
 		return {name: 'Test ' + i};
 	});
 	fixture('things', store.findAll);
@@ -209,8 +216,7 @@ test('fixture.store fixtures should have unique IDs', function () {
 		data: {
 			offset: 0,
 			limit: 200,
-			order: ['name ASC'],
-			searchText: 'thing 2'
+			order: 'name ASC'
 		},
 		success: function (result) {
 			var seenIds = [];
@@ -481,9 +487,9 @@ test('fixture.store with can.Model', function () {
 	}
 
 
-	var check100Updated = function(){
+	var check101Updated = function(){
 		return $.ajax({
-			url: "/models/100",
+			url: "/models/101",
 			dataType: 'json'
 		}).then(function(model){
 			equal(model.name, 'Updated test object', 'Successfully updated object');
@@ -515,16 +521,16 @@ test('fixture.store with can.Model', function () {
 						}
 					})
 					.then(function (newmodel) {
-						equal(newmodel.id, 100, 'Id got incremented');
+						equal(newmodel.id, 101, 'Id got incremented');
 						// Tests creating, deleting, updating
 						return $.ajax({
-								url: "/models/100",
+								url: "/models/101",
 								dataType: 'json'
 							})
 							.then(function (model) {
-								equal(model.id, 100, 'Loaded new object');
+								equal(model.id, 101, 'Loaded new object');
 								return $.ajax({
-										url: "/models/100",
+										url: "/models/101",
 										dataType: 'json',
 										type: 'put',
 										data: {
@@ -533,10 +539,10 @@ test('fixture.store with can.Model', function () {
 									})
 									.then(function (model) {
 
-										return check100Updated().then(function(){
+										return check101Updated().then(function(){
 
 											return $.ajax({
-													url: "/models/100",
+													url: "/models/101",
 													dataType: 'json',
 													type: 'delete'
 												})
@@ -553,7 +559,7 @@ test('fixture.store with can.Model', function () {
 	}, errorAndStart);
 });
 
-test('fixture.store returns 404 on findOne with bad id (#803)', function () {
+test('GET fixture.store returns 404 on findOne with bad id (#803)', function () {
 	var store = fixture.store(2, function (i) {
 		return {
 			id: i,
@@ -571,6 +577,8 @@ test('fixture.store returns 404 on findOne with bad id (#803)', function () {
 	});
 });
 
+// problem here is that memory cache is cool with these changes.  We need to do something different
+// if instance isn't there.
 test('fixture.store returns 404 on update with a bad id (#803)', function () {
 	var store = fixture.store(5, function (i) {
 		return {
@@ -580,11 +588,13 @@ test('fixture.store returns 404 on update with a bad id (#803)', function () {
 	});
 
 	stop();
-
-	fixture('POST /models/{id}', store.update);
+	debugger;
+	fixture('POST /models/{id}', store.updateData);
 
 	$.ajax({url: "/models/6", dataType: "json", data: {'jedan': 'dva'}, type: 'POST'})
-		.then(function(){},function (data) {
+		.then(function(){
+			
+		},function (data) {
 			equal(data.statusText, 'error', 'Got an error');
 			equal(data.responseText, 'Requested resource not found', 'Got correct status message');
 			start();
