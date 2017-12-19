@@ -18,7 +18,7 @@
     "detect-cycle": "detect-cyclic-packages --ignore done-serve"
   },
   "dependencies": {
-    "can-connect": "^1.5.4",
+    "can-connect": "^2.0.0",
     "can-deparam": "^1.0.1",
     "can-namespace": "1.0.0",
     "can-set": "^1.3.0",
