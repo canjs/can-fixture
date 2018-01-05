@@ -1745,6 +1745,40 @@ test("set.Algebra stores provide a count (#58)", function(){
 	});
 });
 
+asyncTest('should allow Arrays as data type (#133)', function() {
+	fixture('/array-data', function(req, res) {
+		ok(req.data instanceof Array, 'data returned should be instance of Array');
+		return {};
+	});
+
+	var data = [];
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener('load', function() {
+		fixture('/array-data', null);
+		ok(true, 'should not throw when sending Array');
+		start();
+	});
+	xhr.open('GET', '/array-data');
+	xhr.send(data);
+});
+
+asyncTest('should allow FormData as data type (#133)', function() {
+	fixture('/upload', function(req, res) {
+		ok(req.data instanceof FormData, 'data returned should be instance of formdata');
+		res(400);
+	});
+
+	var data = new FormData();
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener('load', function() {
+		fixture('/upload', null);
+		ok(true, 'should not throw when sending FormData');
+		start();
+	});
+	xhr.open('POST', '/upload', true);
+	xhr.send(data);
+});
+
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
 	asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
 		fixture('/onload', 1000);
@@ -1863,23 +1897,5 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 		xhr.open('GET', '/onload');
 		xhr.send();
-	});
-
-	asyncTest('should not process FormData type #133', function() {
-
-		fixture('/upload', function(req, res) {
-			ok(req.data instanceof FormData, 'data returned should be instance of formdata');
-			res(400);
-		});
-
-		var data = new FormData();
-		var xhr = new XMLHttpRequest();
-		xhr.addEventListener('load', function() {
-			fixture('/upload', null);
-			ok(true, 'should not throw when sending FormData');
-			start();
-		});
-		xhr.open('POST', '/upload', true);
-		xhr.send(data);
 	});
 }
