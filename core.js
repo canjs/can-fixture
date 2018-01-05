@@ -27,6 +27,14 @@ var methodMapping = {
 	}
 };
 
+
+// Get a global reference.
+var GLOBAL = typeof global !== "undefined"? global : window;
+
+// valid form types in addition to plain objects as URL search params
+// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/send
+var formTypes = ['ArrayBuffer', 'ArrayBufferView', 'Blob', 'FormData'];
+
 function getMethodAndPath (route) {
 	// Match URL if it has GET, POST, PUT, DELETE or PATCH.
 	var matches = route.match(/(GET|POST|PUT|DELETE|PATCH) (.+)/i);
@@ -249,13 +257,30 @@ exports.get = function(xhrSettings) {
 				};
 			}
 		} else {
-			var xhrData = assign({}, xhrSettings.data || {});
-			fixtureSettings.data = assign(xhrData, data);
+			if(exports.isTypedBody(xhrSettings.data)){
+				fixtureSettings.data = xhrSettings.data;
+			} else {
+				var xhrData = assign({}, xhrSettings.data || {});
+				fixtureSettings.data = assign(xhrData, data);
+			}
 		}
 	}
 
-
 	return fixtureSettings;
+};
+
+exports.isTypedBody = function(data){
+	for(var i = 0; i < formTypes.length; i ++){
+		var Type = GLOBAL[formTypes[i]];
+		if(!Type){
+			continue;
+		}
+		if(data instanceof Type){
+			return true;
+		}
+	}
+
+	return false;
 };
 
 exports.matches = function(settings, fixture, exact) {
