@@ -4,6 +4,7 @@ var sub = require("can-util/js/string/string").sub;
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var isPlainObject = require("can-util/js/is-plain-object/is-plain-object");
 var canLog = require("can-util/js/log/log");
 var canDev = require("can-util/js/dev/dev");
 require("./store");
@@ -248,12 +249,15 @@ exports.get = function(xhrSettings) {
 					throw "fixtures.js Error " + error + " " + message;
 				};
 			}
-		} else {
+
+		} else if (isPlainObject(xhrSettings.data)) {
 			var xhrData = assign({}, xhrSettings.data || {});
 			fixtureSettings.data = assign(xhrData, data);
+
+		} else {
+			fixtureSettings.data = xhrSettings.data;
 		}
 	}
-
 
 	return fixtureSettings;
 };
