@@ -4,6 +4,7 @@ var sub = require("can-util/js/string/string").sub;
 var each = require("can-util/js/each/each");
 var assign = require("can-util/js/assign/assign");
 var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
+var isPlainObject = require("can-util/js/is-plain-object/is-plain-object");
 var canLog = require("can-util/js/log/log");
 var canDev = require("can-util/js/dev/dev");
 require("./store");
@@ -26,14 +27,6 @@ var methodMapping = {
 		'POST': 'createData'
 	}
 };
-
-
-// Get a global reference.
-var GLOBAL = typeof global !== "undefined"? global : window;
-
-// valid form types in addition to plain objects as URL search params
-// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/send
-var formTypes = ['ArrayBuffer', 'ArrayBufferView', 'Blob', 'FormData'];
 
 function getMethodAndPath (route) {
 	// Match URL if it has GET, POST, PUT, DELETE or PATCH.
@@ -256,31 +249,17 @@ exports.get = function(xhrSettings) {
 					throw "fixtures.js Error " + error + " " + message;
 				};
 			}
+
+		} else if (isPlainObject(xhrSettings.data)) {
+			var xhrData = assign({}, xhrSettings.data || {});
+			fixtureSettings.data = assign(xhrData, data);
+
 		} else {
-			if(exports.isTypedBody(xhrSettings.data)){
-				fixtureSettings.data = xhrSettings.data;
-			} else {
-				var xhrData = assign({}, xhrSettings.data || {});
-				fixtureSettings.data = assign(xhrData, data);
-			}
+			fixtureSettings.data = xhrSettings.data;
 		}
 	}
 
 	return fixtureSettings;
-};
-
-exports.isTypedBody = function(data){
-	for(var i = 0; i < formTypes.length; i ++){
-		var Type = GLOBAL[formTypes[i]];
-		if(!Type){
-			continue;
-		}
-		if(data instanceof Type){
-			return true;
-		}
-	}
-
-	return false;
 };
 
 exports.matches = function(settings, fixture, exact) {
