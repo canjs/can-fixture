@@ -250,7 +250,7 @@ exports.get = function(xhrSettings) {
 				};
 			}
 
-		} else if (isPlainObject(xhrSettings.data)) {
+		} else if (isPlainObject(xhrSettings.data) || xhrSettings.data == null) {
 			var xhrData = assign({}, xhrSettings.data || {});
 			fixtureSettings.data = assign(xhrData, data);
 
