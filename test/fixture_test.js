@@ -814,6 +814,32 @@ test("create a store with array and comparison object",function(){
 
 });
 
+QUnit.test("posting an empty data object", function(assert) {
+	var done = assert.async();
+
+	fixture("/data", function(req, res) {
+		if (req.data == null) {
+			throw new Error("req.data should be an empty object");
+		} else {
+			return {};
+		}
+	});
+
+	var def = $.ajax({
+		method: "post",
+		url: "/data",
+		dataType: "json",
+		data: {}
+	});
+
+	def.then(function() {
+		assert.ok(true, "works!");
+		done();
+	}, function(e) {
+		assert.notOk(e, "should not fail");
+	});
+});
+
 test("store with objects allows .create, .update and .destroy (#1471)", 4, function(){
 
 	var store = fixture.store([
