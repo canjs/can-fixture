@@ -4,6 +4,6 @@
 
 Sets the delay until a response is fired in milliseconds.
 
-```js
+```javascript
 fixture.delay = 1000; // 1 second delay
 ```

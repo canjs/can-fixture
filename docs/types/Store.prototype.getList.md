@@ -5,6 +5,6 @@
 
 Returns the matching items from the store like: `{data: [...]}`.
 
-```js
+```javascript
 todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
 ```

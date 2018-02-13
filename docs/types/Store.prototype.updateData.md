@@ -5,6 +5,6 @@
 
 A `requestHandler` that updates an item in the store.
 
-```js
+```javascript
 fixture("PUT /api/todos/{_id}", todoStore.updateData);
 ```

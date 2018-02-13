@@ -5,6 +5,6 @@
 
 A `requestHandler` that removes an item from the store.
 
-```js
+```javascript
 fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
 ```

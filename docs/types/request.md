@@ -9,7 +9,7 @@ object.
 This object is passed to a [can-fixture.requestHandler]
 and can be used to determine the response.
 
-```js
+```javascript
 fixture("GET /todos/{id}", function(request, response){
     request.url     //-> "todos/5"
     request.method  //-> "get"

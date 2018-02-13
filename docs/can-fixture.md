@@ -13,7 +13,7 @@ If an XHR request matches ajaxSettings, calls requestHandler with the XHR reques
 
 The following traps requests to GET /todos and responds with an array of data:
 
-```js
+```javascript
 fixture({method: "get", url: "/todos"},
         function(request, response, headers, ajaxSettings){
     return {
@@ -34,13 +34,13 @@ When adding a fixture, it will remove any identical fixtures from the list of fi
 
 Redirects the request to another url.  This can be useful for simulating a response with a file.
 
-```js
+```javascript
 fixture({url: "/tasks"}, "fixtures/tasks.json");
 ```
 
 Placeholders available in the `ajaxSettings` url will be available in the redirect url:
 
-```js
+```javascript
 fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
 ```
 
@@ -48,7 +48,7 @@ fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
 
 Responds with the `JSON.stringify` result of `data`.
 
-```js
+```javascript
 fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 ```
 
@@ -56,7 +56,7 @@ fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 
 Delays the ajax request from being made for `delay` milliseconds.
 
-```js
+```javascript
 fixture({url: "/tasks"}, 2000);
 ```
 
@@ -66,7 +66,7 @@ This doesn't simulate a response, but is useful for simulating slow connections.
 
 Removes the matching fixture from the list of fixtures.
 
-```js
+```javascript
 fixture({url: "/tasks"}, "fixtures/tasks.json");
 
 $.get("/tasks") // requests fixtures/tasks.json
@@ -80,7 +80,7 @@ $.get("/tasks") // requests /tasks
 
 A short hand for creating an [can-fixture/types/ajaxSettings] with a `method` and `url`.
 
-```js
+```javascript
 fixture("GET /tasks", requestHandler );
 
 // is the same as
@@ -94,7 +94,7 @@ The format is `METHOD URL`.
 
 A short hand for creating an [can-fixture/types/ajaxSettings] with just a `url`.
 
-```js
+```javascript
 fixture("/tasks", requestHandler);
 
 // is the same as
@@ -106,7 +106,7 @@ fixture({url: "/tasks"}, requestHandler);
 
 Create multiple fixtures at once.
 
-```js
+```javascript
 fixture({
     "POST /tasks": function(){
         return {id: Math.random()}
@@ -125,11 +125,11 @@ fixture({
 
 Wire up a restful API scheme to a store.
 
-```js
-var todoAlgebra = new set.Algebra(
+```javascript
+const todoAlgebra = new set.Algebra(
     set.props.id("id")
 );
-var todoStore = fixture.store([
+const todoStore = fixture.store([
   { id: 1, name: 'Do the dishes'},
   { id: 2, name: 'Walk the dog'}
 ], todoAlgebra);
@@ -139,7 +139,7 @@ fixture("/api/todos/{id}", todoStore); // can also be written fixture("/api/todo
 
 This is a shorthand for wiring up the `todoStore` as follows:
 
-```js
+```javascript
 fixture({
     "GET /api/todos": todoStore.getListData,
     "GET /api/todos/{id}": todoStore.getData,

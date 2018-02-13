@@ -5,9 +5,9 @@
 
 Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 
-```js
+```javascript
 // Creates a store with one item.
-var todoStore = fixture.store(
+const todoStore = fixture.store(
     [{id: 1, name: "dishes"}],
     new set.Algebra());
 fixture("/todos/{id}", todoStore)

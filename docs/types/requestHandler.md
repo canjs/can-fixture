@@ -5,7 +5,7 @@
 
 Defines the XHR response for a given trapped request.
 
-```js
+```javascript
 fixture({method: "get", url: "/todos"},
   function(request, response, headers, ajaxSettings){
     request //-> {
@@ -22,7 +22,7 @@ $.ajax({ method: "get", url: "/todos?complete=true" });
 
 Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
 
-```js
+```javascript
 fixture({url: "/todos/{action}"},
   function(request, response, headers, ajaxSettings){
     request //-> {

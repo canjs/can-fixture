@@ -7,7 +7,7 @@ Used to detail a response.
 
 Example:
 
-```js
+```javascript
 fixture({url: "/todos/{action}"},
   function(request, response, headers, ajaxSettings){
     response(
@@ -23,7 +23,7 @@ $.post("/todos/delete");
 
 You don't have to provide every argument to `response`. It can be called like:
 
-```js
+```javascript
 // Just body
 response({ message: "Hello World"});
 // status and body
