@@ -32,7 +32,7 @@
 
 
 ## <code>__can-fixture__ function</code>
-can-fixture intercepts an AJAX request and simulates the response with a file or function. 
+can-fixture intercepts an AJAX request and simulates the response with a file or function.
 
 
 ### <code>fixture(ajaxSettings, requestHandler(...))</code>
@@ -61,7 +61,7 @@ When adding a fixture, it will remove any identical fixtures from the list of fi
   An object that is used to match values on an XHR object, namely the url and method. url can be templated like /todos/{_id}.
 1. __requestHandler__ <code>{[requestHandler](#requesthandlerrequest-response-requestheaders-ajaxsettings)()}</code>:
   Handles the request and provides a response. The next section details this function's use.
-  
+
 
 ### <code>fixture(ajaxSettings, url)</code>
 
@@ -211,7 +211,7 @@ fixture({method: "get", url: "/todos"},
             //   }
 
   }
-});
+);
 
 $.ajax({ method: "get", url: "/todos?complete=true" })
 ```
@@ -227,7 +227,7 @@ fixture({url: "/todos/{action}"},
             //    data: {action: delete}
             //   }
   }
-});
+);
 
 $.post("/todos/delete");
 ```
@@ -240,7 +240,7 @@ $.post("/todos/delete");
   Headers used to make the request.
 1. __ajaxSettings__ <code>{Object}</code>:
   The settings object used to match this request.
-  
+
 
 ##### <code>response(status, body, headers, statusText)</code>
 
@@ -258,7 +258,7 @@ fixture({url: "/todos/{action}"},
         { "WWW-Authenticate": 'Basic realm="myRealm"'},
         "unauthorized");
   }
-});
+);
 
 $.post("/todos/delete");
 ```
@@ -289,7 +289,7 @@ for everything else.
   - An object of HTTP response headers and values.
 1. __`statusText`__ <code>{String}</code>:
   - The status text of the response. Ex: ``"ok"`` for 200.
-  
+
 
 ## <code>fixture.rand(min, max)</code>
 
@@ -306,7 +306,7 @@ fixture.rand(10) //-> Random number between 0 and 10 inclusive.
   {Number} TODO describe
 1. __max__:
   {Number} TODO describe
-  
+
 
 ## <code>fixture.rand(choices, min, max)</code>
 
@@ -336,7 +336,7 @@ fixture.rand(["a","b","c"],2,3) //-> ["c","a","b"]
   {Number} TODO describe
 1. __max__:
   {Number} TODO describe
-  
+
 
 ## <code>fixture.delay</code>
 
@@ -376,12 +376,12 @@ described by `algebra`.
 
 ```js
 // Describe the services parameters:
-var todoAlgebra = new set.Algebra({
+var todoAlgebra = new set.Algebra(
     set.props.id("_id"),
     set.props.boolean("completed"),
     set.props.rangeInclusive("start","end"),
-    set.props.sort("orderBy"),
-});
+    set.props.sort("orderBy")
+);
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
@@ -405,7 +405,7 @@ fixture("/todos/{_id}", todoStore);
   {Array} An array of items that will populate the store.
 1. __algebra__:
   {can-set.Algebra} A description of the service layer's parameters.
-  
+
 
 ## <code>fixture.store(count, makeItems, algebra)</code>
 
@@ -415,7 +415,7 @@ it uses `makeItems` to create `count` entries in the store.
 
 ```js
 // Describe the services parameters:
-var todoAlgebra = new set.Algebra({ ... });
+var todoAlgebra = new set.Algebra( ... );
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
@@ -440,7 +440,7 @@ fixture("/todos/{_id}", todoStore);
   {function} A function that will generate `baseItems`
 1. __algebra__:
   {can-set.Algebra} A description of the service layer's parameters.
-  
+
 
 ## <code>Store</code>
 
@@ -461,7 +461,7 @@ fixture("GET /api/todos", todoStore.getListData);
   TODO describe
 1. __response__ <code>{Object}</code>:
   TODO describe
-  
+
 
 ### <code>Store.prototype.getData(request, response)</code>
 
@@ -476,7 +476,7 @@ fixture("GET /api/todos/{_id}", todoStore.getData);
   TODO describe
 1. __response__ <code>{Object}</code>:
   TODO describe
-  
+
 
 ### <code>Store.prototype.createData(request, response)</code>
 
@@ -491,7 +491,7 @@ fixture("POST /api/todos", todoStore.createData);
   TODO describe
 1. __response__ <code>{Object}</code>:
   TODO describe
-  
+
 
 ### <code>Store.prototype.updateData(request, response)</code>
 
@@ -506,7 +506,7 @@ fixture("PUT /api/todos/{_id}", todoStore.updateData);
   TODO describe
 1. __response__ <code>{Object}</code>:
   TODO describe
-  
+
 
 ### <code>Store.prototype.destroyData(request, response)</code>
 
@@ -521,7 +521,7 @@ fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
   TODO describe
 1. __response__ <code>{Object}</code>:
   TODO describe
-  
+
 
 ### <code>Store.prototype.reset([baseItems])</code>
 
@@ -548,7 +548,7 @@ $.ajax({url: "todos/1", method: "delete"}).then(function(){
 
 1. __TODO__ <code>{Array}</code>:
   describe
-  
+
 
 ### <code>Store.prototype.get(params)</code>
 
@@ -561,7 +561,7 @@ todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 
 1. __TODO__ <code>{Object}</code>:
   describe
-  
+
 
 ### <code>Store.prototype.getList(set)</code>
 
@@ -574,4 +574,3 @@ todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
 
 1. __set__ <code>{Object}</code>:
   TODO describe
-  

@@ -16,7 +16,7 @@ fixture({url: "/todos/{action}"},
         { "WWW-Authenticate": 'Basic realm="myRealm"'},
         "unauthorized");
   }
-});
+);
 
 $.post("/todos/delete");
 ```

@@ -15,9 +15,9 @@ fixture({method: "get", url: "/todos"},
             //   }
 
   }
-});
+);
 
-$.ajax({ method: "get", url: "/todos?complete=true" })
+$.ajax({ method: "get", url: "/todos?complete=true" });
 ```
 
 Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
@@ -31,12 +31,12 @@ fixture({url: "/todos/{action}"},
             //    data: {action: delete}
             //   }
   }
-});
+);
 
 $.post("/todos/delete");
 ```
   @param {can-fixture/types/request} request Information about the request. The request's data property will contain data from the request's querystring or request body. Also
-  any templated values in the [can-fixture/types/ajaxSettings]'s `url` will be added. 
+  any templated values in the [can-fixture/types/ajaxSettings]'s `url` will be added.
   @param {can-fixture.response} response A callback function that provides response information.
   @param {Object} requestHeaders Headers used to make the request.
   @param {Object} ajaxSettings The settings object used to match this request.

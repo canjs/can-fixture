@@ -8,12 +8,12 @@ described by `algebra`.
 
 ```js
 // Describe the services parameters:
-var todoAlgebra = new set.Algebra({
+var todoAlgebra = new set.Algebra(
     set.props.id("_id"),
     set.props.boolean("completed"),
     set.props.rangeInclusive("start","end"),
     set.props.sort("orderBy"),
-});
+);
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
@@ -46,7 +46,7 @@ it uses `makeItems` to create `count` entries in the store.
 
 ```js
 // Describe the services parameters:
-var todoAlgebra = new set.Algebra({ ... });
+var todoAlgebra = new set.Algebra( ... );
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
