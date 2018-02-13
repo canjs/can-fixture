@@ -5,7 +5,7 @@
 
 Turns the fixtures on or off. Defaults to `true` for on.
 
-```javascript
+```js
 fixture.on = false; //-> AJAX requests will not be trapped
 ```
 

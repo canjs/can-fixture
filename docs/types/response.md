@@ -7,15 +7,15 @@ Used to detail a response.
 
 Example:
 
-```javascript
+```js
 fixture({url: "/todos/{action}"},
-  function(request, response, headers, ajaxSettings){
-    response(
-        401,
-        { message: "Unauthorized"},
-        { "WWW-Authenticate": 'Basic realm="myRealm"'},
-        "unauthorized");
-  }
+	function(request, response, headers, ajaxSettings){
+		response(
+			401,
+			{ message: "Unauthorized"},
+			{ "WWW-Authenticate": 'Basic realm="myRealm"'},
+			"unauthorized");
+	}
 );
 
 $.post("/todos/delete");
@@ -23,7 +23,7 @@ $.post("/todos/delete");
 
 You don't have to provide every argument to `response`. It can be called like:
 
-```javascript
+```js
 // Just body
 response({ message: "Hello World"});
 // status and body

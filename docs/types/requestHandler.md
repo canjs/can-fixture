@@ -5,16 +5,16 @@
 
 Defines the XHR response for a given trapped request.
 
-```javascript
+```js
 fixture({method: "get", url: "/todos"},
-  function(request, response, headers, ajaxSettings){
-    request //-> {
-            //    method: "get",
-            //    url: "/todos",
-            //    data: {complete: true}
-            //   }
+	function(request, response, headers, ajaxSettings){
+		request //-> {
+		//    method: "get",
+		//    url: "/todos",
+		//    data: {complete: true}
+		//   }
 
-  }
+	}
 );
 
 $.ajax({ method: "get", url: "/todos?complete=true" });
@@ -22,15 +22,15 @@ $.ajax({ method: "get", url: "/todos?complete=true" });
 
 Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
 
-```javascript
+```js
 fixture({url: "/todos/{action}"},
-  function(request, response, headers, ajaxSettings){
-    request //-> {
-            //    method: "post",
-            //    url: "/todos",
-            //    data: {action: delete}
-            //   }
-  }
+	function(request, response, headers, ajaxSettings){
+		request //-> {
+		//    method: "post",
+		//    url: "/todos",
+		//    data: {action: delete}
+		//   }
+	}
 );
 
 $.post("/todos/delete");

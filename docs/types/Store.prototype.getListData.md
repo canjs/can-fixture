@@ -5,6 +5,6 @@
 
 A `requestHandler` that gets multiple items from the store.
 
-```javascript
+```js
 fixture("GET /api/todos", todoStore.getListData);
 ```

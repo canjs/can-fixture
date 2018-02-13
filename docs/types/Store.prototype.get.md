@@ -5,6 +5,6 @@
 
 Returns a single item's data from the store.
 
-```javascript
+```js
 todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 ```

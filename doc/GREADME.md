@@ -42,16 +42,16 @@ If an XHR request matches ajaxSettings, calls requestHandler with the XHR reques
 
 The following traps requests to GET /todos and responds with an array of data:
 
-```javascript
+```js
 fixture({method: "get", url: "/todos"},
-        function(request, response, headers, ajaxSettings){
-    return {
-        data: [
-            {id: 1, name: "dishes"},
-            {id: 2, name: "mow"}
-        ]
-    };
-})
+	function(request, response, headers, ajaxSettings){
+		return {
+			data: [
+				{id: 1, name: "dishes"},
+				{id: 2, name: "mow"}
+			]
+		};
+	})
 ```
 
 When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
@@ -68,13 +68,13 @@ When adding a fixture, it will remove any identical fixtures from the list of fi
 
 Redirects the request to another url.  This can be useful for simulating a response with a file.
 
-```javascript
+```js
 fixture({url: "/tasks"}, "fixtures/tasks.json");
 ```
 
 Placeholders available in the `ajaxSettings` url will be available in the redirect url:
 
-```javascript
+```js
 fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
 ```
 
@@ -84,7 +84,7 @@ fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
 
 Responds with the `JSON.stringify` result of `data`.
 
-```javascript
+```js
 fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 ```
 
@@ -94,7 +94,7 @@ fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 
 Delays the ajax request from being made for `delay` milliseconds.
 
-```javascript
+```js
 fixture({url: "/tasks"}, 2000);
 ```
 
@@ -106,7 +106,7 @@ This doesn't simulate a response, but is useful for simulating slow connections.
 
 Removes the matching fixture from the list of fixtures.
 
-```javascript
+```js
 fixture({url: "/tasks"}, "fixtures/tasks.json");
 
 $.get("/tasks") // requests fixtures/tasks.json
@@ -122,7 +122,7 @@ $.get("/tasks") // requests /tasks
 
 A short hand for creating an `ajaxSetting` with a `method` and `url`.
 
-```javascript
+```js
 fixture("GET /tasks", requestHandler );
 
 // is the same as
@@ -138,7 +138,7 @@ The format is `METHOD URL`.
 
 A short hand for creating an `ajaxSetting` with just a `url`.
 
-```javascript
+```js
 fixture("/tasks", requestHandler);
 
 // is the same as
@@ -155,13 +155,13 @@ Create multiple fixtures at once.
 - fixtures `{Object<methodAndUrl,url|data|requestHandler|store>}` - A mapping of methodAndUrl to
   some response argument type.
 
-```javascript
+```js
 fixture({
-    "POST /tasks": function(){
-        return {id: Math.random()}
-    },
-    "GET /tasks": {data: [{id: 1, name: "mow lawn"}]},
-    "/people": "fixtures/people.json"
+	"POST /tasks": function(){
+		return {id: Math.random()}
+	},
+	"GET /tasks": {data: [{id: 1, name: "mow lawn"}]},
+	"/people": "fixtures/people.json"
 });
 ```
 
@@ -171,11 +171,11 @@ fixture({
 
 Wire up a restful API scheme to a store.
 
-```javascript
+```js
 const todoAlgebra = new set.Algebra();
 const todoStore = fixture.store([
-  { id: 1, name: 'Do the dishes'},
-  { id: 2, name: 'Walk the dog'}
+	{ id: 1, name: 'Do the dishes'},
+	{ id: 2, name: 'Walk the dog'}
 ], todoAlgebra);
 
 fixture("/api/todos/{id}", todoStore);
@@ -183,13 +183,13 @@ fixture("/api/todos/{id}", todoStore);
 
 This is a shorthand for wiring up the `todoStore` as follows:
 
-```javascript
+```js
 fixture({
-    "GET /api/todos": todoStore.getListData,
-    "GET /api/todos/{id}": todoStore.getData,
-    "POST /api/todos": todosStore.createData,
-    "PUT /api/todos/{id}": todos.updateData,
-    "DELETE /api/todos/{id}": todos.destroyData
+	"GET /api/todos": todoStore.getListData,
+	"GET /api/todos/{id}": todoStore.getData,
+	"POST /api/todos": todosStore.createData,
+	"PUT /api/todos/{id}": todos.updateData,
+	"DELETE /api/todos/{id}": todos.destroyData
 });
 ```
 
@@ -201,16 +201,16 @@ Defines what can-fixture callback functions are called with.  TODO fix grammar
 
 Example:
 
-```javascript
+```js
 fixture({method: "get", url: "/todos"},
-  function(request, response, headers, ajaxSettings){
-    request //-> {
-            //    method: "get",
-            //    url: "/todos",
-            //    data: {complete: true}
-            //   }
+	function(request, response, headers, ajaxSettings){
+		request //-> {
+		//    method: "get",
+		//    url: "/todos",
+		//    data: {complete: true}
+		//   }
 
-  }
+	}
 );
 
 $.ajax({ method: "get", url: "/todos?complete=true" })
@@ -218,15 +218,15 @@ $.ajax({ method: "get", url: "/todos?complete=true" })
 
 Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
 
-```javascript
+```js
 fixture({url: "/todos/{action}"},
-  function(request, response, headers, ajaxSettings){
-    request //-> {
-            //    method: "post",
-            //    url: "/todos",
-            //    data: {action: delete}
-            //   }
-  }
+	function(request, response, headers, ajaxSettings){
+		request //-> {
+		//    method: "post",
+		//    url: "/todos",
+		//    data: {action: delete}
+		//   }
+	}
 );
 
 $.post("/todos/delete");
@@ -249,15 +249,15 @@ Used to detail a response.
 
 Example:
 
-```javascript
+```js
 fixture({url: "/todos/{action}"},
-  function(request, response, headers, ajaxSettings){
-    response(
-        401,
-        { message: "Unauthorized"},
-        { "WWW-Authenticate": 'Basic realm="myRealm"'},
-        "unauthorized");
-  }
+	function(request, response, headers, ajaxSettings){
+		response(
+			401,
+			{ message: "Unauthorized"},
+			{ "WWW-Authenticate": 'Basic realm="myRealm"'},
+			"unauthorized");
+	}
 );
 
 $.post("/todos/delete");
@@ -265,7 +265,7 @@ $.post("/todos/delete");
 
 You don't have to provide every argument to `response`. It can be called like:
 
-```javascript
+```js
 // Just body
 response({ message: "Hello World"});
 // status and body
@@ -297,7 +297,7 @@ for everything else.
 Returns a random integer in the range [min, max]. If only one argument is provided,
 returns a random integer from [0, max].
 
-```javascript
+```js
 fixture.rand(1, 10) //-> Random number between 1 and 10 inclusive.
 fixture.rand(10) //-> Random number between 0 and 10 inclusive.
 ```
@@ -315,7 +315,7 @@ An array of between min and max random items from choices. If only `min` is
 provided, `max` will equal `min`.  If both `max` and `min` are not provided,
 `min` will be 1 and `max` will be `choices.length`.
 
-```javascript
+```js
 // pick a random number of items from an array
 fixture.rand(["a","b","c"]) //-> ["c"]
 fixture.rand(["a","b","c"]) //-> ["b","a"]
@@ -343,7 +343,7 @@ fixture.rand(["a","b","c"],2,3) //-> ["c","a","b"]
 
 Sets the delay until a response is fired in milliseconds.
 
-```javascript
+```js
 fixture.delay = 1000; // 1 second delay
 ```
 
@@ -355,7 +355,7 @@ fixture.delay = 1000; // 1 second delay
 
 Turns the fixtures on or off. Defaults to `true` for on.
 
-```javascript
+```js
 fixture.on = false; //-> AJAX requests will not be trapped
 ```
 
@@ -374,28 +374,28 @@ The list of currently active fixtures.
 Create a store that starts with `baseItems` for a service layer
 described by `algebra`.
 
-```javascript
+```js
 // Describe the services parameters:
 const todoAlgebra = new set.Algebra(
-    set.props.id("_id"),
-    set.props.boolean("completed"),
-    set.props.rangeInclusive("start","end"),
-    set.props.sort("orderBy")
+	set.props.id("_id"),
+	set.props.boolean("completed"),
+	set.props.rangeInclusive("start","end"),
+	set.props.sort("orderBy")
 );
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
 const todoStore = fixture.store([
-    {
-      _id : 1,
-      name : 'Do the dishes',
-      complete: true
-    }, {
-      _id : 2,
-      name : 'Walk the dog',
-      complete: false
-    }],
-    todoAlgebra );
+	{
+		_id : 1,
+		name : 'Do the dishes',
+		complete: true
+	}, {
+		_id : 2,
+		name : 'Walk the dog',
+		complete: false
+	}],
+todoAlgebra );
 
 // Hookup urls to the store:
 fixture("/todos/{_id}", todoStore);
@@ -413,22 +413,22 @@ fixture("/todos/{_id}", todoStore);
 Similar to `fixture.store(baseItems, algebra)`, except that
 it uses `makeItems` to create `count` entries in the store.
 
-```javascript
+```js
 // Describe the services parameters:
 const todoAlgebra = new set.Algebra( /* ... */ );
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
 const todoStore = fixture.store(
-    1000,
-    function(i){
-        return {
-          _id : i+1,
-          name : 'Todo '+i,
-          complete: fixture.rand([true, false],1)[0]
-        }
-    },
-    todoAlgebra );
+	1000,
+	function(i){
+		return {
+			_id : i+1,
+			name : 'Todo '+i,
+			complete: fixture.rand([true, false],1)[0]
+		}
+	},
+	todoAlgebra );
 
 // Hookup urls to the store:
 fixture("/todos/{_id}", todoStore);
@@ -453,7 +453,7 @@ The following documents the methods on a store object returned by `fixture.store
 
 A `requestHandler` that gets multiple items from the store.
 
-```javascript
+```js
 fixture("GET /api/todos", todoStore.getListData);
 ```
 
@@ -468,7 +468,7 @@ fixture("GET /api/todos", todoStore.getListData);
 
 A `requestHandler` that gets a single item from the store.
 
-```javascript
+```js
 fixture("GET /api/todos/{_id}", todoStore.getData);
 ```
 
@@ -483,7 +483,7 @@ fixture("GET /api/todos/{_id}", todoStore.getData);
 
 A `requestHandler` that creates an item in the store.
 
-```javascript
+```js
 fixture("POST /api/todos", todoStore.createData);
 ```
 
@@ -498,7 +498,7 @@ fixture("POST /api/todos", todoStore.createData);
 
 A `requestHandler` that updates an item in the store.
 
-```javascript
+```js
 fixture("PUT /api/todos/{_id}", todoStore.updateData);
 ```
 
@@ -513,7 +513,7 @@ fixture("PUT /api/todos/{_id}", todoStore.updateData);
 
 A `requestHandler` that removes an item from the store.
 
-```javascript
+```js
 fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
 ```
 
@@ -528,21 +528,21 @@ fixture("DELETE /api/todos/{_id}", todoStore.destroyData)
 
 Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 
-```javascript
+```js
 // Creates a store with one item.
 const todoStore = fixture.store(
-    [{id: 1, name: "dishes"}],
-    new set.Algebra());
+	[{id: 1, name: "dishes"}],
+	new set.Algebra());
 fixture("/todos/{id}", todoStore)
 todoStore.getList({}).length //-> 1
 
 // delete that item
 $.ajax({url: "todos/1", method: "delete"}).then(function(){
-    return todoStore.getList({}).length //-> 0
+	return todoStore.getList({}).length //-> 0
 }).then(function(){
-    // calling reset adds it back
-    todoStore.reset();
-    todoStore.getList({}).length //-> 1
+	// calling reset adds it back
+	todoStore.reset();
+	todoStore.getList({}).length //-> 1
 });
 ```
 
@@ -555,7 +555,7 @@ $.ajax({url: "todos/1", method: "delete"}).then(function(){
 
 Returns a single item's data from the store.
 
-```javascript
+```js
 todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 ```
 
@@ -568,7 +568,7 @@ todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
 
 Returns the matching items from the store like: `{data: [...]}`.
 
-```javascript
+```js
 todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
 ```
 

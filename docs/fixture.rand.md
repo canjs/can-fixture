@@ -6,7 +6,7 @@
 Returns a random integer in the range [min, max]. If only one argument is provided,
 returns a random integer from [0, max].
 
-```javascript
+```js
 fixture.rand(1, 10) //-> Random number between 1 and 10 inclusive.
 fixture.rand(10) //-> Random number between 0 and 10 inclusive.
 ```
@@ -19,7 +19,7 @@ An array of between min and max random items from choices. If only `min` is
 provided, `max` will equal `min`.  If both `max` and `min` are not provided,
 `min` will be 1 and `max` will be `choices.length`.
 
-```javascript
+```js
 // pick a random number of items from an array
 fixture.rand(["a","b","c"]) //-> ["c"]
 fixture.rand(["a","b","c"]) //-> ["b","a"]
