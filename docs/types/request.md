@@ -10,15 +10,15 @@ This object is passed to a [can-fixture.requestHandler]
 and can be used to determine the response.
 
 ```js
-fixture("GET /todos/{id}", function(request, response){
-	request.url     //-> "todos/5"
-	request.method  //-> "get"
-	request.data    //-> {id: "5", include: ["owner"]}
-	request.headers //-> {}
-	request.async   //-> false
-});
+fixture( "GET /todos/{id}", function( request, response ) {
+	request.url;     //-> "todos/5"
+	request.method;  //-> "get"
+	request.data;    //-> {id: "5", include: ["owner"]}
+	request.headers; //-> {}
+	request.async;   //-> false
+} );
 
-$.get("/todos/5?include[]=owner");
+$.get( "/todos/5?include[]=owner" );
 ```
 
   @option {String} url The requested url with anything after the querystring taken off in `GET` and `DESTROY` method requests.

@@ -6,5 +6,5 @@
 A `requestHandler` that gets a single item from the store.
 
 ```js
-fixture("GET /api/todos/{_id}", todoStore.getData);
+fixture( "GET /api/todos/{_id}", todoStore.getData );
 ```

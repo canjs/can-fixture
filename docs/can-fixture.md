@@ -14,15 +14,15 @@ If an XHR request matches ajaxSettings, calls requestHandler with the XHR reques
 The following traps requests to GET /todos and responds with an array of data:
 
 ```js
-fixture({method: "get", url: "/todos"},
-	function(request, response, headers, ajaxSettings){
+fixture( { method: "get", url: "/todos" },
+	function( request, response, headers, ajaxSettings ) {
 		return {
 			data: [
-				{id: 1, name: "dishes"},
-				{id: 2, name: "mow"}
+				{ id: 1, name: "dishes" },
+				{ id: 2, name: "mow" }
 			]
 		};
-	})
+	} );
 ```
 
 When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
@@ -35,13 +35,13 @@ When adding a fixture, it will remove any identical fixtures from the list of fi
 Redirects the request to another url.  This can be useful for simulating a response with a file.
 
 ```js
-fixture({url: "/tasks"}, "fixtures/tasks.json");
+fixture( { url: "/tasks" }, "fixtures/tasks.json" );
 ```
 
 Placeholders available in the `ajaxSettings` url will be available in the redirect url:
 
 ```js
-fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
+fixture( { url: "/tasks/{id}" }, "fixtures/tasks/{id}.json" );
 ```
 
 @signature `fixture(ajaxSettings, data)`
@@ -49,7 +49,7 @@ fixture({url: "/tasks/{id}"}, "fixtures/tasks/{id}.json");
 Responds with the `JSON.stringify` result of `data`.
 
 ```js
-fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
+fixture( { url: "/tasks" }, { tasks: [ { id: 1, complete: false } ] } );
 ```
 
 @signature `fixture(ajaxSettings, delay)`
@@ -57,7 +57,7 @@ fixture({url: "/tasks"}, {tasks: [{id: 1, complete: false}]});
 Delays the ajax request from being made for `delay` milliseconds.
 
 ```js
-fixture({url: "/tasks"}, 2000);
+fixture( { url: "/tasks" }, 2000 );
 ```
 
 This doesn't simulate a response, but is useful for simulating slow connections.
@@ -67,13 +67,13 @@ This doesn't simulate a response, but is useful for simulating slow connections.
 Removes the matching fixture from the list of fixtures.
 
 ```js
-fixture({url: "/tasks"}, "fixtures/tasks.json");
+fixture( { url: "/tasks" }, "fixtures/tasks.json" );
 
-$.get("/tasks") // requests fixtures/tasks.json
+$.get( "/tasks" ); // requests fixtures/tasks.json
 
-fixture({url: "/tasks"}, null);
+fixture( { url: "/tasks" }, null );
 
-$.get("/tasks") // requests /tasks
+$.get( "/tasks" ); // requests /tasks
 ```
 
 @signature `fixture(methodAndUrl, url|data|requestHandler)`
@@ -81,11 +81,11 @@ $.get("/tasks") // requests /tasks
 A short hand for creating an [can-fixture/types/ajaxSettings] with a `method` and `url`.
 
 ```js
-fixture("GET /tasks", requestHandler );
+fixture( "GET /tasks", requestHandler );
 
 // is the same as
 
-fixture({method: "get", url: "/tasks"}, requestHandler );
+fixture( { method: "get", url: "/tasks" }, requestHandler );
 ```
 
 The format is `METHOD URL`.
@@ -95,11 +95,11 @@ The format is `METHOD URL`.
 A short hand for creating an [can-fixture/types/ajaxSettings] with just a `url`.
 
 ```js
-fixture("/tasks", requestHandler);
+fixture( "/tasks", requestHandler );
 
 // is the same as
 
-fixture({url: "/tasks"}, requestHandler);
+fixture( { url: "/tasks" }, requestHandler );
 ```
 
 @signature `fixture(fixtures)`
@@ -107,13 +107,13 @@ fixture({url: "/tasks"}, requestHandler);
 Create multiple fixtures at once.
 
 ```js
-fixture({
-	"POST /tasks": function(){
-		return {id: Math.random()}
+fixture( {
+	"POST /tasks": function() {
+		return { id: Math.random() };
 	},
-	"GET /tasks": {data: [{id: 1, name: "mow lawn"}]},
+	"GET /tasks": { data: [ { id: 1, name: "mow lawn" } ] },
 	"/people": "fixtures/people.json"
-});
+} );
 ```
 
   @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to
@@ -127,26 +127,26 @@ Wire up a restful API scheme to a store.
 
 ```js
 const todoAlgebra = new set.Algebra(
-	set.props.id("id")
+	set.props.id( "id" )
 );
-const todoStore = fixture.store([
-	{ id: 1, name: 'Do the dishes'},
-	{ id: 2, name: 'Walk the dog'}
-], todoAlgebra);
+const todoStore = fixture.store( [
+	{ id: 1, name: "Do the dishes" },
+	{ id: 2, name: "Walk the dog" }
+], todoAlgebra );
 
-fixture("/api/todos/{id}", todoStore); // can also be written fixture("/api/todos", todoStore);
+fixture( "/api/todos/{id}", todoStore ); // can also be written fixture("/api/todos", todoStore);
 ```
 
 This is a shorthand for wiring up the `todoStore` as follows:
 
 ```js
-fixture({
+fixture( {
 	"GET /api/todos": todoStore.getListData,
 	"GET /api/todos/{id}": todoStore.getData,
 	"POST /api/todos": todoStore.createData,
 	"PUT /api/todos/{id}": todoStore.updateData,
 	"DELETE /api/todos/{id}": todoStore.destroyData
-});
+} );
 ```
 
   @param {String} restfulUrl The url that may include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed, if provided; otherwise the `item` url is assumed to have the `/{ID_PROP}` part appended to the end.

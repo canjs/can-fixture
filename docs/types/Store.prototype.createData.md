@@ -6,5 +6,5 @@
 A `requestHandler` that creates an item in the store.
 
 ```js
-fixture("POST /api/todos", todoStore.createData);
+fixture( "POST /api/todos", todoStore.createData );
 ```
