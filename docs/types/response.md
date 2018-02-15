@@ -8,30 +8,33 @@ Used to detail a response.
 Example:
 
 ```js
-fixture({url: "/todos/{action}"},
-  function(request, response, headers, ajaxSettings){
-    response(
-        401,
-        { message: "Unauthorized"},
-        { "WWW-Authenticate": 'Basic realm="myRealm"'},
-        "unauthorized");
-  }
-});
+fixture( { url: "/todos/{action}" },
+	function( request, response, headers, ajaxSettings ) {
+		response(
+			401,
+			{ message: "Unauthorized" },
+			{ "WWW-Authenticate": "Basic realm=\"myRealm\"" },
+			"unauthorized" );
+	}
+);
 
-$.post("/todos/delete");
+$.post( "/todos/delete" );
 ```
 
 You don't have to provide every argument to `response`. It can be called like:
 
 ```js
 // Just body
-response({ message: "Hello World"});
+response( { message: "Hello World" } );
+
 // status and body
-response(401, { message: "Unauthorized"});
+response( 401, { message: "Unauthorized" } );
+
 // body and headers
-response('{"message":"Unauthorized"}',{"WWW-Authenticate":'Basic realm="myRealm"'});
+response( "{\"message\":\"Unauthorized\"}", { "WWW-Authenticate": "Basic realm=\"myRealm\"" } );
+
 // status, body statusText
-response(401, '{"message":"Unauthorized"}','unauthorized');
+response( 401, "{\"message\":\"Unauthorized\"}", "unauthorized" );
 ```
 
 The default `statusText` will be `ok` for `200 <= status < 300, status === 304` and `error`

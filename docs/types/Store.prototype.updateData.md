@@ -6,5 +6,5 @@
 A `requestHandler` that updates an item in the store.
 
 ```js
-fixture("PUT /api/todos/{_id}", todoStore.updateData);
+fixture( "PUT /api/todos/{_id}", todoStore.updateData );
 ```

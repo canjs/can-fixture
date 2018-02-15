@@ -6,5 +6,5 @@
 Returns the matching items from the store like: `{data: [...]}`.
 
 ```js
-todoStore.get({name: "dishes"}) //-> {data: [{id: 1, name: "dishes"}]}
+todoStore.get( { name: "dishes" } ); //-> {data: [{id: 1, name: "dishes"}]}
 ```

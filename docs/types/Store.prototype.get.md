@@ -6,5 +6,5 @@
 Returns a single item's data from the store.
 
 ```js
-todoStore.get({id: 1}) //-> {id: 1, name: "dishes"}
+todoStore.get( { id: 1 } ); //-> {id: 1, name: "dishes"}
 ```
