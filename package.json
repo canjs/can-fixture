@@ -4,9 +4,8 @@
   "description": "Intercept AJAX requests and simulate responses.",
   "main": "fixture.js",
   "scripts": {
-    "preversion": "npm test && npm run build",
-    "version": "git commit -am \"Update version number\" && git checkout -b release && git add -f dist/",
-    "postpublish": "git push --tags && git checkout master && git branch -D release && git push origin master",
+    "preversion": "npm test",
+    "postpublish": "git push --tags && git push",
     "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
@@ -18,11 +17,12 @@
     "detect-cycle": "detect-cyclic-packages --ignore done-serve"
   },
   "dependencies": {
-    "can-connect": "^2.0.1",
     "can-deparam": "^1.0.1",
+    "can-log": "^1.0.0",
+    "can-memory-store": "file:../can-memory-store",
     "can-namespace": "1.0.0",
-    "can-set": "^1.3.0",
-    "can-util": "^3.9.0"
+    "can-query": "file:../can-query",
+    "can-reflect": "^1.13.4"
   },
   "devDependencies": {
     "bit-docs": "0.0.7",

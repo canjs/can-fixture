@@ -1,16 +1,9 @@
-var canSet = require("can-set");
-var connect = require("can-connect");
-var legacyStore = require("./helpers/legacyStore");
-var each = require("can-util/js/each/each");
-var assign = require("can-util/js/assign/assign");
-var isArrayLike = require("can-util/js/is-array-like/is-array-like");
-var dataMemoryCache = require("can-connect/data/memory-cache/memory-cache");
+var Query = require("can-query");
 
-var firstProp = function(obj){
-	for(var prop in obj) {
-		return prop;
-	}
-};
+var canReflect = require("can-reflect");
+
+var memoryStore = require("can-memory-store");
+
 
 // Returns a function that calls the method on a connection.
 // Wires up fixture signature to a connection signature.
@@ -30,8 +23,8 @@ var makeMakeItems = function(baseItems, idProp){
 		// clone baseItems
 		var items = [],
 			maxId = 0;
-		each(baseItems, function(item){
-			items.push(JSON.parse(JSON.stringify(item)));
+		baseItems.forEach(function(item){
+			items.push(canReflect.serialize(item) );
 			maxId = Math.max(item[idProp] + 1, maxId + 1) || items.length;
 		});
 
@@ -53,7 +46,7 @@ var Store = function(connection, makeItems, idProp){
 		this[method] = this[method].bind(this);
 	}
 };
-assign(Store.prototype,{
+canReflect.assignMap(Store.prototype,{
 	getListData: connectToConnection("getListData"),
 	getData: connectToConnection( "getData"),
 
@@ -90,7 +83,7 @@ assign(Store.prototype,{
 	}
 });
 // legacy methods
-each({
+canReflect.eachKey({
 	findAll: "getListData",
 	findOne: "getData",
 	create: "createData",
@@ -105,26 +98,20 @@ each({
 
 
 
-
 // ## fixture.store
 // Make a store of objects to use when making requests against fixtures.
 Store.make = function (count, make, algebra) {
 	/*jshint eqeqeq:false */
-	// check if algebra was passed
-	var isNew = false;
-	if( count instanceof canSet.Algebra || make instanceof canSet.Algebra || algebra instanceof canSet.Algebra ) {
-		isNew = true;
-	}
-	if(!isNew) {
-		console.warn("can-fixture: This form ( `fixture(count, make, filter)` ) of making a store is deprecated.  Please use the algebra-based form.");
-		return legacyStore.apply(this, arguments);
-	}
+
 
 	// Figure out makeItems which populates data
 	var makeItems,
 		idProp;
 	if(typeof count === "number") {
-		idProp = firstProp(algebra.clauses.id || {}) || "id";
+		if(!algebra) {
+			algebra = new Query({});
+		}
+		idProp = algebra.getIdentityKeys()[0] || "id";
 		makeItems = function () {
 			var items = [];
 			var maxId = 0;
@@ -135,7 +122,7 @@ Store.make = function (count, make, algebra) {
 				if (!item[idProp]) {
 					item[idProp] = i;
 				}
-				maxId = Math.max(item[idProp] + 1, maxId + 1) || items.length;
+				maxId = Math.max(item[idProp] , maxId) || items.length;
 				items.push(item);
 			}
 			return {
@@ -143,15 +130,17 @@ Store.make = function (count, make, algebra) {
 				items: items
 			};
 		};
-	} else if(isArrayLike(count)){
+	} else if(Array.isArray(count)){
 		algebra = make;
-		idProp = firstProp(algebra.clauses.id || {}) || "id";
+		if(!algebra) {
+			algebra = new Query({});
+		}
+		idProp = algebra.getIdentityKeys()[0] || "id";
 		makeItems = makeMakeItems(count, idProp);
 	}
 
-	var connection = connect([dataMemoryCache],{
-		algebra: algebra,
-		idProp: idProp
+	var connection = memoryStore({
+		algebra: algebra
 	});
 
 	return new Store(connection, makeItems, idProp);

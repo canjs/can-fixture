@@ -1,11 +1,14 @@
+require("./matches-test");
+
 var QUnit = require('steal-qunit');
 var fixture = require("can-fixture");
-var core = require("../core");
-var set = require("can-set");
+var set = require("can-query/compat/compat");
 var $ = require("jquery");
-var each = require("can-util/js/each/each");
-var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-var canDev = require('can-util/js/dev/dev');
+var canDev = require('can-log/dev/dev');
+var dataFromUrl = require("../data-from-url");
+var canReflect = require("can-reflect");
+var matches = require("../matches");
+
 
 var errorCallback = function(xhr, status, error){
 	ok(false, error);
@@ -129,6 +132,8 @@ test('dynamic fixtures', function () {
 		.done(function (data) {
 			equal(data[0].sweet, 'ness', 'can.get works');
 			start();
+		}).catch(function(err){
+			debugger;
 		});
 });
 
@@ -166,18 +171,23 @@ if (__dirname !== '/') {
 
 test('fixture.store fixtures', function () {
 	stop();
+
+	var SearchText = matches.makeComparatorType(function(searchTextValue, dataSearchTextValue, data, path){
+		var regex = new RegExp('^' + searchTextValue);
+		return regex.test(data.name);
+	});
+
+
 	var algebra = new set.Algebra({
-		searchText: function(searchTextProp, querySearchText, data, query){
-			if(querySearchText && data.name) {
-				var regex = new RegExp('^' + querySearchText);
-				return regex.test(data.name);
-			} else {
-				return true;
-			}
+		schema: function(schema) {
+
+			schema.properties.searchText = SearchText;
 		}
 	},
 		set.props.offsetLimit("offset","limit"),
 		set.props.sort("order"));
+
+
 	var store = fixture.store(1000, function (i) {
 		return {
 			id: i,
@@ -214,9 +224,8 @@ test('fixture.store fixtures should have unique IDs', function () {
 		url: 'things',
 		dataType: 'json',
 		data: {
-			offset: 0,
-			limit: 200,
-			order: ['name ASC']
+			page: {start: 0, end: 199},
+			order: 'name ASC'
 		},
 		success: function (result) {
 			var seenIds = [];
@@ -334,69 +343,27 @@ test('rand', function () {
 		delete matched[i];
 	}
 
-	each(choices, function(choice){
+	choices.forEach(function(choice){
 		ok(matched[choice], "has "+choice);
 		delete matched[choice];
 	});
 
-	ok(isEmptyObject(matched), "nothing else unexpected");
+	ok(canReflect.size(matched) === 0, "nothing else unexpected");
 });
 
-test('core.dataFromUrl', function () {
-	var data = core.dataFromUrl('/thingers/{id}', '/thingers/5');
+test('dataFromUrl', function () {
+	var data = dataFromUrl('/thingers/{id}', '/thingers/5');
 	equal(data.id, 5, 'gets data');
-	data = core.dataFromUrl('/thingers/5?hi.there', '/thingers/5?hi.there');
+	data = dataFromUrl('/thingers/5?hi.there', '/thingers/5?hi.there');
 	deepEqual(data, {}, 'gets data');
 });
 
 test('core.dataFromUrl with double character value', function () {
-	var data = core.dataFromUrl('/days/{id}/time_slots.json', '/days/17/time_slots.json');
+	var data = dataFromUrl('/days/{id}/time_slots.json', '/days/17/time_slots.json');
 	equal(data.id, 17, 'gets data');
 });
 
-test('core.defaultCompare', function () {
-	var same = set.equal({
-		url: '/thingers/5'
-	}, {
-		url: '/thingers/{id}'
-	}, core.defaultCompare);
-	ok(same, 'they are similar');
-	same = set.equal({
-		url: '/thingers/5'
-	}, {
-		url: '/thingers'
-	}, core.defaultCompare);
-	ok(!same, 'they are not the same');
-});
 
-test('core.matches', function () {
-	var same = core.matches({
-		url: '/thingers/5'
-	}, {
-		url: '/thingers/{id}'
-	});
-	ok(same, 'similar');
-	same = core.matches({
-		url: '/thingers/5',
-		type: 'get'
-	}, {
-		url: '/thingers/{id}'
-	});
-	ok(same, 'similar with extra pops on settings');
-	var exact = core.matches({
-		url: '/thingers/5',
-		type: 'get'
-	}, {
-		url: '/thingers/{id}'
-	}, true);
-	ok(!exact, 'not exact');
-	exact = core.matches({
-		url: '/thingers/5'
-	}, {
-		url: '/thingers/5'
-	}, true);
-	ok(exact, 'exact');
-});
 
 test('fixture function gets id', function () {
 	fixture('/thingers/{id}', function (settings) {

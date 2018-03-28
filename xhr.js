@@ -7,9 +7,8 @@
 // and then respond normally.
 var fixtureCore = require("./core");
 var deparam = require("can-deparam");
-var assign = require('can-util/js/assign/assign');
-var each = require('can-util/js/each/each');
-var canLog = require('can-util/js/log/log');
+var canReflect = require("can-reflect");
+var canLog = require('can-log');
 
 // Save the real XHR object as XHR
 var XHR = XMLHttpRequest,
@@ -58,7 +57,7 @@ GLOBAL.XMLHttpRequest = function() {
 	this.__events = {};
 
 	// wire up events to forward from real xhr to fake xhr
-	each(events, function(eventName) {
+	events.forEach(function(eventName) {
 		realXHR["on" + eventName] = function() {
 			callEvents(mockXHR, eventName);
 			if(mockXHR["on"+eventName]) {
@@ -75,7 +74,7 @@ GLOBAL.XMLHttpRequest = function() {
 GLOBAL.XMLHttpRequest._XHR = XHR;
 
 // Methods on the mock XHR:
-assign(XMLHttpRequest.prototype,{
+canReflect.assignMap(XMLHttpRequest.prototype,{
 	setRequestHeader: function(name, value){
 		this._requestHeaders[name] = value;
 	},
@@ -173,19 +172,19 @@ assign(XMLHttpRequest.prototype,{
 					getResponseHeader: function(){}
 				};
 
-				assign(mockXHR, {
+				canReflect.assignMap(mockXHR, {
 					readyState: 4,
 					status: status
 				});
 
 				var success = (status >= 200 && status < 300 || status === 304);
 				if ( success ) {
-					assign(mockXHR,{
+					canReflect.assignMap(mockXHR,{
 						statusText: statusText || "OK",
 						responseText: body
 					});
 				} else {
-					assign(mockXHR,{
+					canReflect.assignMap(mockXHR,{
 						statusText: statusText || "error",
 						responseText: body
 					});
@@ -193,7 +192,7 @@ assign(XMLHttpRequest.prototype,{
 
 				mockXHR.getAllResponseHeaders = function() {
 					var ret = [];
-					each(headers || {}, function(value, name) {
+					canReflect.eachKey(headers || {}, function(value, name) {
 						Array.prototype.push.apply(ret, [name, ': ', value, '\r\n']);
 					});
 					return ret.join('');
@@ -243,7 +242,7 @@ assign(XMLHttpRequest.prototype,{
 		// if we do have a fixture, update the real XHR object.
 		if(fixtureSettings) {
 			canLog.log(xhrSettings.url+" -> " + fixtureSettings.url);
-			assign(mockXHR, fixtureSettings);
+			canReflect.assignMap(mockXHR, fixtureSettings);
 		}
 
 		// Make the request.
@@ -252,7 +251,7 @@ assign(XMLHttpRequest.prototype,{
 });
 
 // when props of mockXHR are get/set, return the prop from the real XHR
-each(props, function(prop) {
+props.forEach(function(prop) {
 	Object.defineProperty(XMLHttpRequest.prototype, prop, {
 		get: function(){
 			return this._xhr[prop];

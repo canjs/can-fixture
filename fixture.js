@@ -2,13 +2,13 @@ var core = require("./core");
 var fixture = core.add;
 var Store = require("./store");
 require("./xhr");
-var assign = require("can-util/js/assign/assign");
+var canReflect = require("can-reflect");
 var ns = require("can-namespace");
 // HELPERS START
 
 var noop = function(){};
 
-assign(fixture, {
+canReflect.assignMap(fixture, {
 	rand: function randomize (arr, min, max) {
 		if (typeof arr === 'number') {
 			if (typeof min === 'number') {

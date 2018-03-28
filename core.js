@@ -1,12 +1,11 @@
 // Adds
-var canSet = require("can-set");
-var sub = require("can-util/js/string/string").sub;
-var each = require("can-util/js/each/each");
-var assign = require("can-util/js/assign/assign");
-var isEmptyObject = require("can-util/js/is-empty-object/is-empty-object");
-var isPlainObject = require("can-util/js/is-plain-object/is-plain-object");
-var canLog = require("can-util/js/log/log");
-var canDev = require("can-util/js/dev/dev");
+var sub = require("can-get/sub/sub");
+var canReflect = require("can-reflect");
+var matches = require("./matches");
+var canLog = require("can-log");
+var canDev = require("can-log/dev/dev");
+var dataFromUrl = require("./data-from-url");
+
 require("./store");
 
 var fixtures = [];
@@ -147,7 +146,7 @@ exports.add = function (settings, fixture) {
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
 	if (fixture === undefined) {
-		each(settings, function (fixture, url) {
+		canReflect.eachKey(settings, function (fixture, url) {
 			exports.add(url, fixture);
 		});
 		return;
@@ -206,7 +205,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 
 exports.index = function (settings, exact) {
 	for (var i = 0; i < fixtures.length; i++) {
-		if (exports.matches(settings, fixtures[i], exact)) {
+		if (matches.matches(settings, fixtures[i], exact)) {
 			return i;
 		}
 	}
@@ -218,16 +217,16 @@ exports.get = function(xhrSettings) {
 	}
 	// First try an exact match
 	var index = exports.index(xhrSettings, true);
-
+	
 	// If that doesn't work, try a looser match.
 	if(index === -1) {
 		index = exports.index(xhrSettings, false);
 	}
 
-	var fixtureSettings = index >=0 ? assign({},fixtures[index]) : undefined;
+	var fixtureSettings = index >=0 ? canReflect.assignMap({},fixtures[index]) : undefined;
 	if(fixtureSettings) {
 		var url = fixtureSettings.fixture,
-			data = exports.dataFromUrl(fixtureSettings.url, xhrSettings.url);
+			data = dataFromUrl(fixtureSettings.url, xhrSettings.url);
 		if(typeof fixtureSettings.fixture === "string") {
 			// check that we might have a replacement
 
@@ -250,9 +249,9 @@ exports.get = function(xhrSettings) {
 				};
 			}
 
-		} else if (isPlainObject(xhrSettings.data) || xhrSettings.data == null) {
-			var xhrData = assign({}, xhrSettings.data || {});
-			fixtureSettings.data = assign(xhrData, data);
+		} else if (canReflect.isPlainObject(xhrSettings.data) || xhrSettings.data == null) {
+			var xhrData = canReflect.assignMap({}, xhrSettings.data || {});
+			fixtureSettings.data = canReflect.assignMap(xhrData, data);
 
 		} else {
 			fixtureSettings.data = xhrSettings.data;
@@ -262,92 +261,8 @@ exports.get = function(xhrSettings) {
 	return fixtureSettings;
 };
 
-exports.matches = function(settings, fixture, exact) {
-	if (exact) {
-		return canSet.equal(settings, fixture, {fixture: function(){ return true; }});
-	} else {
-		return canSet.subset(settings, fixture, exports.defaultCompare);
-	}
-};
-var isEmptyOrNull = function(a, b){
-	if( a == null && isEmptyObject(b) ) {
-		return true;
-	} else if( b == null && isEmptyObject(a) ) {
-		return true;
-	} else {
-		return canSet.equal(a, b);
-	}
-};
-var isEmptyOrSubset = function(a, b) {
-	if( a == null && isEmptyObject(b) ) {
-		return true;
-	} else if( b == null && isEmptyObject(a) ) {
-		return true;
-	} else {
-		return canSet.subset(a, b);
-	}
-};
+exports.matches = matches;
 
-// Comparator object used to find a similar fixture.
-exports.defaultCompare = {
-	url: function (a, b) {
-		return !!exports.dataFromUrl(b, a);
-	},
-	fixture: function(){
-		return true;
-	},
-	xhr: function(){
-		return true;
-	},
-	type: function(a,b){
-		return b && a ? a.toLowerCase() === b.toLowerCase() : b === a;
-	},
-	method: function(a,b){
-		return b && a ? a.toLowerCase() === b.toLowerCase() : b === a;
-	},
-	helpers: function(){
-		return true;
-	},
-	headers: isEmptyOrNull,
-	data: isEmptyOrSubset
-};
-
-var replacer =  /\{([^\}]+)\}/g;
-// Returns data from a url, given a fixtue URL. For example, given
-// "todo/{id}" and "todo/5", it will return an object with an id property
-// equal to 5.
-exports.dataFromUrl = function (fixtureUrl, url) {
-	if(!fixtureUrl) {
-		// if there's no url, it's a match
-		return {};
-	}
-
-	var order = [],
-		// Sanitizes fixture URL
-		fixtureUrlAdjusted = fixtureUrl.replace('.', '\\.')
-			.replace('?', '\\?'),
-		// Creates a regular expression out of the adjusted fixture URL and
-		// runs it on the URL we passed in.
-		res = new RegExp(fixtureUrlAdjusted.replace(replacer, function (whole, part) {
-			order.push(part);
-			return "([^\/]+)";
-		}) + "$")
-			.exec(url),
-		data = {};
-
-	// If there were no matches, return null;
-	if (!res) {
-		return null;
-	}
-
-	// Shift off the URL and just keep the data.
-	res.shift();
-	each(order, function (name) {
-		// Add data from regular expression onto data object.
-		data[name] = res.shift();
-	});
-	return data;
-};
 
 
 
