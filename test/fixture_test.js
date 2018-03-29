@@ -8,6 +8,7 @@ var canDev = require('can-log/dev/dev');
 var dataFromUrl = require("../data-from-url");
 var canReflect = require("can-reflect");
 var matches = require("../matches");
+var Query = require("can-query");
 
 
 var errorCallback = function(xhr, status, error){
@@ -194,7 +195,7 @@ test('fixture.store fixtures', function () {
 			name: 'thing ' + i
 		};
 	}, algebra);
-	fixture('things', store.findAll);
+	fixture('things', store.getListData);
 
 	$.ajax({
 		url: 'things',
@@ -218,7 +219,7 @@ test('fixture.store fixtures should have unique IDs', function () {
 	var store = fixture.store(100, function (i) {
 		return {name: 'Test ' + i};
 	});
-	fixture('things', store.findAll);
+	fixture('things', store.getListData);
 
 	$.ajax({
 		url: 'things',
@@ -534,12 +535,13 @@ test('GET fixture.store returns 404 on findOne with bad id (#803)', function () 
 		};
 	});
 
-	fixture('GET /models/{id}', store.findOne);
+	fixture('GET /models/{id}', store.getData);
 	stop();
 
 	$.ajax({url: "/models/3", dataType: "json"}).then(function(){},function (data) {
+		equal(data.status, 404, 'status');
 		equal(data.statusText, 'error', 'statusText');
-		equal(data.responseText, 'Requested resource not found', 'responseText');
+		equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
 		start();
 	});
 });
@@ -559,10 +561,12 @@ test('fixture.store returns 404 on update with a bad id (#803)', function () {
 
 	$.ajax({url: "/models/6", dataType: "json", data: {'jedan': 'dva'}, type: 'POST'})
 		.then(function(){
-
+			QUnit.ok(false, "success");
+			QUnit.start();
 		},function (data) {
-			equal(data.statusText, 'error', 'Got an error');
-			equal(data.responseText, 'Requested resource not found', 'Got correct status message');
+			equal(data.status, 404, 'status');
+			equal(data.statusText, 'error', 'statusText');
+			equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
 			start();
 		});
 });
@@ -577,27 +581,39 @@ test('fixture.store returns 404 on destroy with a bad id (#803)', function () {
 
 	stop();
 
-	fixture('DELETE /models/{id}', store.destroy);
+	fixture('DELETE /models/{id}', store.destroyData);
 
 	$.ajax({url: "/models/6", dataType: "json", type: 'DELETE'})
 		.then(function(){},function (data) {
-			equal(data.statusText, 'error', 'Got an error');
-			equal(data.responseText, 'Requested resource not found', 'Got correct status message');
+			equal(data.status, 404, 'status');
+			equal(data.statusText, 'error', 'statusText');
+			equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
 			start();
 		});
 });
 
 test('fixture.store can use id of different type (#742)', function () {
+
+	var MustBeNumber = matches.makeComparatorType(function(queryVal, propVal){
+		return parseInt(queryVal,10) === propVal;
+	});
+
+	var query = new Query({
+		properties: {
+			parentId: MustBeNumber
+		}
+	});
+
 	var store = fixture.store(100, function (i) {
 			return {
 				id: i,
 				parentId: i * 2,
 				name: 'Object ' + i
 			};
-		});
-	fixture('GET /models', store.findAll);
+		}, query);
+	fixture('GET /models', store.getListData);
 	stop();
-	$.ajax({url: "/models", dataType: "json", data: { parentId: '4' } })
+	$.ajax({url: "/models", dataType: "json", data: { filter: {parentId: '4'} } })
 		.then(function (models) {
 			equal(models.data.length, 1, 'Got one model');
 			deepEqual(models.data[0], { id: 2, parentId: 4, name: 'Object 2' });
@@ -698,37 +714,57 @@ test('store create works with an empty array of items', function () {
 	var store = fixture.store(0, function () {
 		return {};
 	});
-	store.create({
+	QUnit.stop();
+	store.createData({
 		data: {}
 	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 0, 'the first id is 0');
+		equal(responseData.id, 1, 'the first id is 1');
+		QUnit.start();
 	});
 });
 
-test('store creates sequential ids', function () {
+QUnit.test('store creates sequential ids', function () {
 	var store = fixture.store(0, function () {
 		return {};
 	});
-	store.create({
+	QUnit.stop();
+
+	store.createData({
 		data: {}
 	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 0, 'the first id is 0');
-	});
-	store.create({
-		data: {}
-	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 1, 'the second id is 1');
-	});
-	store.destroy({
-		data: {
-			id: 0
-		}
-	});
-	store.create({
-		data: {}
-	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 2, 'the third id is 2');
-	});
+		equal(responseData.id, 1, 'the first id is 1');
+		createSecond();
+	})
+
+	function createSecond(){
+		store.createData({
+			data: {}
+		}, function (responseData, responseHeaders) {
+			equal(responseData.id, 2, 'the second id is 2');
+			destroyFirst();
+		});
+	}
+	function destroyFirst(){
+		store.destroyData({
+			data: {
+				id: 1
+			}
+		}, createThird);
+	}
+
+	function createThird(){
+		store.createData({
+			data: {}
+		}, function (responseData, responseHeaders) {
+			equal(responseData.id, 3, 'the third id is 3');
+			QUnit.start();
+		});
+	}
+
+
+
+
+
 });
 
 test('fixture updates request.data with id', function() {
@@ -748,6 +784,19 @@ test('fixture updates request.data with id', function() {
 
 test("create a store with array and comparison object",function(){
 
+	var SoftEq = matches.makeComparatorType(function(a, b){
+		/* jshint eqeqeq:false */
+		return a == b;
+	});
+
+
+	var query = new Query({
+		properties: {
+			year: SoftEq,
+			modelId: SoftEq
+		}
+	});
+
 	var store = fixture.store([
 		{id: 1, modelId: 1, year: 2013, name: "2013 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2012/07/01-2013-ford-mustang-gt-review-585x388.jpg"},
 		{id: 2, modelId: 1, year: 2014, name: "2014 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2013/03/2014-roush-mustang.jpg"},
@@ -757,22 +806,12 @@ test("create a store with array and comparison object",function(){
 		{id: 2, modelId: 3, year: 2014, name: "2014 Altima", thumb: "http://www.blogcdn.com/www.autoblog.com/media/2012/04/01-2013-nissan-altima-ny.jpg"},
 		{id: 2, modelId: 4, year: 2013, name: "2013 Leaf", thumb: "http://www.blogcdn.com/www.autoblog.com/media/2012/04/01-2013-nissan-altima-ny.jpg"},
 		{id: 2, modelId: 4, year: 2014, name: "2014 Leaf", thumb: "http://images.thecarconnection.com/med/2013-nissan-leaf_100414473_m.jpg"}
-	],{
-		year: function(a, b){
-			/* jshint eqeqeq:false */
-			return a == b;
-
-		},
-		modelId: function(a, b){
-			/* jshint eqeqeq:false */
-			return a == b;
-		}
-	});
+	],query);
 
 
-	fixture('GET /presetStore', store.findAll);
+	fixture('GET /presetStore', store.getListData);
 	stop();
-	$.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" }).then(function(response){
+	$.ajax({ url: "/presetStore", method: "get", data: {filter: {year: 2013, modelId:1} }, dataType: "json" }).then(function(response){
 
 		equal(response.data[0].id, 1, "got the first item");
 		equal(response.data.length, 1, "only got one item");
@@ -821,10 +860,10 @@ test("store with objects allows .create, .update and .destroy (#1471)", 4, funct
 	]);
 
 
-	fixture('GET /cars', store.findAll);
-	fixture('POST /cars', store.create);
-	fixture('PUT /cars/{id}', store.update);
-	fixture('DELETE /cars/{id}', store.destroy);
+	fixture('GET /cars', store.getListData);
+	fixture('POST /cars', store.createData);
+	fixture('PUT /cars/{id}', store.updateData);
+	fixture('DELETE /cars/{id}', store.destroyData);
 
 	var findAll = function(){
 		return $.ajax({ url: "/cars", dataType: "json" });
@@ -869,15 +908,15 @@ test("filtering works", function() {
 	var next;
 	var store = fixture.store(
 		[	{ state : 'CA', name : 'Casadina' },
-			{ state : 'NT', name : 'Alberny' }],
-		// David, make sure this is here!
-		{});
+			{ state : 'NT', name : 'Alberny' }], new Query({
+				identity: ["state"]
+			}));
 
 	fixture({
-		'GET /api/cities' : store.findAll,
+		'GET /api/cities' : store.getListData,
 	});
 	stop();
-	$.getJSON('/api/cities?state=CA').then(function(data){
+	$.getJSON('/api/cities?filter[state]=CA').then(function(data){
 		deepEqual(data, {
 			data: [{
 				state : 'CA',
@@ -885,86 +924,42 @@ test("filtering works", function() {
 			}],
 			count: 1
 		});
-		next();
+		QUnit.start();
 	}, function(e){
 		ok(false, ""+e);
 		start();
 	});
+});
 
-	next = function (){
+test("filtering works with nested props", function() {
+	QUnit.stop();
+	var store = fixture.store([{
+		id : 1,
+		name : 'Cheese City',
+		slug : 'cheese-city',
+		address : {
+			city : 'Casadina',
+			state : 'CA'
+		}
+	}, {
+		id : 2,
+		name : 'Crab Barn',
+		slug : 'crab-barn',
+		address : {
+			city : 'Alberny',
+			state : 'NT'
+		}
+	}]);
 
-		var store =fixture.store([{
-			_id : 1,
-			name : 'Cheese City',
-			slug : 'cheese-city',
-			address : {
-				city : 'Casadina',
-				state : 'CA'
-			}
-		}, {
-			_id : 2,
-			name : 'Crab Barn',
-			slug : 'crab-barn',
-			address : {
-				city : 'Alberny',
-				state : 'NT'
-			}
-		}],{
-
-		});
-
-		fixture({
-			'GET /restaurants' : store.findAll
-		});
-		$.getJSON('/api/restaurants?address[city]=Alberny').then(function(responseData){
-
-			deepEqual(responseData, {
-				count: 1,
-				data: [{
-					_id : 2,
-					name : 'Crab Barn',
-					slug : 'crab-barn',
-					address : {
-						city : 'Alberny',
-						state : 'NT'
-					}
-				}]
-			});
-			last();
-
-		}, function(e){
-			ok(false);
-			start();
-		});
-	};
-	function last(){
-		var store =fixture.store([{
-			_id : 1,
-			name : 'Cheese City',
-			slug : 'cheese-city',
-			address : {
-				city : 'Casadina',
-				state : 'CA'
-			}
-		}, {
-			_id : 2,
-			name : 'Crab Barn',
-			slug : 'crab-barn',
-			address : {
-				city : 'Alberny',
-				state : 'NT'
-			}
-		}],{
-			"address.city": function(restaurantValue, paramValue, restaurant, params){
-				return restaurant.address.city === paramValue;
-			}
-		});
-		var responseData = store.findAll({data: {"address.city": "Alberny"}});
+	fixture({
+		'GET /restaurants' : store.getListData
+	});
+	$.getJSON('/api/restaurants?filter[address][city]=Alberny').then(function(responseData){
 
 		deepEqual(responseData, {
 			count: 1,
 			data: [{
-				_id : 2,
+				id : 2,
 				name : 'Crab Barn',
 				slug : 'crab-barn',
 				address : {
@@ -973,8 +968,52 @@ test("filtering works", function() {
 				}
 			}]
 		});
+		QUnit.start();
+
+	}, function(e){
+		ok(false);
 		start();
-	}
+	});
+});
+
+test("filtering works with nested.props", function() {
+	QUnit.stop();
+
+	var store =fixture.store([{
+		id : 1,
+		name : 'Cheese City',
+		slug : 'cheese-city',
+		address : {
+			city : 'Casadina',
+			state : 'CA'
+		}
+	}, {
+		id : 2,
+		name : 'Crab Barn',
+		slug : 'crab-barn',
+		address : {
+			city : 'Alberny',
+			state : 'NT'
+		}
+	}]);
+	store.connection.getListData({filter: {"address.city": "Alberny"}})
+		.then(function(responseData){
+			deepEqual(responseData, {
+				count: 1,
+				data: [{
+					id : 2,
+					name : 'Crab Barn',
+					slug : 'crab-barn',
+					address : {
+						city : 'Alberny',
+						state : 'NT'
+					}
+				}]
+			});
+			QUnit.start();
+		});
+
+
 });
 
 
@@ -1208,11 +1247,11 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 	], algebra);
 
 
-	fixture('GET /cars', store.findAll);
-	fixture('POST /cars', store.create);
-	fixture('PUT /cars/{_id}', store.update);
-	fixture('DELETE /cars/{_id}', store.destroy);
-	fixture('GET /cars/{_id}', store.findOne);
+	fixture('GET /cars', store.getListData);
+	fixture('POST /cars', store.createData);
+	fixture('PUT /cars/{_id}', store.updateData);
+	fixture('DELETE /cars/{_id}', store.destroyData);
+	fixture('GET /cars/{_id}', store.getData);
 
 	var findAll = function(){
 		return $.ajax({ url: "/cars", dataType: "json" });
@@ -1329,6 +1368,17 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 });
 
 asyncTest("set.Algebra clauses work", function(){
+
+	var NumberValue = matches.makeComparatorType(function(a,b){
+		if(a === b) {
+			return true;
+		}
+		if(a && b) {
+			return +a === +b;
+		}
+		return false;
+	});
+
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
 		set.props.id("_id"),
@@ -1336,14 +1386,8 @@ asyncTest("set.Algebra clauses work", function(){
 		set.props.enum("type", ["used","new","certified"]),
 		set.props.rangeInclusive("start","end"),
 		{
-			year: function(a, b){
-				if(a === b) {
-					return true;
-				}
-				if(a && b) {
-					return +a === +b;
-				}
-				return false;
+			schema: function(schema){
+				schema.properties.year = NumberValue;
 			}
 		}
 	);
@@ -1359,7 +1403,7 @@ asyncTest("set.Algebra clauses work", function(){
 		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
 	], algebra);
 
-	fixture('GET /cars', store.findAll);
+	fixture('GET /cars', store.getListData);
 
 	$.ajax({ url: "/cars?where[year]=2013", dataType: "json" }).then(function(carsData) {
 		equal(carsData.data.length, 4, 'Where clause works with numbers');

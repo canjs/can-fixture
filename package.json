@@ -1,12 +1,11 @@
 {
   "name": "can-fixture",
-  "version": "2.0.3",
+  "version": "3.0.0-pre.0",
   "description": "Intercept AJAX requests and simulate responses.",
   "main": "fixture.js",
   "scripts": {
     "preversion": "npm test",
     "postpublish": "git push --tags && git push",
-    "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
@@ -19,13 +18,12 @@
   "dependencies": {
     "can-deparam": "^1.0.1",
     "can-log": "^1.0.0",
-    "can-memory-store": "file:../can-memory-store",
+    "can-memory-store": "<2.0.0",
     "can-namespace": "1.0.0",
-    "can-query": "file:../can-query",
+    "can-query": "<2.0.0",
     "can-reflect": "^1.13.4"
   },
   "devDependencies": {
-    "bit-docs": "0.0.7",
     "detect-cyclic-packages": "^1.1.0",
     "jquery": "^3.1.1",
     "jshint": "^2.7.0",

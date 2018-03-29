@@ -4,11 +4,72 @@ var canReflect = require("can-reflect");
 var dataFromUrl = require("./data-from-url");
 var Query = require("can-query");
 
+
+function deepEqual(a, b) {
+	if(a === b) {
+		return true;
+	} else if(Array.isArray(a) && Array.isArray(b)) {
+		if(a.length !== b.length) {
+			return false;
+		} else {
+			return a.every(function(aVal, i){
+				return deepEqual(aVal, b[i]);
+			});
+		}
+	} else if(a && b && canReflect.isPlainObject(a) && canReflect.isPlainObject(b)) {
+		var aKeys = Object.keys(a),
+			bKeys = Object.keys(b);
+		if(aKeys.length === bKeys.length) {
+			for(var prop in a) {
+				if(!b.hasOwnProperty(prop)) {
+					return false;
+				}
+				if(!deepEqual(a[prop], b[prop])) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
+
+
+function deepMatches(a, b) {
+	if(a === b) {
+		return true;
+	} else if(Array.isArray(a) && Array.isArray(b)) {
+
+		return a.every(function(aVal, i){
+			return deepMatches(aVal, b[i]);
+		});
+
+	} else if(a && b && canReflect.isPlainObject(a) && canReflect.isPlainObject(b)) {
+
+		for(var prop in a) {
+			if(!b.hasOwnProperty(prop)) {
+				return false;
+			}
+			if(!deepMatches(a[prop], b[prop])) {
+				return false;
+			}
+		}
+		return true;
+
+	} else {
+		return false
+	}
+}
+
 function removeFixtureAndXHR(query) {
-	if(query.fixture || query.xhr) {
+	if(query.fixture || query.xhr || query.data) {
 		var clone = canReflect.serialize(query);
 		delete clone.fixture;
 		delete clone.xhr;
+		delete clone.data;
 		return clone;
 	} else {
 		return query;
@@ -55,6 +116,13 @@ function makeComparatorType(compare) {
 }
 
 function quickEqual(queryA, queryB){
+	var dataA = queryA.data,
+		dataB = queryB.data;
+	if(dataA && dataB) {
+		if(!deepMatches(dataA, dataB)) {
+			return false;
+		}
+	}
 	var q1 = new BasicQuery.And(removeFixtureAndXHR(queryA)),
 		q2 = new BasicQuery.And(removeFixtureAndXHR(queryB));
 	return set.isEqual( q1, q2 );

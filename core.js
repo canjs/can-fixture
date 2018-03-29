@@ -217,7 +217,7 @@ exports.get = function(xhrSettings) {
 	}
 	// First try an exact match
 	var index = exports.index(xhrSettings, true);
-	
+
 	// If that doesn't work, try a looser match.
 	if(index === -1) {
 		index = exports.index(xhrSettings, false);

@@ -13,7 +13,7 @@ var connectToConnection = function(method){
 		this.connection[method](req.data).then(function(data){
 			res(data);
 		}, function(err){
-			res(403, err);
+			res(parseInt(err.status, 10), err);
 		});
 	};
 };
@@ -25,7 +25,7 @@ var makeMakeItems = function(baseItems, idProp){
 			maxId = 0;
 		baseItems.forEach(function(item){
 			items.push(canReflect.serialize(item) );
-			maxId = Math.max(item[idProp] + 1, maxId + 1) || items.length;
+			maxId = Math.max(item[idProp], maxId) ;
 		});
 
 		return {
@@ -75,7 +75,7 @@ canReflect.assignMap(Store.prototype,{
 		this.connection.addSet({}, {data:itemData.items});
 	},
 	get: function (params) {
-		var id = this.connection.id(params);
+		var id = this.connection.algebra.id(params);
 		return this.connection.getInstance(id);
 	},
 	getList: function(set){
@@ -90,9 +90,11 @@ canReflect.eachKey({
 	update: "updateData",
 	destroy: "destroyData"
 }, function(method, prop){
+
 	Store.prototype[prop] = function(){
+		throw new Error("Use "+method+" instead of "+prop);
 		// TODO: warn here
-		return this[method].apply(this, arguments);
+		this[method].apply(this, arguments);
 	};
 });
 
@@ -122,9 +124,10 @@ Store.make = function (count, make, algebra) {
 				if (!item[idProp]) {
 					item[idProp] = i;
 				}
-				maxId = Math.max(item[idProp] , maxId) || items.length;
+				maxId = Math.max(item[idProp] , maxId);
 				items.push(item);
 			}
+
 			return {
 				maxId: maxId,
 				items: items
@@ -140,7 +143,8 @@ Store.make = function (count, make, algebra) {
 	}
 
 	var connection = memoryStore({
-		algebra: algebra
+		algebra: algebra,
+		errorOnMissingRecord: true
 	});
 
 	return new Store(connection, makeItems, idProp);
