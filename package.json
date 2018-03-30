@@ -6,6 +6,7 @@
   "scripts": {
     "preversion": "npm test",
     "postpublish": "git push --tags && git push",
+    "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
