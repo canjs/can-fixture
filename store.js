@@ -82,22 +82,6 @@ canReflect.assignMap(Store.prototype,{
 		return this.connection._getListData(set);
 	}
 });
-// legacy methods
-canReflect.eachKey({
-	findAll: "getListData",
-	findOne: "getData",
-	create: "createData",
-	update: "updateData",
-	destroy: "destroyData"
-}, function(method, prop){
-
-	Store.prototype[prop] = function(){
-		throw new Error("Use "+method+" instead of "+prop);
-		// TODO: warn here
-		this[method].apply(this, arguments);
-	};
-});
-
 
 
 // ## fixture.store

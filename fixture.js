@@ -42,7 +42,7 @@ canReflect.assignMap(fixture, {
 		return result;
 	},
 	xhr: function (xhr) {
-		return assign({}, {
+		return canReflect.assignMap({}, {
 			abort: noop,
 			getAllResponseHeaders: function () {
 				return "";
