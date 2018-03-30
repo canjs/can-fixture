@@ -1,6 +1,6 @@
 {
   "name": "can-fixture",
-  "version": "3.0.0-pre.0",
+  "version": "3.0.0-pre.1",
   "description": "Intercept AJAX requests and simulate responses.",
   "main": "fixture.js",
   "scripts": {
