@@ -18,13 +18,15 @@
   },
   "dependencies": {
     "can-deparam": "^1.0.1",
+    "can-key": "<2.0.0",
     "can-log": "^1.0.0",
     "can-memory-store": "<2.0.0",
     "can-namespace": "1.0.0",
-    "can-query": "<2.0.0",
-    "can-reflect": "^1.13.4"
+    "can-query-logic": "<2.0.0",
+    "can-reflect": "^1.15.1"
   },
   "devDependencies": {
+    "can-set-legacy": "^0.1.0",
     "detect-cyclic-packages": "^1.1.0",
     "jquery": "^3.1.1",
     "jshint": "^2.7.0",

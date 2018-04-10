@@ -1,8 +1,8 @@
-var BasicQuery = require("can-query/src/types/basic-query");
-var set = require("can-query/src/set");
+var BasicQuery = require("can-query-logic/src/types/basic-query");
+var set = require("can-query-logic/src/set");
 var canReflect = require("can-reflect");
 var dataFromUrl = require("./data-from-url");
-var Query = require("can-query");
+var Query = require("can-query-logic");
 
 
 function deepEqual(a, b) {
@@ -172,7 +172,7 @@ canReflect.eachKey({
 
 var schema = {
 	identity: ["id"],
-	properties: {
+	keys: {
 		url: types.TemplateUrl,
 		fixture: types.Ignore,
 		xhr: types.Ignore,
@@ -192,7 +192,7 @@ var query = new Query(schema);
 module.exports = {
 	fixture: quickEqual,
 	request: function(requestData, fixtureData) {
-		return query.has({filter: fixtureData}, requestData);
+		return query.isMember({filter: fixtureData}, requestData);
 	},
 	matches: function(settings, fixture, exact) {
 		if (exact) {

@@ -1,16 +1,17 @@
-var Query = require("can-query");
+var QueryLogic = require("can-query-logic");
 
 var canReflect = require("can-reflect");
 
 var memoryStore = require("can-memory-store");
 
 
+
 // Returns a function that calls the method on a connection.
 // Wires up fixture signature to a connection signature.
-var connectToConnection = function(method){
+var connectToConnection = function(method, convert){
 	return function(req, res){
 		// have to get data from
-		this.connection[method](req.data).then(function(data){
+		this.connection[method]( convert.call(this, req.data) ).then(function(data){
 			res(data);
 		}, function(err){
 			res(parseInt(err.status, 10), err);
@@ -35,6 +36,28 @@ var makeMakeItems = function(baseItems, idProp){
 	};
 };
 
+var stringToAny = function(str){
+	switch(str) {
+		case "NaN":
+		case "Infinity":
+			return +str;
+		case "null":
+			return null;
+		case "undefined":
+			return undefined;
+		case "true":
+		case "false":
+			return str === "true";
+		default:
+			var val = +str;
+			if(!isNaN(val)) {
+				return val;
+			} else {
+				return str;
+			}
+	}
+};
+
 // A store constructor function
 var Store = function(connection, makeItems, idProp){
 	this.connection = connection;
@@ -46,9 +69,38 @@ var Store = function(connection, makeItems, idProp){
 		this[method] = this[method].bind(this);
 	}
 };
+
+var doNotConvert = function(v){ return v; };
+
+function typeConvert(data){
+	var schema = this.connection.queryLogic.schema;
+	var identityKey = schema.identity[0],
+		keys = schema.keys;
+	if(!keys || !keys[identityKey]) {
+		console.warn("No type specified for identity key. Going to convert strings to reasonable type.");
+		keys = {};
+		keys[identityKey] = function(value){
+			return typeof value === "string" ? stringToAny(value) : value;
+		}
+	}
+		// this probably needs to be recursive, but this is ok for now
+	var copy = {};
+	canReflect.eachKey(data, function(value, key){
+		if(keys[key]) {
+			copy[key] = canReflect.convert(value, keys[key]);
+		} else {
+			copy[key] = value;
+		}
+	});
+	// clone the data
+
+	return copy;
+
+}
+
 canReflect.assignMap(Store.prototype,{
-	getListData: connectToConnection("getListData"),
-	getData: connectToConnection( "getData"),
+	getListData: connectToConnection("getListData",doNotConvert),
+	getData: connectToConnection( "getData",typeConvert),
 
 	// used
 	createData: function(req, res){
@@ -56,7 +108,7 @@ canReflect.assignMap(Store.prototype,{
 		// add an id
 		req.data[idProp] = ++this.maxId;
 
-		this.connection.createData(req.data).then(function(data){
+		this.connection.createData( typeConvert.call(this,req.data) ).then(function(data){
 			var responseData = {};
 			responseData[idProp] = req.data[idProp];
 			res(responseData);
@@ -64,8 +116,8 @@ canReflect.assignMap(Store.prototype,{
 			res(403, err);
 		});
 	},
-	updateData: connectToConnection("updateData"),
-	destroyData: connectToConnection("destroyData"),
+	updateData: connectToConnection("updateData",typeConvert),
+	destroyData: connectToConnection("destroyData",typeConvert),
 	reset: function(newItems){
 		if(newItems) {
 			this.makeItems = makeMakeItems(newItems, this.idProp);
@@ -75,7 +127,7 @@ canReflect.assignMap(Store.prototype,{
 		this.connection.addSet({}, {data:itemData.items});
 	},
 	get: function (params) {
-		var id = this.connection.algebra.id(params);
+		var id = this.connection.queryLogic.memberIdentity(params);
 		return this.connection.getInstance(id);
 	},
 	getList: function(set){
@@ -86,7 +138,7 @@ canReflect.assignMap(Store.prototype,{
 
 // ## fixture.store
 // Make a store of objects to use when making requests against fixtures.
-Store.make = function (count, make, algebra) {
+Store.make = function (count, make, queryLogic) {
 	/*jshint eqeqeq:false */
 
 
@@ -94,10 +146,10 @@ Store.make = function (count, make, algebra) {
 	var makeItems,
 		idProp;
 	if(typeof count === "number") {
-		if(!algebra) {
-			algebra = new Query({});
+		if(!queryLogic) {
+			queryLogic = new QueryLogic({});
 		}
-		idProp = algebra.getIdentityKeys()[0] || "id";
+		idProp = queryLogic.identityKeys()[0] || "id";
 		makeItems = function () {
 			var items = [];
 			var maxId = 0;
@@ -118,16 +170,16 @@ Store.make = function (count, make, algebra) {
 			};
 		};
 	} else if(Array.isArray(count)){
-		algebra = make;
-		if(!algebra) {
-			algebra = new Query({});
+		queryLogic = make;
+		if(!queryLogic) {
+			queryLogic = new QueryLogic({});
 		}
-		idProp = algebra.getIdentityKeys()[0] || "id";
+		idProp = queryLogic.identityKeys()[0] || "id";
 		makeItems = makeMakeItems(count, idProp);
 	}
 
 	var connection = memoryStore({
-		algebra: algebra,
+		queryLogic: queryLogic,
 		errorOnMissingRecord: true
 	});
 

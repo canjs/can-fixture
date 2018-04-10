@@ -2,13 +2,13 @@ require("./matches-test");
 
 var QUnit = require('steal-qunit');
 var fixture = require("can-fixture");
-var set = require("can-query/compat/compat");
+var set = require("can-set-legacy");
 var $ = require("jquery");
 var canDev = require('can-log/dev/dev');
 var dataFromUrl = require("../data-from-url");
 var canReflect = require("can-reflect");
 var matches = require("../matches");
-var Query = require("can-query");
+var QueryLogic = require("can-query-logic");
 
 
 var errorCallback = function(xhr, status, error){
@@ -182,7 +182,7 @@ test('fixture.store fixtures', function () {
 	var algebra = new set.Algebra({
 		schema: function(schema) {
 
-			schema.properties.searchText = SearchText;
+			schema.keys.searchText = SearchText;
 		}
 	},
 		set.props.offsetLimit("offset","limit"),
@@ -598,8 +598,8 @@ test('fixture.store can use id of different type (#742)', function () {
 		return parseInt(queryVal,10) === propVal;
 	});
 
-	var query = new Query({
-		properties: {
+	var query = new QueryLogic({
+		keys: {
 			parentId: MustBeNumber
 		}
 	});
@@ -790,8 +790,8 @@ test("create a store with array and comparison object",function(){
 	});
 
 
-	var query = new Query({
-		properties: {
+	var query = new QueryLogic({
+		keys: {
 			year: SoftEq,
 			modelId: SoftEq
 		}
@@ -908,7 +908,7 @@ test("filtering works", function() {
 	var next;
 	var store = fixture.store(
 		[	{ state : 'CA', name : 'Casadina' },
-			{ state : 'NT', name : 'Alberny' }], new Query({
+			{ state : 'NT', name : 'Alberny' }], new QueryLogic({
 				identity: ["state"]
 			}));
 
@@ -1225,7 +1225,7 @@ if (__dirname !== '/') {
 	});
 }
 
-test("set.Algebra CRUD works (#12)", 5, function(){
+test("first set.Algebra CRUD works (#12)", 5, function(){
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1387,7 +1387,7 @@ asyncTest("set.Algebra clauses work", function(){
 		set.props.rangeInclusive("start","end"),
 		{
 			schema: function(schema){
-				schema.properties.year = NumberValue;
+				schema.keys.year = NumberValue;
 			}
 		}
 	);

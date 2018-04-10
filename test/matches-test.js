@@ -3,6 +3,7 @@ var matches = require("../matches");
 
 
 QUnit.test('core.defaultCompare', function () {
+	
 	var same = matches.request({
         url: '/thingers/5'
 	}, {

@@ -1,5 +1,5 @@
 // Adds
-var sub = require("can-get/sub/sub");
+var sub = require("can-key/sub/sub");
 var canReflect = require("can-reflect");
 var matches = require("./matches");
 var canLog = require("can-log");
