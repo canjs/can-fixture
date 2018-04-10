@@ -60,6 +60,14 @@ var stringToAny = function(str){
 
 // A store constructor function
 var Store = function(connection, makeItems, idProp){
+	var schema = connection.queryLogic.schema;
+	var identityKey = schema.identity[0],
+		keys = schema.keys;
+
+	if(!keys || !keys[identityKey]) {
+		console.warn("No type specified for identity key. Going to convert strings to reasonable type.");
+	}
+
 	this.connection = connection;
 	this.makeItems = makeItems;
 	this.idProp = idProp;
@@ -77,11 +85,10 @@ function typeConvert(data){
 	var identityKey = schema.identity[0],
 		keys = schema.keys;
 	if(!keys || !keys[identityKey]) {
-		console.warn("No type specified for identity key. Going to convert strings to reasonable type.");
 		keys = {};
 		keys[identityKey] = function(value){
 			return typeof value === "string" ? stringToAny(value) : value;
-		}
+		};
 	}
 		// this probably needs to be recursive, but this is ok for now
 	var copy = {};
