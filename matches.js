@@ -1,8 +1,7 @@
-var BasicQuery = require("can-query-logic/src/types/basic-query");
 var set = require("can-query-logic/src/set");
 var canReflect = require("can-reflect");
 var dataFromUrl = require("./data-from-url");
-var Query = require("can-query-logic");
+var QueryLogic = require("can-query-logic");
 
 
 function deepEqual(a, b) {
@@ -123,13 +122,13 @@ function quickEqual(queryA, queryB){
 			return false;
 		}
 	}
-	var q1 = new BasicQuery.And(removeFixtureAndXHR(queryA)),
-		q2 = new BasicQuery.And(removeFixtureAndXHR(queryB));
+	var q1 = new QueryLogic.KeysAnd(removeFixtureAndXHR(queryA)),
+		q2 = new QueryLogic.KeysAnd(removeFixtureAndXHR(queryB));
 	return set.isEqual( q1, q2 );
 }
 
 function quickSubset(queryA, queryB){
-	return set.isSubset( new BasicQuery.And(queryA), new BasicQuery.And(queryB) );
+	return set.isSubset( new QueryLogic.KeysAnd(queryA), new QueryLogic.KeysAnd(queryB) );
 }
 
 // Define types
@@ -184,7 +183,7 @@ var schema = {
 	}
 };
 
-var query = new Query(schema);
+var query = new QueryLogic(schema);
 
 
 
