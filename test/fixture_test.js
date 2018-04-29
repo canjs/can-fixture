@@ -1,4 +1,5 @@
 require("./matches-test");
+require("./store-test");
 
 var QUnit = require('steal-qunit');
 var fixture = require("can-fixture");

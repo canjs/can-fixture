@@ -123,7 +123,20 @@ canReflect.assignMap(Store.prototype,{
 			res(403, err);
 		});
 	},
+	createInstance: function(record){
+		var idProp = this.idProp;
+		if(!(idProp in record)) {
+			record[idProp] = ++this.maxId;
+		}
+		return this.connection.createData( record )
+	},
 	updateData: connectToConnection("updateData",typeConvert),
+	updateInstance: function(record) {
+		return this.connection.updateData(record);
+	},
+	destroyInstance: function(record) {
+		return this.connection.destroyData(record);
+	},
 	destroyData: connectToConnection("destroyData",typeConvert),
 	reset: function(newItems){
 		if(newItems) {
