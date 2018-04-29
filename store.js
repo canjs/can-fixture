@@ -128,7 +128,7 @@ canReflect.assignMap(Store.prototype,{
 		if(!(idProp in record)) {
 			record[idProp] = ++this.maxId;
 		}
-		return this.connection.createData( record )
+		return this.connection.createData( record );
 	},
 	updateData: connectToConnection("updateData",typeConvert),
 	updateInstance: function(record) {
