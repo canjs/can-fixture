@@ -155,6 +155,9 @@ canReflect.assignMap(Store.prototype,{
 	}
 });
 
+function looksLikeAQueryLogic(obj){
+	return obj && ("identityKeys" in obj);
+}
 
 // ## fixture.store
 // Make a store of objects to use when making requests against fixtures.
@@ -168,6 +171,8 @@ Store.make = function (count, make, queryLogic) {
 	if(typeof count === "number") {
 		if(!queryLogic) {
 			queryLogic = new QueryLogic({});
+		} else if(!looksLikeAQueryLogic(queryLogic)) {
+			queryLogic = new QueryLogic(queryLogic);
 		}
 		idProp = queryLogic.identityKeys()[0] || "id";
 		makeItems = function () {
@@ -193,6 +198,8 @@ Store.make = function (count, make, queryLogic) {
 		queryLogic = make;
 		if(!queryLogic) {
 			queryLogic = new QueryLogic({});
+		} else if(!looksLikeAQueryLogic(queryLogic)) {
+			queryLogic = new QueryLogic(queryLogic);
 		}
 		idProp = queryLogic.identityKeys()[0] || "id";
 		makeItems = makeMakeItems(count, idProp);
