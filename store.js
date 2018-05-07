@@ -144,14 +144,14 @@ canReflect.assignMap(Store.prototype,{
 		}
 		var itemData =  this.makeItems();
 		this.maxId = itemData.maxId;
-		this.connection.addSet({}, {data:itemData.items});
+		this.connection.updateListData(itemData.items, {});
 	},
 	get: function (params) {
 		var id = this.connection.queryLogic.memberIdentity(params);
-		return this.connection.getInstance(id);
+		return this.connection.getRecord(id);
 	},
 	getList: function(set){
-		return this.connection._getListData(set);
+		return this.connection.getListDataSync(set);
 	}
 });
 
