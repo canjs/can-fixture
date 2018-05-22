@@ -116,9 +116,7 @@ canReflect.assignMap(Store.prototype,{
 		req.data[idProp] = ++this.maxId;
 
 		this.connection.createData( typeConvert.call(this,req.data) ).then(function(data){
-			var responseData = {};
-			responseData[idProp] = req.data[idProp];
-			res(responseData);
+			res(data);
 		}, function(err){
 			res(403, err);
 		});

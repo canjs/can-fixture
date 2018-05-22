@@ -74,3 +74,40 @@ QUnit.test("anything with a schema will be converted to a queryLogic automatical
 
 
 });
+
+
+QUnit.test("createData, destroyData, updateData", function(assert){
+    var store = fixture.store([
+        {id: 0, name: "foo"}
+    ], new QueryLogic({identity: ["id"]}));
+
+    QUnit.stop();
+    store.createData({
+        data: {name: "bar"}
+    }, function(instance){
+        QUnit.deepEqual(instance, {id: 1, name: "bar"} );
+        QUnit.start();
+    });
+    /*
+    .then(function(instance){
+        var data = store.getList({});
+        assert.deepEqual(data, {
+            count: 2,
+            data: [
+                {id: 0, name: "foo"},
+                {id: 1, name: "updated"}
+            ]
+        });
+        return store.destroyInstance(instance);
+    })
+    .then(function(){
+        var data = store.getList({});
+        assert.deepEqual(data, {
+            count: 1,
+            data: [
+                {id: 0, name: "foo"}
+            ]
+        });
+        QUnit.start();
+    });*/
+});
