@@ -1945,4 +1945,4 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		xhr.open('GET', '/onload');
 		xhr.send();
 	});
-}
+} // END onabort check

@@ -234,14 +234,14 @@ canReflect.assignMap(XMLHttpRequest.prototype,{
 		};
 
 		if(fixtureSettings && typeof fixtureSettings.fixture === "number") {
-			canLog.log(xhrSettings.url+" -> delay " + fixtureSettings.fixture+"ms");
+			canLog.log("can-fixture: "+xhrSettings.url+" => delay " + fixtureSettings.fixture+"ms");
 			this.timeoutId = setTimeout(makeRequest, fixtureSettings.fixture);
 			return;
 		}
 
 		// if we do have a fixture, update the real XHR object.
 		if(fixtureSettings) {
-			canLog.log(xhrSettings.url+" -> " + fixtureSettings.url);
+			canLog.log("can-fixture: "+xhrSettings.url+" => " + fixtureSettings.url);
 			canReflect.assignMap(mockXHR, fixtureSettings);
 		}
 

@@ -170,19 +170,24 @@ var $fixture = exports.add;
 $fixture.on = true;
 $fixture.delay =10;
 
+function FixtureResponse(fixture, response){
+	this.statusCode= response[0];
+	this.responseBody= response[1];
+	this.headers= response[2];
+	this.statusText= response[3];
+	this.fixture= fixture;
+}
 
 // Calls a dynamic fixture and calls `cb` with the response data.
 exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 	// this is for legacy.  In the future, people should get it from fixtureSettings probably.
 	xhrSettings.data = fixtureSettings.data;
 
-	//!steal-remove-start
-	var json = JSON.stringify(xhrSettings.data);
-	canLog.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
-	//!steal-remove-end
-
 	var response = function(){
 		var res = exports.extractResponse.apply(xhrSettings, arguments);
+		//!steal-remove-start
+		canLog.log("can-fixture: " + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" ",xhrSettings.data," => ",new FixtureResponse(fixtureSettings.fixture,res));
+		//!steal-remove-end
 		return cb.apply(this, res);
 	};
 	var callFixture = function () {
