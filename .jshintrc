@@ -45,5 +45,6 @@
   "yui": true,
   "browser": true,
   "phantom": true,
-  "rhino": true
+  "rhino": true,
+  "node": true
 }
