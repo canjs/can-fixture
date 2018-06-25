@@ -178,8 +178,10 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 	xhrSettings.data = fixtureSettings.data;
 
 	//!steal-remove-start
-	var json = JSON.stringify(xhrSettings.data);
-	canLog.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
+	if(process.env.NODE_ENV !== 'production') {
+		var json = JSON.stringify(xhrSettings.data);
+		canLog.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
+	}
 	//!steal-remove-end
 
 	var response = function(){
