@@ -1,3 +1,4 @@
+"use strict";
 var stealTools = require("steal-tools");
 var globalJS = require("steal-tools/lib/build/helpers/global").js;
 var baseHelpers = require("steal-tools/lib/build/helpers/base");

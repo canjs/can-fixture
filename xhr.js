@@ -1,3 +1,4 @@
+"use strict";
 /* global require, window, global */
 /* global setTimeout, clearTimeout, XMLHttpRequest */
 

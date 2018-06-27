@@ -1,3 +1,4 @@
+"use strict";
 // Adds
 var canSet = require("can-set");
 var sub = require("can-util/js/string/string").sub;
