@@ -1,3 +1,4 @@
+"use strict";
 var getId = require("./getid");
 var canSet = require("can-set");
 var isArrayLike = require("can-util/js/is-array-like/is-array-like");

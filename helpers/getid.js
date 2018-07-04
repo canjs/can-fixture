@@ -1,3 +1,4 @@
+"use strict";
 // Attemps to guess where the id is in an AJAX call's URL and returns it.
 module.exports = function (xhrSettings, fixtureSettings) {
 	var id = xhrSettings.data.id;

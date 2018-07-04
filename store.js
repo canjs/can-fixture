@@ -1,3 +1,4 @@
+"use strict";
 var canSet = require("can-set");
 var connect = require("can-connect");
 var legacyStore = require("./helpers/legacyStore");
