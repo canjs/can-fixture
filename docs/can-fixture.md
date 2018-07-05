@@ -1,6 +1,6 @@
 @module {function} can-fixture
 @parent can-data-modeling
-@collection can-ecosystem
+@collection can-core
 @group can-fixture.properties properties
 @group can-fixture.types types
 @package ../package.json
@@ -126,13 +126,13 @@ fixture( {
 Wire up a restful API scheme to a store.
 
 ```js
-const todoAlgebra = new set.Algebra(
-	set.props.id( "id" )
+const todoQueryLogic = new QueryLogic(
+	{identity: ["id"]}
 );
 const todoStore = fixture.store( [
 	{ id: 1, name: "Do the dishes" },
 	{ id: 2, name: "Walk the dog" }
-], todoAlgebra );
+], todoQueryLogic );
 
 fixture( "/api/todos/{id}", todoStore ); // can also be written fixture("/api/todos", todoStore);
 ```

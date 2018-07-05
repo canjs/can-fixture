@@ -1,19 +1,19 @@
 @function can-fixture.store store
 @parent can-fixture.properties
 
-@signature `fixture.store(baseItems, algebra)`
+@signature `fixture.store(baseItems, queryLogic)`
 
 Create a store that starts with `baseItems` for a service layer
-described by `algebra`.
+described by `queryLogic`.
 
 ```js
+const Todo = DefineMap.extend({
+	id: {identity: true, type: "number"},
+	completed: "boolean"
+})
+
 // Describe the services parameters:
-const todoAlgebra = new set.Algebra(
-	set.props.id( "_id" ),
-	set.props.boolean( "completed" ),
-	set.props.rangeInclusive( "start", "end" ),
-	set.props.sort( "orderBy" ),
-);
+const todoQueryLogic = new QueryLogic(Todo);
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
@@ -27,26 +27,26 @@ const todoStore = fixture.store( [
 		name: "Walk the dog",
 		complete: false
 	} ],
-todoAlgebra );
+todoQueryLogic );
 
 // Hookup urls to the store:
 fixture( "/todos/{_id}", todoStore );
 ```
   @param {Array} baseItems An array of items that will populate the store.
-  @param {can-set.Algebra} algebra A description of the service layer's parameters.
+  @param {can-query-logic} QueryLogic A description of the service layer's parameters.
   @return {can-fixture/StoreType} A store that can be used to simulate
   a restful service layer that supports filtering, pagination, and
   more.  
 
 
-@signature `fixture.store(count, makeItems, algebra)`
+@signature `fixture.store(count, makeItems, queryLogic)`
 
-Similar to `fixture.store(baseItems, algebra)`, except that
+Similar to `fixture.store(baseItems, queryLogic)`, except that
 it uses `makeItems` to create `count` entries in the store.
 
 ```js
 // Describe the services parameters:
-const todoAlgebra = new set.Algebra( /* ... */ );
+const todoQueryLogic = new QueryLogic( /* ... */ );
 
 // Create a store with initial data.
 // Pass [] if you want it to be empty.
@@ -59,14 +59,14 @@ const todoStore = fixture.store(
 			complete: fixture.rand( [ true, false ], 1 )[ 0 ]
 		};
 	},
-	todoAlgebra );
+	todoQueryLogic );
 
 // Hookup urls to the store:
 fixture( "/todos/{_id}", todoStore );
 ```
   @param {Number} count TODO describe
   @param {function} makeItems A function that will generate `baseItems`
-  @param {can-set.Algebra} algebra A description of the service layer's parameters.
+  @param {can-query-logic} queryLogic A description of the service layer's parameters.
   @return {can-fixture/StoreType} A store that can be used to simulate
   a restful service layer that supports filtering, pagination, and
   more.  

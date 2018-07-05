@@ -9,7 +9,7 @@ Sets the items in the store to their original state or to `baseItems` if it's pa
 // Creates a store with one item.
 const todoStore = fixture.store(
 	[ { id: 1, name: "dishes" } ],
-	new set.Algebra() );
+	new QueryLogic({identity: ["id"]}) );
 fixture( "/todos/{id}", todoStore );
 todoStore.getList( {} ).length; //-> 1
 

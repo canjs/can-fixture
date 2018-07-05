@@ -41,5 +41,5 @@ fixture({method: "GET"}, function(){ ... });
   The templated values get added to the [can-fixture/types/request] object's `data`.
 
   @option {String} [method] The method of the request. Ex: `GET`, `PUT`, `POST`, etc. Capitalization is ignored.
-  @option {Object} [data] Match the data of the request. The data of the querystring or the data to `XMLHTTPRequest.prototype.send` is converted to a JavaScript objects with either `JSON.stringify` or [can-util/js/deparam/deparam].  The data must match part of the `request`'s data.
+  @option {Object} [data] Match the data of the request. The data of the querystring or the data to `XMLHTTPRequest.prototype.send` is converted to a JavaScript objects with either `JSON.stringify` or [can-deparam].  The data must match part of the `request`'s data.
   @option {Boolean} [async] Write `true` to match asynchronous requests only.  
