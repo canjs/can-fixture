@@ -1,3 +1,4 @@
+"use strict";
 // Adds
 var sub = require("can-key/sub/sub");
 var canReflect = require("can-reflect");
@@ -182,6 +183,13 @@ function FixtureResponse(fixture, response){
 exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 	// this is for legacy.  In the future, people should get it from fixtureSettings probably.
 	xhrSettings.data = fixtureSettings.data;
+
+	//!steal-remove-start
+	if(process.env.NODE_ENV !== 'production') {
+		var json = JSON.stringify(xhrSettings.data);
+		canLog.log("" + xhrSettings.type.toUpperCase() + " " + xhrSettings.url+" "+json.substr(0,50)+" -> handler(req,res)");
+	}
+	//!steal-remove-end
 
 	var response = function(){
 		var res = exports.extractResponse.apply(xhrSettings, arguments);
