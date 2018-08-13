@@ -125,11 +125,12 @@ function getSettingsFromString (route) {
 // from our array of fixture overwrites.
 function upsertFixture (fixtureList, settings, fixture) {
 	var index = exports.index(settings, true);
+	var oldFixture;
 	if (index > -1) {
-		fixtures.splice(index, 1);
+		oldFixture = fixtures.splice(index, 1);
 	}
 	if (fixture == null) {
-		return;
+			return oldFixture;
 	}
 	if(typeof fixture === "object") {
 		var data = fixture;
@@ -139,10 +140,19 @@ function upsertFixture (fixtureList, settings, fixture) {
 	}
 	settings.fixture = fixture;
 	fixtures.unshift(settings);
+		return oldFixture;
 }
 
 // Adds a fixture to the list of fixtures.
 exports.add = function (settings, fixture) {
+	
+	if (Array.isArray(settings)) {
+		var allFixtures = settings.reduce(function(oldFixtures, currentValue){
+	    return oldFixtures.concat(upsertFixture(fixtures, currentValue, currentValue.fixture));
+		},[]);
+		return allFixtures;
+	}
+
 	// If a fixture isn't provided, we assume that settings is
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
@@ -164,7 +174,7 @@ exports.add = function (settings, fixture) {
 	if (typeof settings === 'string') {
 		settings = getSettingsFromString(settings);
 	}
-	upsertFixture(fixtures, settings, fixture);
+	return upsertFixture(fixtures, settings, fixture);
 };
 
 var $fixture = exports.add;
