@@ -130,7 +130,7 @@ function upsertFixture (fixtureList, settings, fixture) {
 		oldFixture = fixtures.splice(index, 1);
 	}
 	if (fixture == null) {
-			return oldFixture;
+		return oldFixture;
 	}
 	if(typeof fixture === "object") {
 		var data = fixture;
@@ -140,7 +140,7 @@ function upsertFixture (fixtureList, settings, fixture) {
 	}
 	settings.fixture = fixture;
 	fixtures.unshift(settings);
-		return oldFixture;
+	return oldFixture;
 }
 
 // Adds a fixture to the list of fixtures.
