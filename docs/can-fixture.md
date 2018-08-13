@@ -38,6 +38,7 @@
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture( ajaxSettings, url )`
 
@@ -88,6 +89,7 @@
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method.
   @param {Object} data A representation of records in the store.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture(ajaxSettings, delay)`
 
@@ -108,6 +110,7 @@
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {Number} delay A numeric representation of milliseconds that the response should wait.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture(ajaxSettings, null)`
 
@@ -132,6 +135,7 @@
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {object} null A representation of the intentional absence of any object value. [null](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null) is a JavaScript primitive value.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture( methodAndUrl, url|data|requestHandler )`
 
@@ -147,6 +151,7 @@
 
   @param {Object} methodAndUrl A string formatted like is `METHOD URL`.
   @param {String|Object|can-fixture.requestHandler} url|data|requestHandler The URL that will be queried. A representation of records in the store. A definition for XHR response for a given trapped request.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture( url, url|data|requestHandler )`
 
@@ -161,6 +166,7 @@
   ```
   @param {String} url The pathname of requests that will be trapped.
   @param {String|Object|can-fixture.requestHandler} url|data|requestHandler The URL that will be queried. A representation of records in the store. A definition for XHR response for a given trapped request.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture( fixtures )`
 
@@ -188,6 +194,7 @@
   @codepen
 
   @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to some response argument type.
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
 
 @signature `fixture( restfulUrl, store )`
 
@@ -237,3 +244,11 @@
 
   @param {String} restfulUrl The url that may include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed, if provided; otherwise the `item` url is assumed to have the `/{ID_PROP}` part appended to the end.
   @param {can-fixture/StoreType} store A store produced by [can-fixture.store].
+  @return {Array<can-fixture/types/ajaxSettings>}  Returns an array of any fixtures that are replaced by the fixture that is added.
+
+@signature `fixture(ajaxSettingsArray)`
+
+  Add fixtures that have been previously removed with another call to fixture.
+  
+  @param {Array<can-fixture/types/ajaxSettings>}  An array of AJAX settings objects
+  @return {Array<can-fixture/types/ajaxSettings>} Returns an array of any fixtures that are replaced by the fixtures that are added.
