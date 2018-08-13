@@ -157,18 +157,18 @@ exports.add = function (settings, fixture) {
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
 	if (fixture === undefined) {
+		var oldFixtures = [];
 		canReflect.eachKey(settings, function (fixture, url) {
-			exports.add(url, fixture);
+			oldFixtures = oldFixtures.concat(exports.add(url, fixture));
 		});
-		return;
+		return oldFixtures;
 	}
 
 	// When a fixture is passed a store like:
 	// `fixture("/things/{id}", store)`
 	if (isStoreLike(fixture)) {
 		settings = addStoreFixture(settings, fixture);
-		exports.add(settings);
-		return;
+		return exports.add(settings);
 	}
 
 	if (typeof settings === 'string') {
