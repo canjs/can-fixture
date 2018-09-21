@@ -14,20 +14,27 @@
   The following traps requests to GET /todos and responds with an array of data:
 
   ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   fixture( { method: "get", url: "/todos" },
-    function( request, response, headers, ajaxSettings ) {
-      return {
-        data: [
-          { id: 1, name: "dishes" },
-          { id: 2, name: "mow" }
-        ]
-      };
-    } );
+    ( request, response, headers, ajaxSettings ) => {
+      return {data: [
+        { id: 1, name: "dishes" },
+        { id: 2, name: "mow" }
+      ]};
+    }
+  );
+
+  $.get("/todos").then(result => {
+    console.log( JSON.parse(result).data ); //-> [{id: 1, name: "dishes"}, {id:2, name: "mow"}]
+  });
   ```
+  @codepen
 
   When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
 
-  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like /todos/{_id}.
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response. The next section details this function's use.
 
 @signature `fixture(ajaxSettings, url)`
@@ -35,30 +42,60 @@
   Redirects the request to another url.  This can be useful for simulating a response with a file.
 
   ```js
-  fixture( { url: "/tasks" }, "fixtures/tasks.json" );
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
+  fixture( { url: "/tasks" }, "/fixtures/tasks.json" );
+
+  $.get("/tasks"); //-> "can-fixture: /tasks => /fixtures/tasks.json"
   ```
+  @codepen
+  @highlight 4,only
 
   Placeholders available in the `ajaxSettings` url will be available in the redirect url:
 
   ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   fixture( { url: "/tasks/{id}" }, "fixtures/tasks/{id}.json" );
+
+  $.get("/tasks/1"); //-> "can-fixture: /tasks/1 => /fixtures/tasks/1.json"
   ```
+  @codepen
+  @highlight 4,only
 
 @signature `fixture(ajaxSettings, data)`
 
   Responds with the `JSON.stringify` result of `data`.
 
   ```js
-  fixture( { url: "/tasks" }, { tasks: [ { id: 1, complete: false } ] } );
-  ```
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-  @signature `fixture(ajaxSettings, delay)`
+  fixture( { url: "/tasks" }, { tasks: [ { id: 1, complete: false } ] } );
+
+  $.get("/tasks").then(result => {
+    console.log( result ) //-> "{'tasks':[{'id':1,'complete':false}]}"
+  });
+  ```
+  @codepen
+  @highlight 4,only
+
+@signature `fixture(ajaxSettings, delay)`
 
   Delays the ajax request from being made for `delay` milliseconds.
 
   ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   fixture( { url: "/tasks" }, 2000 );
+
+  $.get("/tasks"); //-> "can-fixture: /tasks => delay 2000ms"
   ```
+  @codepen
+  @highight 4,only
 
   This doesn't simulate a response, but is useful for simulating slow connections.
 
@@ -67,6 +104,9 @@
   Removes the matching fixture from the list of fixtures.
 
   ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   fixture( { url: "/tasks" }, "fixtures/tasks.json" );
 
   $.get( "/tasks" ); // requests fixtures/tasks.json
@@ -75,6 +115,7 @@
 
   $.get( "/tasks" ); // requests /tasks
   ```
+  <!-- @codepen -->
 
 @signature `fixture(methodAndUrl, url|data|requestHandler)`
 
@@ -107,14 +148,26 @@
   Create multiple fixtures at once.
 
   ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   fixture( {
-    "POST /tasks": function() {
-      return { id: Math.random() };
+    "POST /tasks": () => {
+      return { id: parseInt(Math.random() * 10, 10) };
     },
-    "GET /tasks": { data: [ { id: 1, name: "mow lawn" } ] },
+    "GET /tasks": { data: [ {id: 1, name: "mow lawn"} ] },
     "/people": "fixtures/people.json"
   } );
+  
+  $.post( "/tasks", result => {
+    console.log( JSON.parse(result) ); //-> {id: RandomNumber}
+  });
+
+  $.get("/tasks").then(result => {
+    console.log( JSON.parse(result).data ); //-> [ {id: 1, name: "mow lawn"} ]
+  });
   ```
+  @codepen
 
   @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to
   some response argument type.
@@ -124,20 +177,41 @@
   Wire up a restful API scheme to a store.
 
   ```js
+  import {QueryLogic, fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
   const todoQueryLogic = new QueryLogic(
     {identity: ["id"]}
   );
+
   const todoStore = fixture.store( [
     { id: 1, name: "Do the dishes" },
     { id: 2, name: "Walk the dog" }
   ], todoQueryLogic );
 
   fixture( "/api/todos/{id}", todoStore ); // can also be written fixture("/api/todos", todoStore);
+
+  $.get("/api/todos/1").then(result => {
+    console.log( result ); //-> "{'id':1,'name':'Do the dishes'}"
+  });
   ```
+  @codepen
 
   This is a shorthand for wiring up the `todoStore` as follows:
 
   ```js
+  import {QueryLogic, fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+
+  const todoQueryLogic = new QueryLogic(
+    {identity: ["id"]}
+  );
+
+  const todoStore = fixture.store( [
+    { id: 1, name: "Do the dishes" },
+    { id: 2, name: "Walk the dog" }
+  ], todoQueryLogic );
+
   fixture( {
     "GET /api/todos": todoStore.getListData,
     "GET /api/todos/{id}": todoStore.getData,
@@ -145,7 +219,13 @@
     "PUT /api/todos/{id}": todoStore.updateData,
     "DELETE /api/todos/{id}": todoStore.destroyData
   } );
+
+  $.get("/api/todos/1").then(result => {
+    console.log( result ); //-> "{'id':1,'name':'Do the dishes'}"
+  });
   ```
+  @codepen
+  @highlight 13-19,only
 
   @param {String} restfulUrl The url that may include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed, if provided; otherwise the `item` url is assumed to have the `/{ID_PROP}` part appended to the end.
   @param {can-fixture/StoreType} store A store produced by [can-fixture.store].
