@@ -3,35 +3,45 @@
 
 @signature `fixture.store(baseItems, queryLogic)`
 
-Create a store that starts with `baseItems` for a service layer
-described by `queryLogic`.
+  Create a store that starts with `baseItems` for a service layer
+  described by `queryLogic`.
 
-```js
-const Todo = DefineMap.extend({
-	id: {identity: true, type: "number"},
-	completed: "boolean"
-})
+  ```js
+  import {DefineMap, QueryLogic, fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-// Describe the services parameters:
-const todoQueryLogic = new QueryLogic(Todo);
+  const Todo = DefineMap.extend({
+    _id: {identity: true, type: "number"},
+    completed: "boolean"
+  })
 
-// Create a store with initial data.
-// Pass [] if you want it to be empty.
-const todoStore = fixture.store( [
-	{
-		_id: 1,
-		name: "Do the dishes",
-		complete: true
-	}, {
-		_id: 2,
-		name: "Walk the dog",
-		complete: false
-	} ],
-todoQueryLogic );
+  // Describe the services parameters:
+  const todoQueryLogic = new QueryLogic(Todo);
 
-// Hookup urls to the store:
-fixture( "/todos/{_id}", todoStore );
-```
+  // Create a store with initial data.
+  // Pass an empty Array (ex: []) if you want it to be empty.
+  const todoStore = fixture.store( [
+    {
+      _id: 1,
+      name: "Do the dishes",
+      complete: true
+    }, {
+      _id: 2,
+      name: "Walk the dog",
+      complete: false
+    }
+  ],todoQueryLogic );
+
+  // Hookup urls to the store:
+  fixture( "/todos/{_id}", todoStore );
+
+  $.get("/todos/1", result => {
+    console.log( JSON.parse(result) );
+  } );
+  ```
+  @codepen
+  @highlight 14-24
+
   @param {Array} baseItems An array of items that will populate the store.
   @param {can-query-logic} QueryLogic A description of the service layer's parameters.
   @return {can-fixture/StoreType} A store that can be used to simulate
@@ -41,30 +51,45 @@ fixture( "/todos/{_id}", todoStore );
 
 @signature `fixture.store(count, makeItems, queryLogic)`
 
-Similar to `fixture.store(baseItems, queryLogic)`, except that
-it uses `makeItems` to create `count` entries in the store.
+  Similar to `fixture.store(baseItems, queryLogic)`, except that
+  it uses `makeItems` to create `count` entries in the store.
 
-```js
-// Describe the services parameters:
-const todoQueryLogic = new QueryLogic( /* ... */ );
+  ```js
+  import {DefineMap, QueryLogic, fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-// Create a store with initial data.
-// Pass [] if you want it to be empty.
-const todoStore = fixture.store(
-	1000,
-	function( i ) {
-		return {
-			_id: i + 1,
-			name: "Todo " + i,
-			complete: fixture.rand( [ true, false ], 1 )[ 0 ]
-		};
-	},
-	todoQueryLogic );
+  const Todo = DefineMap.extend({
+    _id: {identity: true, type: "number"},
+    completed: "boolean"
+  })
 
-// Hookup urls to the store:
-fixture( "/todos/{_id}", todoStore );
-```
-  @param {Number} count TODO describe
+  // Describe the services parameters:
+  const todoQueryLogic = new QueryLogic(Todo);
+
+  // Create a store with initial data.
+  // Pass an empty Array (ex: []) if you want it to be empty.
+  const todoStore = fixture.store(
+    1000,
+    ( i ) => ( {
+      _id: i + 1,
+      name: "Todo " + i,
+      complete: fixture.rand( [ true, false ], 1 )[ 0 ]
+    } ),
+    todoQueryLogic
+  );
+
+  // Hookup urls to the store:
+  fixture( "/todos/{_id}", todoStore );
+
+  $.get("/todos/3").then( result => {
+    console.log( result ); //-> "{'_id':3,'name':'Todo 2','complete':true||false}"
+  } );
+
+  ```
+  @codepen
+  @highlight 14-22,only
+
+  @param {Number} count The number of `baseItems` to create.
   @param {function} makeItems A function that will generate `baseItems`
   @param {can-query-logic} queryLogic A description of the service layer's parameters.
   @return {can-fixture/StoreType} A store that can be used to simulate
