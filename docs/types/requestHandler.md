@@ -3,38 +3,42 @@
 
 @signature `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
-Defines the XHR response for a given trapped request.
+  Defines the XHR response for a given trapped request.
 
-```js
-fixture( { method: "get", url: "/todos" },
-	function( request, response, headers, ajaxSettings ) {
-		request; //-> {
-		//    method: "get",
-		//    url: "/todos",
-		//    data: {complete: true}
-		//   }
+  ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-	}
-);
+  fixture( { method: "get", url: "/todos" },
+    ( request, response, headers, ajaxSettings ) => {
+      console.log( request.method );  //-> "get"
+      console.log( request.url );     //-> "/todos"
+      console.log( request.data );    //-> {complete: "true"}
+    }
+  );
 
-$.ajax( { method: "get", url: "/todos?complete=true" } );
-```
+  $.get("/todos?complete=true");
+  ```
+  @codepen
 
-Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
+  Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
 
-```js
-fixture( { url: "/todos/{action}" },
-	function( request, response, headers, ajaxSettings ) {
-		request; //-> {
-		//    method: "post",
-		//    url: "/todos",
-		//    data: {action: delete}
-		//   }
-	}
-);
+  ```js
+  import {fixture} from "can";
+  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-$.post( "/todos/delete" );
-```
+  fixture( { url: "/todos/{action}" },
+    ( request, response, headers, ajaxSettings ) => {
+      console.log( request.method );  //-> "post"
+      console.log( request.url );     //-> "/todos/delete"
+      console.log( request.data );    //-> {action: "delete"}
+    }
+  );
+
+  $.post( "/todos/delete" );
+  ```
+  @codepen
+
   @param {can-fixture/types/request} request Information about the request. The request's data property will contain data from the request's querystring or request body. Also
   any templated values in the [can-fixture/types/ajaxSettings]'s `url` will be added.
   @param {can-fixture.response} response A callback function that provides response information.
