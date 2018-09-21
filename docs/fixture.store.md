@@ -48,7 +48,6 @@
   a restful service layer that supports filtering, pagination, and
   more.  
 
-
 @signature `fixture.store(count, makeItems, queryLogic)`
 
   Similar to `fixture.store(baseItems, queryLogic)`, except that
