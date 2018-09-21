@@ -68,13 +68,13 @@
     return "success";
   } );
 
-   // attempting to just get from the endpoint "/things" won't work.
+  // attempting to just get from the endpoint "/things" won't work.
   $.get("/things/1").then( results => {
     console.log(results); //-> "success"
   } );
   ```
   @codepen
-  @codepen 4-6
+  @highlight 4-6
 
   The templated values get added to the [can-fixture/types/request] object's `data`.
 
