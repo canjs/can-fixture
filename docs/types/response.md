@@ -105,7 +105,7 @@
   @codepen
   @highlight 6,only
 
-  The default `statusText` will be `ok` for `200 <= status < 300, status === 304` and `error`
+  The default `statusText` will be `ok` for `200 <= status < 300`, `status === 304` and `error`
   for everything else.
 
   @param {Number} status The [HTTP response code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html). Ex: `200`.
