@@ -3,17 +3,19 @@
 
 @signature `Store.prototype.destroyInstance(request, response)`
 
-Destroy an instance in the fixture store programatically.  This is usually
-used to make sure a record exists in the store when simulating real-time services.
+  Destroy an instance in the fixture store programmatically.  This is usually
+  used to make sure a record exists in the store when simulating real-time services.
 
-```js
-var store = fixture.store([
+  ```js
+  import {fixture} from "can";
+
+  const store = fixture.store([
     {id: 0, name: "foo"}
-], new QueryLogic({identity: ["id"]}));
+  ], new QueryLogic({identity: ["id"]}));
 
-// In a test, make sure the store has destroyed the same data that
-// the client is being told has been destroyed.
-store.destroyInstance({id: 0}).then(function(record){
+  // In a test, make sure the store has destroyed the same data that
+  // the client is being told has been destroyed.
+  store.destroyInstance({id: 0}).then((record) => {
     connection.destroyInstance(record)
-});
-```
+  });
+  ```
