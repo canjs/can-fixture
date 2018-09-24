@@ -3,8 +3,28 @@
 
 @signature `Store.prototype.get(params)`
 
-Returns a single item's data from the store.
+  Returns a single item's data from the store.
 
-```js
-todoStore.get( { id: 1 } ); //-> {id: 1, name: "dishes"}
-```
+  ```js
+  import {QueryLogic, fixture} from "//unpkg.com/can@5/core.mjs";
+  import {Todo} from "https://unpkg.com/can-demo-models@5";
+
+  const todoQueryLogic = new QueryLogic( Todo );
+
+  const todoStore = fixture.store( [{
+    id: 1,
+    name: "Do the dishes",
+    complete: true
+  }, {
+    id: 2,
+    name: "Walk the dog",
+    complete: false
+  }],
+  todoQueryLogic );
+
+  const result = todoStore.get( {id: 1} );
+  console.log( result ); //-> {id: 1, name: "Do the dishes", complete: true}
+
+  ```
+  @codepen
+  @highlight 17, only
