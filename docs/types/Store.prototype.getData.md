@@ -3,8 +3,8 @@
 
 @signature `Store.prototype.getData(request, response)`
 
-A `requestHandler` that gets a single item from the store.
+  A `requestHandler` that gets a single item from the store.
 
-```js
-fixture( "GET /api/todos/{_id}", todoStore.getData );
-```
+  ```js
+  fixture( "GET /api/todos/{_id}", todoStore.getData );
+  ```

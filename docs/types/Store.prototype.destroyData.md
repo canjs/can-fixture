@@ -3,8 +3,8 @@
 
 @signature `Store.prototype.destroyData(request, response)`
 
-A `requestHandler` that removes an item from the store.
+  A `requestHandler` that removes an item from the store.
 
-```js
-fixture( "DELETE /api/todos/{_id}", todoStore.destroyData );
-```
+  ```js
+  fixture( "DELETE /api/todos/{_id}", todoStore.destroyData );
+  ```

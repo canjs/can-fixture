@@ -3,8 +3,8 @@
 
 @signature `Store.prototype.getListData(request, response)`
 
-A `requestHandler` that gets multiple items from the store.
+  A `requestHandler` that gets multiple items from the store.
 
-```js
-fixture( "GET /api/todos", todoStore.getListData );
-```
+  ```js
+  fixture( "GET /api/todos", todoStore.getListData );
+  ```

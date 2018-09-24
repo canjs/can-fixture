@@ -3,8 +3,8 @@
 
 @signature `Store.prototype.createData(request, response)`
 
-A `requestHandler` that creates an item in the store.
+  A `requestHandler` that creates an item in the store.
 
-```js
-fixture( "POST /api/todos", todoStore.createData );
-```
+  ```js
+  fixture( "POST /api/todos", todoStore.createData );
+  ```
