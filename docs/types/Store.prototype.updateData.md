@@ -6,36 +6,40 @@
   A `requestHandler` that updates an item in the store.
 
   ```js
-  import {DefineMap, QueryLogic, fixture} from "can";
+  import {QueryLogic, fixture} from "can";
   import {Todo} from "https://unpkg.com/can-demo-models@5";
   import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
-  const todoQueryLogic = new QueryLogic(Todo);
+  const todoStore = fixture.store( [
+    {id: 1, name: "Do the dishes", complete: true},
+    {id: 2, name: "Walk the dog", complete: false}
+  ], new QueryLogic(Todo) );
 
-  const todoStore = fixture.store( [{
-    _id: 1,
-    name: "Do the dishes",
-    complete: true
-  }, {
-    _id: 2,
-    name: "Walk the dog",
-    complete: false
-  }],
-  todoQueryLogic );
+  fixture( "PUT /todos/{id}", (req, res) => {
+    // Will only invoke updateData if authorization header is correct.
+    if (req.headers.authorization === "myAuthKey") {
+      todoStore.updateData(req, res);
+    } else {
+      res(401, "incorrect authorization key");
+    }
+  } );
 
-  fixture( "PUT /todos/{_id}", todoStore.updateData );
-
-  fixture( "GET /todos/{_id}", todoStore );
-
-  $.ajax({
+  const ajaxSettings = {
     url: "/todos/1",
     type: "PUT",
-    data: {name: "test"}
+    data: {name: "test"},
+    headers: {authorization: ""}
+  };
+
+  $.ajax(ajaxSettings).catch( error => {
+    console.log(error.responseText); //-> "incorrect authorization key"
   });
 
-  $.get("/todos/1", (value) => {
-    console.log( JSON.parse( value ) );
-  } ); //-> {_id: 1, name: "test"}
+  ajaxSettings.headers.authorization = "myAuthKey";
+
+  $.ajax(ajaxSettings).then( value => {
+    console.log(value); //-> "{'name':'test','id':1}"
+  });
 
   ```
   @codepen

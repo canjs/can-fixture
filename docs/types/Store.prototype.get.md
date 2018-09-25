@@ -6,25 +6,18 @@
   Returns a single item's data from the store.
 
   ```js
-  import {QueryLogic, fixture} from "//unpkg.com/can@5/core.mjs";
-  import {Todo} from "https://unpkg.com/can-demo-models@5";
+  import {QueryLogic, fixture} from "can";
+  import {Todo} from "//unpkg.com/can-demo-models@5";
 
   const todoQueryLogic = new QueryLogic( Todo );
 
-  const todoStore = fixture.store( [{
-    id: 1,
-    name: "Do the dishes",
-    complete: true
-  }, {
-    id: 2,
-    name: "Walk the dog",
-    complete: false
-  }],
-  todoQueryLogic );
+  const todoStore = fixture.store( [
+    {id: 1, name: "Do the dishes", complete: true}, 
+    {id: 2, name: "Walk the dog", complete: false}
+  ], todoQueryLogic );
 
   const result = todoStore.get( {id: 1} );
   console.log( result ); //-> {id: 1, name: "Do the dishes", complete: true}
 
   ```
   @codepen
-  @highlight 17, only
