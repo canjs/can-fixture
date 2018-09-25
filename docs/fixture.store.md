@@ -8,12 +8,8 @@
 
   ```js
   import {DefineMap, QueryLogic, fixture} from "can";
+  import {Todo} from "https://unpkg.com/can-demo-models@5";
   import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
-
-  const Todo = DefineMap.extend({
-    _id: {identity: true, type: "number"},
-    completed: "boolean"
-  })
 
   // Describe the services parameters:
   const todoQueryLogic = new QueryLogic(Todo);
@@ -30,7 +26,7 @@
       name: "Walk the dog",
       complete: false
     }
-  ],todoQueryLogic );
+  ], todoQueryLogic );
 
   // Hookup urls to the store:
   fixture( "/todos/{_id}", todoStore );
@@ -40,7 +36,7 @@
   } );
   ```
   @codepen
-  @highlight 14-24
+  @highlight 10-20
 
   @param {Array} baseItems An array of items that will populate the store.
   @param {can-query-logic} QueryLogic A description of the service layer's parameters.
@@ -55,18 +51,13 @@
 
   ```js
   import {DefineMap, QueryLogic, fixture} from "can";
+  import {Todo} from "https://unpkg.com/can-demo-models@5";
   import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
-
-  const Todo = DefineMap.extend({
-    _id: {identity: true, type: "number"},
-    completed: "boolean"
-  })
 
   // Describe the services parameters:
   const todoQueryLogic = new QueryLogic(Todo);
 
   // Create a store with initial data.
-  // Pass an empty Array (ex: []) if you want it to be empty.
   const todoStore = fixture.store(
     1000,
     ( i ) => ( {
@@ -86,7 +77,7 @@
 
   ```
   @codepen
-  @highlight 14-22,only
+  @highlight 10-18
 
   @param {Number} count The number of `baseItems` to create.
   @param {function} makeItems A function that will generate `baseItems`
