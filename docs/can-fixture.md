@@ -84,7 +84,7 @@
 
 @signature `fixture(ajaxSettings, delay)`
 
-  Delays the ajax request from being made for `delay` milliseconds.
+  Delays the ajax request from being made for `delay` milliseconds. See [can-fixture.delay delay] for more information.
 
   ```js
   import {fixture} from "can";
@@ -101,7 +101,7 @@
 
 @signature `fixture(ajaxSettings, null)`
 
-  Removes the matching fixture from the list of fixtures.
+  Removes the matching fixture from the list of fixtures. See [can-fixture.on on] for related.
 
   ```js
   import {fixture} from "can";
@@ -113,9 +113,12 @@
 
   fixture( { url: "/tasks" }, null );
 
-  $.get( "/tasks" ); // requests /tasks
+  // Made a request to "/tasks", but we catch returning a 404.
+  $.get( "/tasks" ).catch( error => {
+    console.log( error.statusText ); //-> "error"
+  });
   ```
-  <!-- @codepen -->
+  @codepen
 
 @signature `fixture(methodAndUrl, url|data|requestHandler)`
 
@@ -169,8 +172,7 @@
   ```
   @codepen
 
-  @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to
-  some response argument type.
+  @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to some response argument type.
 
 @signature `fixture(restfulUrl, store)`
 
