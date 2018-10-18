@@ -5,7 +5,7 @@
 @group can-fixture.types types
 @package ../package.json
 
-@description can-fixture intercepts an AJAX request and simulates the response with a file or function.
+@description Intercept AJAX requests and simulate the response.
 
 @signature `fixture(ajaxSettings, requestHandler(...))`
 

@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.createData createData
 @parent can-fixture/StoreType.prototype
 
+@description A `requestHandler` that creates an item in the store.
+
 @signature `Store.createData(request, response)`
 
   A `requestHandler` that creates an item in the store.

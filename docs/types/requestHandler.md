@@ -1,6 +1,8 @@
 @typedef {function(can-fixture/types/request,can-fixture.response,Object,Object)} can-fixture.requestHandler(request,response,requestHeaders,ajaxSettings) requestHandler
 @parent can-fixture.types
 
+@description Defines the XHR response for a given trapped request.
+
 @signature `requestHandler(request, response(...), requestHeaders, ajaxSettings)`
 
   Defines the XHR response for a given trapped request.

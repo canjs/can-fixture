@@ -1,6 +1,8 @@
 @function can-fixture.rand rand
 @parent can-fixture.properties
 
+@description Returns a random integer.
+
 @signature `fixture.rand(min, max)`
 
   Returns a random integer in the range [`min`, `max`]. If only one argument is provided,

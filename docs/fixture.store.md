@@ -1,6 +1,8 @@
 @function can-fixture.store store
 @parent can-fixture.properties
 
+@description Creates a store.
+
 @signature `fixture.store(baseItems, queryLogic)`
 
   Create a store that starts with `baseItems` for a service layer

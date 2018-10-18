@@ -1,8 +1,7 @@
 @typedef {Object} can-fixture/types/request request
 @parent can-fixture.types
 
-An object with easily digestible values derived from the mock XHR
-object.  
+@description An object with easily digestible values derived from the mock XHR object.  
 
 @type {Object}
 

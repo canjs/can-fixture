@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.destroyInstance destroyInstance
 @parent can-fixture/StoreType.prototype
 
+@description Destroy an instance in the fixture store programmatically.
+
 @signature `Store.destroyInstance(request, response)`
 
   Destroy an instance in the fixture store programmatically.  This is usually

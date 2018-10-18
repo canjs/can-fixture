@@ -1,6 +1,8 @@
 @property {Boolean} can-fixture.on on
 @parent can-fixture.properties
 
+@description Turns all fixtures on or off. Defaults to `true` for on.
+
 @signature `fixture.on`
 
   Turns all fixtures on or off. Defaults to `true` for on.
@@ -48,4 +50,3 @@ $.get("/todos")
 ```
 @codepen
 @highlight 8
-

@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.getData getData
 @parent can-fixture/StoreType.prototype
 
+@description A `requestHandler` that gets a single item from the store.
+
 @signature `Store.getData(request, response)`
 
   A `requestHandler` that gets a single item from the store.

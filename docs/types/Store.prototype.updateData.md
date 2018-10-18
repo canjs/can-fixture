@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.updateData updateData
 @parent can-fixture/StoreType.prototype
 
+@description A `requestHandler` that updates an item in the store.
+
 @signature `Store.updateData(request, response)`
 
   A `requestHandler` that updates an item in the store.

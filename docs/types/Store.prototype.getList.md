@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.getList getList
 @parent can-fixture/StoreType.prototype
 
+@description Returns the matching items from the store
+
 @signature `Store.getList(set)`
 
   Returns the matching items from the store like: `{data: [...]}`.

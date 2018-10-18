@@ -1,6 +1,8 @@
 @function can-fixture/StoreType.prototype.createInstance createInstance
 @parent can-fixture/StoreType.prototype
 
+@description Create an instance in the fixture store programmatically.
+
 @signature `Store.createInstance(record)`
 
   Create an instance in the fixture store programmatically.  This is usually
@@ -19,3 +21,4 @@
     connection.createInstance(record)
   });
   ```
+  @codepen
