@@ -1,7 +1,7 @@
 @function can-fixture/StoreType.prototype.reset reset
 @parent can-fixture/StoreType.prototype
 
-@signature `Store.prototype.reset([baseItems])`
+@signature `Store.reset([baseItems])`
 
   Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 

@@ -1,7 +1,7 @@
 @function can-fixture/StoreType.prototype.updateInstance updateInstance
 @parent can-fixture/StoreType.prototype
 
-@signature `Store.prototype.updateInstance(request, response)`
+@signature `Store.updateInstance(request, response)`
 
   Destroy an instance in the fixture store programmatically.  This is usually
   used to make sure a record exists in the store when simulating real-time services.

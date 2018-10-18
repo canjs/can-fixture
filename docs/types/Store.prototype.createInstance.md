@@ -1,7 +1,7 @@
 @function can-fixture/StoreType.prototype.createInstance createInstance
 @parent can-fixture/StoreType.prototype
 
-@signature `Store.prototype.createInstance(record)`
+@signature `Store.createInstance(record)`
 
   Create an instance in the fixture store programmatically.  This is usually
   used to make sure a record exists when simulating real-time services.

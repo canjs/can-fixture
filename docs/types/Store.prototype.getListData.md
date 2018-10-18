@@ -1,7 +1,7 @@
 @function can-fixture/StoreType.prototype.getListData getListData
 @parent can-fixture/StoreType.prototype
 
-@signature `Store.prototype.getListData(request, response)`
+@signature `Store.getListData(request, response)`
 
   A `requestHandler` that gets multiple items from the store.
 
