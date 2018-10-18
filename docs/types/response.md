@@ -5,8 +5,6 @@
 
 @signature `response( [status], body, [headers], [statusText] )`
 
-  Used to detail a response.
-
   Using the response function to return an unauthorized error.
 
   ```js
@@ -38,22 +36,17 @@
   ```
   @codepen
 
-  The default `statusText` will be `ok` for `200 <= status < 300`, `status === 304` and `error`
-  for everything else.
+  The default `statusText` will be `"ok"` for statuses between `200` and `300` including `200`, and `304`. It will `"error"` for everything else.
 
   @param {Number} status The [HTTP response code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html). Ex: `200`.
-  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or
-  the raw string text that will be set as the responseText of the XHR object.
-  @param {Object} headers An object of HTTP response headers and values.
+  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or the raw string text that will be set as the responseText of the XHR object.
+  @param {Object} headers An object of [HTTP response headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers) and values.
   @param {String} statusText The status text of the response. Ex: ``"ok"`` for 200.
 
-@body
+@signature `response( body )`
 
-# Use
-
-You don't have to provide every argument to `response`. It can be called like:
-
-- Just the response body, ex: `response( body )`
+  Using the body object to return a single message.
+  The status will be `200` and statusText will be `"ok"`.
 
   ```js
   import {fixture} from "can";
@@ -70,9 +63,14 @@ You don't have to provide every argument to `response`. It can be called like:
 
   ```
   @codepen
-  @highlight 6,only
+  @highlight 6
 
-- response status and body, ex: `response( status, body )`
+  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or the raw string text that will be set as the responseText of the XHR object.
+
+@signature `response( [status], body )`
+
+  Response will always return a `401` status. The statusText will be `"error"`.
+
   ```js
   import {fixture} from "can";
   import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
@@ -89,9 +87,15 @@ You don't have to provide every argument to `response`. It can be called like:
 
   ```
   @codepen
-  @highlight 6,only
+  @highlight 6
 
-- response body and headers, ex: `response( body, headers )`
+  @param {Number} status The [HTTP response code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html). Ex: `200`.
+  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or the raw string text that will be set as the responseText of the XHR object.
+
+@signature `response( body, [headers] )`
+
+  Response will return the responseBody with custom headers.
+  Because it's not set the `status` will default to `200`, and the `statusText` to `"ok"`.
 
   ```js
   import {fixture} from "can";
@@ -108,9 +112,14 @@ You don't have to provide every argument to `response`. It can be called like:
 
   ```
   @codepen
-  @highlight 6,only
+  @highlight 6
 
-- response status, message, and statusText, ex: `response( status, body, statusText )`
+  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or the raw string text that will be set as the responseText of the XHR object.
+  @param {Object} headers An object of [HTTP response headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers) and values.
+
+@signature `response( [status], body, [statusText] )`
+
+  Response will return with the given `status` and `statusText` along with the `responseBody`.
 
   ```js
   import {fixture} from "can";
@@ -122,10 +131,14 @@ You don't have to provide every argument to `response`. It can be called like:
   });
 
   $.get("/todos").catch( error => {
-    const {status, statusText, responseText} = error;
-    console.log(status, statusText, responseText); //-> 401 "unauthorized" "{'message':'Unauthorized'}"
+    const {status, responseText, statusText} = error;
+    console.log(status, responseText, statusText); //-> 401 "unauthorized" "{'message':'Unauthorized'}"
   } );
 
   ```
   @codepen
-  @highlight 6,only
+  @highlight 6
+
+  @param {Number} status The [HTTP response code](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html). Ex: `200`.
+  @param {Object|String} body A JavaScript object, or a string that will be serialized and set as the responseText of the XHR object, or the raw string text that will be set as the responseText of the XHR object.
+  @param {String} statusText The status text of the response. Ex: ``"ok"`` for 200.
