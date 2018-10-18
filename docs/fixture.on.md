@@ -3,7 +3,7 @@
 
 @signature `fixture.on`
 
-  Turns the fixtures on or off. Defaults to `true` for on.
+  Turns all fixtures on or off. Defaults to `true` for on.
 
   ```js
   import {fixture} from "can";
