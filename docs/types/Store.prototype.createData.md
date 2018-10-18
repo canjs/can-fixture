@@ -1,11 +1,11 @@
 @function can-fixture/StoreType.prototype.createData createData
 @parent can-fixture/StoreType.prototype
 
-@description A `requestHandler` that creates an item in the store.
+@description Creates records in the store. It can serve as a `requestHandler`.
 
 @signature `Store.createData(request, response)`
 
-  A `requestHandler` that creates an item in the store.
+  Creates records in the store. It can serve as a `requestHandler`.
 
   ```js
   import {QueryLogic, fixture} from "can";
