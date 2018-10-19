@@ -1,11 +1,11 @@
 @function can-fixture/StoreType.prototype.destroyData destroyData
 @parent can-fixture/StoreType.prototype
 
-@description A [can-fixture.requestHandler requestHandler] that removes an item from the store.
+@description A [can-fixture.requestHandler requestHandler] that removes a record from the store.
 
 @signature `Store.destroyData(request, response)`
 
-  A `requestHandler` that removes an item from the store.
+  A `requestHandler` that removes a record from the store.
 
   ```js
   import {QueryLogic, fixture, ajax} from "//unpkg.com/can@5/core.mjs";
@@ -27,7 +27,7 @@
   } );
 
   ajax( {type: "GET", url: "/todos"} ).then( value => {
-    console.log( value.data ); //-> [{id: 2, name: "Walk the dog"}]
+    console.log( value.data ); //-> [ {id: 2, name: "Walk the dog"} ]
   } );
 
   ```

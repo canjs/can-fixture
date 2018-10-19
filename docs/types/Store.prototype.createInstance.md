@@ -3,13 +3,13 @@
 
 @description Create an instance in the fixture store programmatically.
 
-@signature `Store.createInstance(record)`
+@signature `Store.createInstance( record )`
 
   Create an instance in the fixture store programmatically.  This is usually
   used to make sure a record exists when simulating real-time services.
 
   ```js
-  import {fixture} from "can";
+  import {fixture, QueryLogic} from "can";
 
   const store = fixture.store([
     {id: 0, name: "foo"}
@@ -17,8 +17,8 @@
 
   // In a test, make sure the store has the same data you are going
   // to "push" to the client:
-  store.createInstance({name: "lawn"}).then(function(record){
-    connection.createInstance(record)
-  });
+  store.createInstance( {name: "lawn"} ).then( (record) => {
+    console.log(record); //-> {name: "lawn", id: 1}
+  } );
   ```
   @codepen

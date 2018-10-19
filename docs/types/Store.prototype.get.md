@@ -14,12 +14,12 @@
   const todoQueryLogic = new QueryLogic( Todo );
 
   const todoStore = fixture.store( [
-    {id: 1, name: "Do the dishes", complete: true}, 
-    {id: 2, name: "Walk the dog", complete: false}
+    {id: 1, name: "Do the dishes"}, 
+    {id: 2, name: "Walk the dog"}
   ], todoQueryLogic );
 
   const result = todoStore.get( {id: 1} );
-  console.log( result ); //-> {id: 1, name: "Do the dishes", complete: true}
+  console.log( result ); //-> {id: 1, name: "Do the dishes"}
 
   ```
   @codepen

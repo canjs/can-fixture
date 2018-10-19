@@ -1,46 +1,36 @@
 @function can-fixture/StoreType.prototype.updateData updateData
 @parent can-fixture/StoreType.prototype
 
-@description A `requestHandler` that updates an item in the store.
+@description A [can-fixture.requestHandler requestHandler] that updates a record in the store.
 
 @signature `Store.updateData(request, response)`
 
   A `requestHandler` that updates an item in the store.
 
   ```js
-  import {QueryLogic, fixture} from "can";
+  import {QueryLogic, fixture, ajax} from "can";
   import {Todo} from "https://unpkg.com/can-demo-models@5";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
   const todoStore = fixture.store( [
-    {id: 1, name: "Do the dishes", complete: true},
-    {id: 2, name: "Walk the dog", complete: false}
+    {id: 1, name: "Do the dishes"},
+    {id: 2, name: "Walk the dog"}
   ], new QueryLogic(Todo) );
 
+  fixture( "/todos/{id}", todoStore);
   fixture( "PUT /todos/{id}", (req, res) => {
-    // Will only invoke updateData if authorization header is correct.
-    if (req.headers.authorization === "myAuthKey") {
-      todoStore.updateData(req, res);
-    } else {
-      res(401, "incorrect authorization key");
-    }
+    todoStore.updateData(req, res);
   } );
 
   const ajaxSettings = {
     url: "/todos/1",
     type: "PUT",
     data: {name: "test"},
-    headers: {authorization: ""}
   };
 
-  $.ajax(ajaxSettings).catch( error => {
-    console.log(error.responseText); //-> "incorrect authorization key"
-  });
-
-  ajaxSettings.headers.authorization = "myAuthKey";
-
-  $.ajax(ajaxSettings).then( value => {
-    console.log(value); //-> "{'name':'test','id':1}"
+  ajax(ajaxSettings).then( () => {
+    ajax( {url: "/todos/1", type: "GET"} ).then( value => {
+      console.log(value); //-> {name:"test", id:1}
+    });
   });
 
   ```

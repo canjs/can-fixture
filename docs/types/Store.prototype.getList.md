@@ -19,7 +19,7 @@
     {id: 3, name: "dry the dishes", complete: false},
   ], todoQueryLogic );
 
-  const result = todoStore.getList( {name: "dishes"} );
-  console.log( result ); //-> {id: 1, name: "Do the dishes", complete: true}
+  const result = todoStore.getList( {complete: false} );
+  console.log( result ); //-> [{id: 1, name: "Do the dishes", complete: true}, {id: 3, name: "dry the dishes", complete: false}]
   ```
   @codepen
