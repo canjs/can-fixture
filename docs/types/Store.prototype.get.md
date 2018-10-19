@@ -1,11 +1,11 @@
 @function can-fixture/StoreType.prototype.get get
 @parent can-fixture/StoreType.prototype
 
-@description Returns a single item's data from the store.
+@description Returns a single record's data from the store.
 
-@signature `Store.get(params)`
+@signature `Store.get( params )`
 
-  Returns a single item's data from the store.
+  Returns a single record's data from the store.
 
   ```js
   import {QueryLogic, fixture} from "can";
