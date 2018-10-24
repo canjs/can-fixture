@@ -71,7 +71,7 @@
 
 @signature `fixture( ajaxSettings, data )`
 
-  Responds with the `JSON.stringify` result of `data`.
+  Responds with the result of `data`.
 
   ```js
   import {fixture, ajax} from "can";
@@ -79,7 +79,7 @@
   fixture( {url: "/tasks"}, {tasks: [ {id: 1, complete: false} ]} );
 
   ajax( {url: "/tasks"} ).then( result => {
-    console.log( result ); //-> "{'tasks':[{'id':1,'complete':false}]}"
+    console.log( result ); //-> {tasks:[{id:1, complete:false}]}
   } );
 
   ```
@@ -201,7 +201,8 @@
     { id: 2, name: "Walk the dog" }
   ], new QueryLogic( {identity: ["id"]} ) );
 
-  fixture( "/api/todos/{id}", todoStore ); // can also be written fixture("/api/todos", todoStore);
+  // can also be written fixture("/api/todos", todoStore);
+  fixture( "/api/todos/{id}", todoStore );
 
   ajax( {url:"/api/todos/1"} ).then( result => {
     console.log( result ); //-> "{'id':1,'name':'Do the dishes'}"

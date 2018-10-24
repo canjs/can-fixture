@@ -16,7 +16,7 @@
 
   fixture.on = false; //-> AJAX requests will not be trapped
 
-  ajax( {url: "/todos"}.catch( error => {
+  ajax( {url: "/todos"} ).catch( error => {
       console.log("Couldn't connect.");
   } );
   ```

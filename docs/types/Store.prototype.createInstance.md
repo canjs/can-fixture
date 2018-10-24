@@ -23,4 +23,4 @@
   ```
   @codepen
 
-  @param {object} record The record being added to the store.
+  @param {Object} record The record being added to the store.

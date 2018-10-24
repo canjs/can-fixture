@@ -19,18 +19,18 @@
   // Pass an empty Array (ex: []) if you want it to be empty.
   const todoStore = fixture.store( [
     {
-      _id: 1,
+      id: 1,
       name: "Do the dishes",
       complete: true
     }, {
-      _id: 2,
+      id: 2,
       name: "Walk the dog",
       complete: false
     }
   ], todoQueryLogic );
 
   // Hookup urls to the store:
-  fixture( "/todos/{_id}", todoStore );
+  fixture( "/todos/{id}", todoStore );
 
   ajax( {url: "/todos/1"} ).then( result => {
     console.log( result );
@@ -62,7 +62,7 @@
   const todoStore = fixture.store(
     1000,
     ( i ) => ( {
-      _id: i + 1,
+      id: i + 1,
       name: "Todo " + i,
       complete: fixture.rand( [ true, false ], 1 )[ 0 ]
     } ),
@@ -70,7 +70,7 @@
   );
 
   // Hookup urls to the store:
-  fixture( "/todos/{_id}", todoStore );
+  fixture( "/todos/{id}", todoStore );
 
   ajax( {url: "/todos/3"} ).then( result => {
     console.log( result ); //-> "{'_id':3,'name':'Todo 2','complete':true||false}"

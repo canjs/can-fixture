@@ -35,7 +35,7 @@
     }
   );
 
-  ajax( {type: "POST" url:"/todos/delete"} );
+  ajax( {type: "POST", url:"/todos/delete"} );
   ```
   @codepen
 

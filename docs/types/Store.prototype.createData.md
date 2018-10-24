@@ -26,7 +26,7 @@
   };
 
   ajax(ajaxSettings).then(result => {
-    console.log(result) //-> {id: 1, name: "Write examples!"}
+    console.log(result); //-> {id: 1, name: "Write examples!"}
   });
 
   ```

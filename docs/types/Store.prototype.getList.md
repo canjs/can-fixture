@@ -20,7 +20,7 @@
   ], todoQueryLogic );
 
   const result = todoStore.getList( {filter: {complete: false}} );
-  console.log( result ); //-> [
+  console.log( result.data ); //-> [
   //   {id: 2, name: "Walk the dog", complete: false},
   //   {id: 3, name: "dry the dishes", complete: false}
   // ]
@@ -29,4 +29,4 @@
 
   @param {Object} set A [can-query-logic/query Query].
 
-  @return {Array} A serialized list of records from the store.
+  @return {Object} A serialized object. The `data` parameter contains a list of records from the store.

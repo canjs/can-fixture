@@ -29,8 +29,7 @@
   // }
 
   ajax( {type:"POST", url: "/todos/delete"} ).catch( error => {
-    const {status, statusText, responseText} = error;
-    console.log(status, statusText, responseText); //-> 401 "unauthorized" "{'message':'Unauthorized'}"
+    console.log(error); //-> {message: "Unauthorized"}
   } );
   ```
   @codepen
@@ -56,7 +55,7 @@
   });
 
   ajax( {url: "/todos"} ).then( result => {
-    console.log( result ); //-> "{'message':'Hello World'}"
+    console.log( result ); //-> {message: "Hello World"}
   } );
 
   ```
@@ -78,8 +77,7 @@
   });
 
   ajax( {url:"/todos"} ).catch( error => {
-    const {status, responseText} = error;
-    console.log( status, responseText ); //-> 401, "{'message':'Unauthorized'}"
+    console.log( error ); //-> 401, {message: "Unauthorized"}
   });
 
   ```
@@ -106,7 +104,7 @@
   });
 
   ajax( {url: "/todos"} ).then( result => {
-    console.log( result ); //-> {message:"Unauthorized"}
+    console.log( result ); //-> {message: "Unauthorized"}
   } );
 
   ```
@@ -129,8 +127,7 @@
   });
 
   ajax( {url: "/todos"} ).catch( error => {
-    const {status, responseText, statusText} = error;
-    console.log(status, responseText, statusText); //-> 401 "unauthorized" "{'message':'Unauthorized'}"
+    console.log(error); //-> {message: "Unauthorized"}
   } );
 
   ```
