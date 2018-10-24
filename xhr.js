@@ -46,16 +46,25 @@ function callEvents(xhr, ev) {
 	}
 }
 
+function defineNonEnumerable(obj, prop, value) {
+	Object.defineProperty(obj, prop, {
+		enumerable: false,
+		configurable: true,
+		writable: true,
+		value: value
+	});
+}
+
 GLOBAL.XMLHttpRequest = function() {
 	var mockXHR = this;
 	var realXHR = new XHR();
 
 	// store real xhr on mockXHR
-	this._xhr = realXHR;
+	defineNonEnumerable(this, "_xhr", realXHR);
 
 	// create other properties needed by prototype functions
-	this._requestHeaders = {};
-	this.__events = {};
+	defineNonEnumerable(this, "_requestHeaders", {});
+	defineNonEnumerable(this, "__events", {});
 
 	// wire up events to forward from real xhr to fake xhr
 	events.forEach(function(eventName) {
