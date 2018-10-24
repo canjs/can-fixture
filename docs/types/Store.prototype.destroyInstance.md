@@ -3,7 +3,7 @@
 
 @description Destroy an instance in the fixture store programmatically.
 
-@signature `Store.destroyInstance( record )`
+@signature `Store.destroyInstance( param )`
 
   Destroy an instance in the fixture store programmatically. This is usually
   used to make sure a record exists in the store when simulating real-time services.
@@ -23,4 +23,4 @@
   ```
   @codepen
 
-  @param {object} record The serialized data of the instance.
+  @param {object} param An object containing a [can-query-logic QueryLogic] schema identity of the store.

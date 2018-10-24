@@ -27,8 +27,8 @@
 
   ajax( ajaxOptions ).then( value => {
     console.log( value.data ); //-> [
-    //   {id:1, name:"Do the dishes"},
-    //   {id:2, name:"Walk the dog"} 
+    //   {id:1, name:"Do the dishes", complete: true},
+    //   {id:2, name:"Walk the dog", complete: true} 
     // ]
   });
 
