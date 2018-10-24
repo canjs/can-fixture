@@ -3,9 +3,9 @@
 
 @description Destroy an instance in the fixture store programmatically.
 
-@signature `Store.destroyInstance(request, response)`
+@signature `Store.destroyInstance( record )`
 
-  Destroy an instance in the fixture store programmatically.  This is usually
+  Destroy an instance in the fixture store programmatically. This is usually
   used to make sure a record exists in the store when simulating real-time services.
 
   ```js
@@ -17,8 +17,10 @@
 
   // In a test, make sure the store has destroyed the same data that
   // the client is being told has been destroyed.
-  store.destroyInstance({id: 0}).then( (record) => {
+  store.destroyInstance( {id: 0} ).then( (record) => {
     console.log(record) //-> {id: 0, name: "foo"}
   } );
   ```
   @codepen
+
+  @param {object} record The serialized data of the instance.

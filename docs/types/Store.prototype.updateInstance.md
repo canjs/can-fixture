@@ -3,10 +3,9 @@
 
 @description Destroy an instance in the fixture store programmatically.
 
-@signature `Store.updateInstance(request, response)`
+@signature `Store.updateInstance( params )`
 
-  Destroy an instance in the fixture store programmatically. This is usually
-  used to make sure a record exists in the store when simulating real-time services.
+  Update an instance in the fixture store programmatically.
 
   ```js
   import {QueryLogic, fixture} from "can";
@@ -17,8 +16,10 @@
 
   // In a test, make sure the store has updated the same data that
   // the client is being told has been updated.
-  store.updateInstance({id: 0, name: "do the dishes"}).then(record => {
+  store.updateInstance( {id: 0, name: "do the dishes"} ).then(record => {
     console.log( record ); //-> {id: 0, name: "do the dishes"}
   });
   ```
   @codepen
+
+  @param {Object} params A matching identity and properties to be updated.

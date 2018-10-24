@@ -22,3 +22,5 @@
   } );
   ```
   @codepen
+
+  @param {object} record The record being added to the store.

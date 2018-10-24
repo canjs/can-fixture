@@ -35,3 +35,6 @@
 
   ```
   @codepen
+
+  @param {object} request An HTTP Request object
+  @param {object} response An HTTP response object.

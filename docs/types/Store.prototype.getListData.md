@@ -9,18 +9,23 @@
 
   ```js
   import {QueryLogic, fixture, ajax} from "can";
-  import {Todo} from "//unpkg.com/can-demo-models@5";
 
   const todoStore = fixture.store( [
-    {id: 1, name: "Do the dishes"},
-    {id: 2, name: "Walk the dog"}
-  ], new QueryLogic(Todo) );
+    {id: 1, name: "Do the dishes", complete: true},
+    {id: 2, name: "Walk the dog", complete: true},
+    {id: 3, name: "Write docs", complete: false}
+  ], new QueryLogic() );
 
   fixture( "GET /todos", (req, res) => {
     todoStore.getListData(req, res);
   } );
 
-  ajax( {url: "/todos"} ).then( value => {
+  const ajaxOptions = {
+    url: "/todos",
+    data: { filter: {complete: true} }
+  }
+
+  ajax( ajaxOptions ).then( value => {
     console.log( value.data ); //-> [
     //   {id:1, name:"Do the dishes"},
     //   {id:2, name:"Walk the dog"} 
@@ -29,3 +34,6 @@
 
   ```
   @codepen
+
+  @param {object} request An HTTP Request object
+  @param {object} response An HTTP response object.

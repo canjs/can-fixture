@@ -3,9 +3,9 @@
 
 @description Returns the matching items from the store
 
-@signature `Store.getList(set)`
+@signature `Store.getList( set )`
 
-  Returns the matching items from the store like: `{data: [...]}`.
+  Returns the matching items from the store like: `{filter: [...]}`.
 
   ```js
   import {QueryLogic, fixture} from "can";
@@ -19,7 +19,14 @@
     {id: 3, name: "dry the dishes", complete: false},
   ], todoQueryLogic );
 
-  const result = todoStore.getList( {complete: false} );
-  console.log( result ); //-> [{id: 1, name: "Do the dishes", complete: true}, {id: 3, name: "dry the dishes", complete: false}]
+  const result = todoStore.getList( {filter: {complete: false}} );
+  console.log( result ); //-> [
+  //   {id: 2, name: "Walk the dog", complete: false},
+  //   {id: 3, name: "dry the dishes", complete: false}
+  // ]
   ```
   @codepen
+
+  @param {Object} set A [can-query-logic/query Query].
+
+  @return {Array} A serialized list of records from the store.

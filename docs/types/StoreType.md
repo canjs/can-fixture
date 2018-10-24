@@ -4,4 +4,5 @@
 
 @signature `Store`
 
-The following documents the methods on a store object returned by [can-fixture.store].
+  `Store` is a placeholder for the methods on a store object returned by [can-fixture.store]. It is for documentation purposes only.
+  

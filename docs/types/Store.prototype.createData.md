@@ -8,28 +8,33 @@
   Creates records in the store. It can serve as a `requestHandler`. The example will store the the object in the data parameter in the store.
 
   ```js
-  import {QueryLogic, fixture, ajax} from "can";
-  import {Todo} from "https://unpkg.com/can-demo-models@5";
+  import {QueryLogic, fixture, ajax} from "//unpkg.com/can@5/core.mjs";
 
-  const todoStore = fixture.store( [], new QueryLogic(Todo) );
+  const todoStore = fixture.store( [
+    {id: 1, name: "Do the dishes", complete: true},
+    {id: 2, name: "Walk the dog", complete: true},
+    {id: 3, name: "Write docs", complete: false}
+  ], new QueryLogic() );
 
-  fixture( "POST /todos", (req, res) => {
-    todoStore.createData(req, res);
+  fixture( "GET /todos", (req, res) => {
+    todoStore.getListData(req, res);
   } );
 
-  const ajaxSettings = {
+  const ajaxOptions = {
     url: "/todos",
-    type: "POST",
-    data: {name:"Write examples!"}
-  };
+    data: { filter: {complete: true} }
+  }
 
-  ajax(ajaxSettings).then(result => {
-    console.log(result) //-> {id: 1, name: "Write examples!"}
+  ajax( ajaxOptions ).then( value => {
+    console.log( value.data ); //-> [
+    //   {id:1, name:"Do the dishes"},
+    //   {id:2, name:"Walk the dog"} 
+    // ]
   });
 
   ```
   @codepen
   
-  @param {object} request A request object
-  @param {object} response A response object.
+  @param {object} request An HTTP Request object
+  @param {object} response An HTTP response object.
   

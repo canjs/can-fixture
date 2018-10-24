@@ -9,17 +9,18 @@
 
   ```js
   import {QueryLogic, fixture} from "can";
-  import {Todo} from "//unpkg.com/can-demo-models@5";
-
-  const todoQueryLogic = new QueryLogic( Todo );
 
   const todoStore = fixture.store( [
     {id: 1, name: "Do the dishes"}, 
     {id: 2, name: "Walk the dog"}
-  ], todoQueryLogic );
+  ], new QueryLogic({identity: ["id"]}) );
 
   const result = todoStore.get( {id: 1} );
   console.log( result ); //-> {id: 1, name: "Do the dishes"}
 
   ```
   @codepen
+
+  @param {Object} params An object containing a [can-query-logic QueryLogic] schema identity of the store.
+
+  @return {Object} The first record that matches the params.
