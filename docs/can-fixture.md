@@ -37,7 +37,7 @@
   When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
-  @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response. The next section details this function's use.
+  @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response.
 
 @signature `fixture( ajaxSettings, url )`
 
