@@ -8,8 +8,7 @@
   Sets the delay until a response is fired in milliseconds.
 
   ```js
-  import {QueryLogic, fixture} from "//unpkg.com/can@5/core.mjs";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {QueryLogic, fixture, ajax} from "can";
 
   const todoQueryLogic = new QueryLogic(
     {identity: ["id"]}
@@ -24,7 +23,7 @@
 
   fixture.delay = 3000;
 
-  $.get("/api/todos/1").then(result => {
+  ajax( {url: "/api/todos/1"} ).then(result => {
     clearInterval(timer);
     console.log(result); //-> { id: 1, name: "Do the dishes" },
   });
@@ -37,4 +36,4 @@
 
   ```
   @codepen
-  @highlight 15,only
+  @highlight 14,only

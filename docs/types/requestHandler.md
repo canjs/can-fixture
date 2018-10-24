@@ -8,8 +8,7 @@
   Defines the XHR response for a given trapped request.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( { method: "get", url: "/todos" },
     ( request, response, headers, ajaxSettings ) => {
@@ -19,15 +18,14 @@
     }
   );
 
-  $.get("/todos?complete=true");
+  ajax( {url: "/todos?complete=true"} );
   ```
   @codepen
 
   Templated `url` data will be added to the `requestHandler`'s `request` argument's `data` property:
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( { url: "/todos/{action}" },
     ( request, response, headers, ajaxSettings ) => {
@@ -37,7 +35,7 @@
     }
   );
 
-  $.post( "/todos/delete" );
+  ajax( {type: "POST" url:"/todos/delete"} );
   ```
   @codepen
 

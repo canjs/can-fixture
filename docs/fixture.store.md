@@ -9,9 +9,8 @@
   described by `queryLogic`.
 
   ```js
-  import {DefineMap, QueryLogic, fixture} from "can";
+  import {DefineMap, QueryLogic, fixture, ajax} from "can";
   import {Todo} from "https://unpkg.com/can-demo-models@5";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
   // Describe the services parameters:
   const todoQueryLogic = new QueryLogic(Todo);
@@ -33,12 +32,12 @@
   // Hookup urls to the store:
   fixture( "/todos/{_id}", todoStore );
 
-  $.get("/todos/1", result => {
-    console.log( JSON.parse(result) );
+  ajax( {url: "/todos/1"} ).then( result => {
+    console.log( result );
   } );
   ```
   @codepen
-  @highlight 10-20
+  @highlight 9-19
 
   @param {Array} baseItems An array of items that will populate the store.
   @param {can-query-logic} QueryLogic A description of the service layer's parameters.
@@ -52,7 +51,7 @@
   it uses `makeItems` to create `count` entries in the store.
 
   ```js
-  import {DefineMap, QueryLogic, fixture} from "can";
+  import {DefineMap, QueryLogic, fixture, ajax} from "can";
   import {Todo} from "https://unpkg.com/can-demo-models@5";
   import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
 
@@ -73,13 +72,13 @@
   // Hookup urls to the store:
   fixture( "/todos/{_id}", todoStore );
 
-  $.get("/todos/3").then( result => {
+  ajax( {url: "/todos/3"} ).then( result => {
     console.log( result ); //-> "{'_id':3,'name':'Todo 2','complete':true||false}"
   } );
 
   ```
   @codepen
-  @highlight 10-18
+  @highlight 9-17
 
   @param {Number} count The number of `baseItems` to create.
   @param {function} makeItems A function that will generate `baseItems`

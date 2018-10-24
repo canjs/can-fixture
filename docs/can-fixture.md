@@ -14,21 +14,23 @@
   The following traps requests to GET /todos and responds with an array of data:
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( { method: "get", url: "/todos" },
     ( request, response, headers, ajaxSettings ) => {
-      return {data: [
-        { id: 1, name: "dishes" },
-        { id: 2, name: "mow" }
-      ]};
+      return {
+        data: [
+          { id: 1, name: "dishes" },
+          { id: 2, name: "mow" }
+        ]
+      };
     }
   );
 
-  $.get("/todos").then(result => {
-    console.log( JSON.parse(result).data ); //-> [{id: 1, name: "dishes"}, {id:2, name: "mow"}]
-  });
+  ajax( {url: "/todos"} ).then( result => {
+    console.log( result.data ); //-> [{id: 1, name: "dishes"}, {id:2, name: "mow"}]
+  } );
+
   ```
   @codepen
 
@@ -37,90 +39,101 @@
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response. The next section details this function's use.
 
-@signature `fixture(ajaxSettings, url)`
+@signature `fixture( ajaxSettings, url )`
 
   Redirects the request to another url.  This can be useful for simulating a response with a file.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( { url: "/tasks" }, "/fixtures/tasks.json" );
 
-  $.get("/tasks"); //-> "can-fixture: /tasks => /fixtures/tasks.json"
+  ajax( {url: "/tasks"} ); // "can-fixture: /tasks => /fixtures/tasks.json"
+
   ```
   @codepen
-  @highlight 4,only
+  @highlight 3
 
   Placeholders available in the `ajaxSettings` url will be available in the redirect url:
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
-  fixture( { url: "/tasks/{id}" }, "fixtures/tasks/{id}.json" );
+  fixture( {url: "/tasks/{id}"}, "fixtures/tasks/{id}.json" );
 
-  $.get("/tasks/1"); //-> "can-fixture: /tasks/1 => /fixtures/tasks/1.json"
+  ajax( {url: "/tasks/1"} ); // "can-fixture: /tasks/1 => /fixtures/tasks/1.json"
   ```
   @codepen
-  @highlight 4,only
+  @highlight 3
 
-@signature `fixture(ajaxSettings, data)`
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/tasks/{_id}`. 
+  @param {String} url The pathname of requests that will be trapped.
+
+@signature `fixture( ajaxSettings, data )`
 
   Responds with the `JSON.stringify` result of `data`.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
-  fixture( { url: "/tasks" }, { tasks: [ { id: 1, complete: false } ] } );
+  fixture( {url: "/tasks"}, {tasks: [ {id: 1, complete: false} ]} );
 
-  $.get("/tasks").then(result => {
-    console.log( result ) //-> "{'tasks':[{'id':1,'complete':false}]}"
-  });
+  ajax( {url: "/tasks"} ).then( result => {
+    console.log( result ); //-> "{'tasks':[{'id':1,'complete':false}]}"
+  } );
+
   ```
   @codepen
-  @highlight 4,only
+  @highlight 3
+
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method.
+  @param {Object} data A representation of records in the store.
 
 @signature `fixture(ajaxSettings, delay)`
 
   Delays the ajax request from being made for `delay` milliseconds. See [can-fixture.delay delay] for more information.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( { url: "/tasks" }, 2000 );
 
-  $.get("/tasks"); //-> "can-fixture: /tasks => delay 2000ms"
+  ajax( {url: "/tasks"} ); // "can-fixture: /tasks => delay 2000ms"
+
   ```
   @codepen
-  @highight 4,only
+  @highlight 3
 
   This doesn't simulate a response, but is useful for simulating slow connections.
+
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
+  @param {Number} delay A numeric representation of milliseconds that the response should wait.
 
 @signature `fixture(ajaxSettings, null)`
 
   Removes the matching fixture from the list of fixtures. See [can-fixture.on on] for related.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
-  fixture( { url: "/tasks" }, "fixtures/tasks.json" );
+  fixture( {url: "/tasks"}, "fixtures/tasks.json" );
 
-  $.get( "/tasks" ); // requests fixtures/tasks.json
+  ajax( {url: "/tasks"} ); // requests fixtures/tasks.json
 
-  fixture( { url: "/tasks" }, null );
+  fixture( {url: "/tasks"}, null );
 
-  // Made a request to "/tasks", but we catch returning a 404.
-  $.get( "/tasks" ).catch( error => {
-    console.log( error.statusText ); //-> "error"
+  // Made a request to "/tasks", but we catch a 404.
+  ajax( {url: "/tasks"} ).catch( error => {
+    console.log("error"); //-> "error"
   });
+
   ```
   @codepen
 
-@signature `fixture(methodAndUrl, url|data|requestHandler)`
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
+  @param {object} null A representation of the intentional absence of any object value. [null](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null) is a JavaScript primitive value.
+
+@signature `fixture( methodAndUrl, url|data|requestHandler )`
 
   A short hand for creating an [can-fixture/types/ajaxSettings] with a `method` and `url`.
 
@@ -132,9 +145,10 @@
   fixture( { method: "get", url: "/tasks" }, requestHandler );
   ```
 
-  The format is `METHOD URL`.
+  @param {Object} methodAndUrl A string formatted like is `METHOD URL`.
+  @param {String|Object|can-fixture.requestHandler} url|data|requestHandler The URL that will be queried. A representation of records in the store. A definition for XHR response for a given trapped request.
 
-@signature `fixture(url, url|data|requestHandler)`
+@signature `fixture( url, url|data|requestHandler )`
 
   A short hand for creating an [can-fixture/types/ajaxSettings] with just a `url`.
 
@@ -145,14 +159,15 @@
 
   fixture( { url: "/tasks" }, requestHandler );
   ```
+  @param {String} url The pathname of requests that will be trapped.
+  @param {String|Object|can-fixture.requestHandler} url|data|requestHandler The URL that will be queried. A representation of records in the store. A definition for XHR response for a given trapped request.
 
-@signature `fixture(fixtures)`
+@signature `fixture( fixtures )`
 
   Create multiple fixtures at once.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( {
     "POST /tasks": () => {
@@ -162,57 +177,47 @@
     "/people": "fixtures/people.json"
   } );
   
-  $.post( "/tasks", result => {
-    console.log( JSON.parse(result) ); //-> {id: RandomNumber}
-  });
+  ajax( {type: "POST", url:"/tasks"} ).then( result => {
+    console.log( result ); //-> {id: RandomNumber}
+  } );
 
-  $.get("/tasks").then(result => {
-    console.log( JSON.parse(result).data ); //-> [ {id: 1, name: "mow lawn"} ]
-  });
+  ajax( {url: "/tasks"} ).then( result => {
+    console.log( result.data ); //-> [ {id: 1, name: "mow lawn"} ]
+  } );
   ```
   @codepen
 
   @param {Object<methodAndUrl,String|Object|can-fixture.requestHandler|can-fixture/StoreType>} fixtures A mapping of methodAndUrl to some response argument type.
 
-@signature `fixture(restfulUrl, store)`
+@signature `fixture( restfulUrl, store )`
 
   Wire up a restful API scheme to a store.
 
   ```js
-  import {QueryLogic, fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
-
-  const todoQueryLogic = new QueryLogic(
-    {identity: ["id"]}
-  );
+  import {QueryLogic, fixture, ajax} from "can";
 
   const todoStore = fixture.store( [
     { id: 1, name: "Do the dishes" },
     { id: 2, name: "Walk the dog" }
-  ], todoQueryLogic );
+  ], new QueryLogic( {identity: ["id"]} ) );
 
   fixture( "/api/todos/{id}", todoStore ); // can also be written fixture("/api/todos", todoStore);
 
-  $.get("/api/todos/1").then(result => {
+  ajax( {url:"/api/todos/1"} ).then( result => {
     console.log( result ); //-> "{'id':1,'name':'Do the dishes'}"
-  });
+  } );
   ```
   @codepen
 
   This is a shorthand for wiring up the `todoStore` as follows:
 
   ```js
-  import {QueryLogic, fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
-
-  const todoQueryLogic = new QueryLogic(
-    {identity: ["id"]}
-  );
+  import {QueryLogic, fixture, ajax} from "can";
 
   const todoStore = fixture.store( [
     { id: 1, name: "Do the dishes" },
     { id: 2, name: "Walk the dog" }
-  ], todoQueryLogic );
+  ], new QueryLogic( {identity: ["id"]} ) );
 
   fixture( {
     "GET /api/todos": todoStore.getListData,
@@ -222,12 +227,12 @@
     "DELETE /api/todos/{id}": todoStore.destroyData
   } );
 
-  $.get("/api/todos/1").then(result => {
+  ajax( {url: "/api/todos/1"} ).then( result => {
     console.log( result ); //-> "{'id':1,'name':'Do the dishes'}"
-  });
+  } );
   ```
   @codepen
-  @highlight 13-19,only
+  @highlight 8-14,only
 
   @param {String} restfulUrl The url that may include a template for the place of the ID prop.  The `list` url is assumed to be `restfulUrl` with the `/{ID_PROP}` part removed, if provided; otherwise the `item` url is assumed to have the `/{ID_PROP}` part appended to the end.
   @param {can-fixture/StoreType} store A store produced by [can-fixture.store].

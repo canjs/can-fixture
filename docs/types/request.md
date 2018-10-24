@@ -9,8 +9,7 @@
   and can be used to determine the response.
 
   ```js
-  import {fixture} from "can";
-  import "//unpkg.com/jquery@3.3.1/dist/jquery.js";
+  import {fixture, ajax} from "can";
 
   fixture( "GET /todos/{id}", ( request, response ) => {
     console.log( request.url );     //-> "todos/5"
@@ -21,7 +20,7 @@
     return;
   } );
 
-  $.get( "/todos/5?include[]=owner" );
+  ajax( {url: "/todos/5?include[]=owner"} );
   ```
   @codepen
 
