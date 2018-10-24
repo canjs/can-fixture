@@ -1,27 +1,37 @@
 @function can-fixture/StoreType.prototype.reset reset
 @parent can-fixture/StoreType.prototype
 
-@signature `Store.prototype.reset([baseItems])`
+@description Sets the items in the store to their original state.
 
-Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
+@signature `Store.reset( [baseItems] )`
 
-```js
-// Creates a store with one item.
-const todoStore = fixture.store(
-	[ { id: 1, name: "dishes" } ],
-	new QueryLogic({identity: ["id"]}) );
-fixture( "/todos/{id}", todoStore );
-todoStore.getList( {} ).length; //-> 1
+  Sets the items in the store to their original state or to `baseItems` if it's passed as an argument.
 
-// delete that item
-$.ajax( { url: "todos/1", method: "delete" } ).then( function() {
-	return todoStore.getList( {} ).length; //-> 0
-} ).then( function() {
+  ```js
+  import {QueryLogic, fixture, ajax} from "can";
 
-	// calling reset adds it back
-	todoStore.reset();
-	todoStore.getList( {} ).length; //-> 1
-} );
-```
+  // Creates a store with one item.
+  const todoStore = fixture.store(
+    [ {id: 1, name: "dishes"} ],
+    new QueryLogic({identity: ["id"]})
+  );
+
+  fixture( "/todos/{id}", todoStore );
+
+  console.log( todoStore.getList( {} ).count ); //-> 1
+
+  // delete that item
+  ajax( { url: "/todos/1", type: "DELETE" } )
+    .then( () => {
+      console.log( todoStore.getList( {} ).count ); //-> 0
+    } )
+    .then( () => {
+      // calling reset adds it back
+      todoStore.reset();
+      console.log( todoStore.getList( {} ).count ); //-> 1
+    } );
+  ```
+  @codepen
+
   @param {Array} baseItems If provided, adds these items to the store.  
   This can be useful for setting up particular testing scenarios.
