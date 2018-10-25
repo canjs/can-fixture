@@ -6,7 +6,6 @@ var fixture = require("can-fixture");
 var set = require("can-set-legacy");
 var $ = require("jquery");
 var canDev = require('can-log/dev/dev');
-var clone = require("steal-clone");
 var dataFromUrl = require("../data-from-url");
 var canReflect = require("can-reflect");
 var matches = require("../matches");
@@ -1949,19 +1948,22 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 	});
 
 	testHelpers.dev.devOnlyTest("Works with steal-clone", function() {
-		clone({})["import"]("can-fixture").then(function(fixture){
-			fixture('/onload', function(req, res) {
-				res(400);
-			});
+		steal.loader.import("steal-clone", { name: "can-fixture" })
+		.then(function(clone) {
+			clone({})["import"]("can-fixture").then(function(fixture){
+				fixture('/onload', function(req, res) {
+					res(400);
+				});
 
-			var xhr = new XMLHttpRequest();
-			xhr.addEventListener('load', function() {
-				fixture('/onload', null);
-				QUnit.ok(true, "Got to the load event without throwing");
-				start();
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener('load', function() {
+					fixture('/onload', null);
+					QUnit.ok(true, "Got to the load event without throwing");
+					start();
+				});
+				xhr.open('GET', '/onload');
+				xhr.send();
 			});
-			xhr.open('GET', '/onload');
-			xhr.send();
 		});
 
 		stop();
