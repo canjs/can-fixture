@@ -6,10 +6,12 @@ var fixture = require("can-fixture");
 var set = require("can-set-legacy");
 var $ = require("jquery");
 var canDev = require('can-log/dev/dev');
+var clone = require("steal-clone");
 var dataFromUrl = require("../data-from-url");
 var canReflect = require("can-reflect");
 var matches = require("../matches");
 var QueryLogic = require("can-query-logic");
+var testHelpers = require("can-test-helpers");
 
 
 var errorCallback = function(xhr, status, error){
@@ -1944,5 +1946,24 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 		xhr.open('GET', '/onload');
 		xhr.send();
+	});
+
+	testHelpers.dev.devOnlyTest("Works with steal-clone", function() {
+		clone({})["import"]("can-fixture").then(function(fixture){
+			fixture('/onload', function(req, res) {
+				res(400);
+			});
+
+			var xhr = new XMLHttpRequest();
+			xhr.addEventListener('load', function() {
+				fixture('/onload', null);
+				QUnit.ok(true, "Got to the load event without throwing");
+				start();
+			});
+			xhr.open('GET', '/onload');
+			xhr.send();
+		});
+
+		stop();
 	});
 } // END onabort check
