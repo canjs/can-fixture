@@ -33,7 +33,7 @@
     "jshint": "^2.7.0",
     "steal": "^1.0.0",
     "steal-qunit": "^1.0.0",
-    "steal-tools": "^1.0.0",
+    "steal-tools": "^2.0.9",
     "testee": "^0.8.0"
   },
   "repository": {
