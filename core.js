@@ -145,14 +145,6 @@ function upsertFixture (fixtureList, settings, fixture) {
 
 // Adds a fixture to the list of fixtures.
 exports.add = function (settings, fixture) {
-	
-	/*if (Array.isArray(settings)) {
-		var allFixtures = settings.reduce(function(oldFixtures, currentValue){
-	    	return oldFixtures.concat(upsertFixture(fixtures, currentValue, currentValue.fixture));
-		},[]);
-		return allFixtures;
-	}*/
-
 	// If a fixture isn't provided, we assume that settings is
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
