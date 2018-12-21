@@ -1835,9 +1835,9 @@ asyncTest('fixture returns the old fixture callback when fixtures are removed (#
   
 	// in a test, remove default fixture and provide your own
 	var oldFixtures = fixture("/services/thing", null);
-	fixture("services/thing", function(){});
+	fixture("/services/thing", function(){});
 	QUnit.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
-	fixture("/services/thing", oldFixtures);
+	fixture(oldFixtures);
 
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener('load', function() {

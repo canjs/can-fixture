@@ -151,6 +151,13 @@ exports.add = function (settings, fixture) {
 	if (fixture === undefined) {
 		var oldFixtures = [];
 		canReflect.eachKey(settings, function (fixture, url) {
+			// If settings is an Array we will have list of fixtures objects with
+			// each object has a structure like: {url, fixture}
+			// we need to make sure we pass the right params types to the add function
+			if (canReflect.isPlainObject(fixture) && canReflect.hasKey(fixture, "url") && canReflect.hasKey(fixture, "fixture")) {
+				url = fixture.url;
+				fixture = fixture.fixture;
+			}
 			oldFixtures = oldFixtures.concat(exports.add(url, fixture));
 		});
 		return oldFixtures;
