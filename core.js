@@ -150,17 +150,19 @@ exports.add = function (settings, fixture) {
 	// the new fixtures.
 	if (fixture === undefined) {
 		var oldFixtures = [];
-		canReflect.eachKey(settings, function (fixture, url) {
-			// If settings is an Array we will have list of fixtures objects with
-			// each object has a structure like: {url, fixture}
-			// we need to make sure we pass the right params types to the add function
-			if (canReflect.isPlainObject(fixture) && canReflect.hasKey(fixture, "url") && canReflect.hasKey(fixture, "fixture")) {
-				url = fixture.url;
-				fixture = fixture.fixture;
-			}
-			oldFixtures = oldFixtures.concat(exports.add(url, fixture));
-		});
-		return oldFixtures;
+		if(Array.isArray(settings)) {
+			canReflect.eachIndex(settings, function(ajaxSettings){
+				var fixture = ajaxSettings.fixture;
+				ajaxSettings = canReflect.assignMap({}, ajaxSettings);
+				delete ajaxSettings.fixture;
+				return exports.add(ajaxSettings, fixture);
+			});
+		} else {
+			canReflect.eachKey(settings, function (fixture, url) {
+				oldFixtures = oldFixtures.concat(exports.add(url, fixture));
+			});
+			return oldFixtures;
+		}
 	}
 
 	// When a fixture is passed a store like:
