@@ -125,11 +125,12 @@ function getSettingsFromString (route) {
 // from our array of fixture overwrites.
 function upsertFixture (fixtureList, settings, fixture) {
 	var index = exports.index(settings, true);
+	var oldFixture;
 	if (index > -1) {
-		fixtures.splice(index, 1);
+		oldFixture = fixtures.splice(index, 1);
 	}
 	if (fixture == null) {
-		return;
+		return oldFixture;
 	}
 	if(typeof fixture === "object") {
 		var data = fixture;
@@ -139,6 +140,7 @@ function upsertFixture (fixtureList, settings, fixture) {
 	}
 	settings.fixture = fixture;
 	fixtures.unshift(settings);
+	return oldFixture;
 }
 
 // Adds a fixture to the list of fixtures.
@@ -147,24 +149,33 @@ exports.add = function (settings, fixture) {
 	// an array of fixtures, and we should iterate over it, and set up
 	// the new fixtures.
 	if (fixture === undefined) {
-		canReflect.eachKey(settings, function (fixture, url) {
-			exports.add(url, fixture);
-		});
-		return;
+		var oldFixtures = [];
+		if(Array.isArray(settings)) {
+			canReflect.eachIndex(settings, function(ajaxSettings){
+				var fixture = ajaxSettings.fixture;
+				ajaxSettings = canReflect.assignMap({}, ajaxSettings);
+				delete ajaxSettings.fixture;
+				return exports.add(ajaxSettings, fixture);
+			});
+		} else {
+			canReflect.eachKey(settings, function (fixture, url) {
+				oldFixtures = oldFixtures.concat(exports.add(url, fixture));
+			});
+			return oldFixtures;
+		}
 	}
 
 	// When a fixture is passed a store like:
 	// `fixture("/things/{id}", store)`
 	if (isStoreLike(fixture)) {
 		settings = addStoreFixture(settings, fixture);
-		exports.add(settings);
-		return;
+		return exports.add(settings);
 	}
 
 	if (typeof settings === 'string') {
 		settings = getSettingsFromString(settings);
 	}
-	upsertFixture(fixtures, settings, fixture);
+	return upsertFixture(fixtures, settings, fixture);
 };
 
 var $fixture = exports.add;

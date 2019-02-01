@@ -1827,6 +1827,17 @@ asyncTest('should allow FormData as data type (#133)', function() {
 	xhr.send(data);
 });
 
+test('fixture returns the old fixture callback when fixtures are removed (#34)', function() {
+	var funcA = function(){
+		return "foo";
+	};
+	fixture("/services/thing", funcA);
+  
+	// in a test, remove default fixture and provide your own
+	var oldFixtures = fixture("/services/thing", null);
+	QUnit.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
+});
+
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
 	asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
 		fixture('/onload', 1000);
