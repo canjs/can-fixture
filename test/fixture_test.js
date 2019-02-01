@@ -1827,7 +1827,7 @@ asyncTest('should allow FormData as data type (#133)', function() {
 	xhr.send(data);
 });
 
-asyncTest('fixture returns the old fixture callback when fixtures are removed (#34)', function() {
+test('fixture returns the old fixture callback when fixtures are removed (#34)', function() {
 	var funcA = function(){
 		return "foo";
 	};
@@ -1835,16 +1835,7 @@ asyncTest('fixture returns the old fixture callback when fixtures are removed (#
   
 	// in a test, remove default fixture and provide your own
 	var oldFixtures = fixture("/services/thing", null);
-	fixture("/services/thing", function(){});
 	QUnit.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
-	fixture(oldFixtures);
-
-	var xhr = new XMLHttpRequest();
-	xhr.addEventListener('load', function() {
-		start();
-	});
-	xhr.open('GET', '/services/thing');
-	xhr.send();
 });
 
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
