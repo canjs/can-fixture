@@ -5,8 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/canjs/can-fixture/blob/master/LICENSE.md)
 [![npm version](https://badge.fury.io/js/can-fixture.svg)](https://www.npmjs.com/package/can-fixture)
 [![Travis build status](https://travis-ci.org/canjs/can-fixture.svg?branch=master)](https://travis-ci.org/canjs/can-fixture)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/canjs/can-fixture?branch=master&svg=true)](https://ci.appveyor.com/project/matthewp/can-fixture)
-[![Coverage status](https://coveralls.io/repos/github/canjs/can-fixture/badge.svg?branch=master)](https://coveralls.io/github/canjs/can-fixture?branch=master)
 [![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-fixture.svg)](https://greenkeeper.io/)
 
 the response with a file or function. Use `can-fixture` to:
