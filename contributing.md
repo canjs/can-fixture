@@ -1,5 +1,5 @@
 First and foremost, thanks for contributing to can-fixture and CanJS! If you
-have any questions, reach out to us on the [gitter channel](https://gitter.im/canjs/canjs).
+have any questions, reach out to us on [Slack](https://www.bitovi.com/community/slack) ([#canjs channel](https://bitovi-community.slack.com/messages/CFC22NZ8A)).
 
 The following details how to make contributions such as:
 
@@ -14,11 +14,11 @@ The following details how to make contributions such as:
 
 ## Reporting Bugs
 
-Report a bug as a new [github issue](https://github.com/canjs/can-fixture/issues/new).
+Report a bug as a new [GitHub issue](https://github.com/canjs/can-fixture/issues/new).
 
 When filing a bug, it is extremely helpful to include:
 
-- A small example with [JSBin](https://justinbmeyer.jsbin.com/zixumu/2/edit?html,js,output).
+- A small example with [JS Bin](https://justinbmeyer.jsbin.com/zixumu/2/edit?html,js,output).
 - Breaking tests (optional)
 - Proposed solutions (optional)
 
