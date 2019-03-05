@@ -7,7 +7,7 @@
 [![Travis build status](https://travis-ci.org/canjs/can-fixture.svg?branch=master)](https://travis-ci.org/canjs/can-fixture)
 [![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-fixture.svg)](https://greenkeeper.io/)
 
-the response with a file or function. Use `can-fixture` to:
+Intercept and simulate AJAX requests.  Works without CanJS.
 
 ## Documentation
 
