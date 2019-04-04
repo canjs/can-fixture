@@ -213,7 +213,7 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 		// fall the fixture
 		var result = fixtureSettings.fixture(xhrSettings, response, xhrSettings.headers, fixtureSettings);
 
-		if (result && typeof result.then === 'function') {
+		if (canReflect.isPromise(result)) {
 			// If we have a promise, wait for it to resolve
 			result.then(function (result) {
 				if (result !== undefined) {
