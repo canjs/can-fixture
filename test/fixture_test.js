@@ -140,6 +140,26 @@ test('dynamic fixtures', function () {
 		});
 });
 
+test('dynamic fixtures return promises', function () {
+	stop();
+	fixture.delay = 10;
+	fixture('something', function () {
+		return Promise.resolve([{
+			sweet: 'ness'
+		}]);
+	});
+	$.ajax({
+		url: 'something',
+		dataType: 'json'
+	})
+		.done(function (data) {
+			equal(data[0].sweet, 'ness', 'can.get works');
+			start();
+		}).catch(function(err){
+			debugger;
+		});
+});
+
 if (__dirname !== '/') {
 	test('fixture function', 3, function () {
 		stop();
@@ -1832,7 +1852,7 @@ test('fixture returns the old fixture callback when fixtures are removed (#34)',
 		return "foo";
 	};
 	fixture("/services/thing", funcA);
-  
+
 	// in a test, remove default fixture and provide your own
 	var oldFixtures = fixture("/services/thing", null);
 	QUnit.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
