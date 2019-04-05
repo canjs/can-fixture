@@ -4,6 +4,7 @@ var fixture = core.add;
 var Store = require("./store");
 require("./xhr");
 var canReflect = require("can-reflect");
+var canDev = require("can-log/dev/dev");
 var ns = require("can-namespace");
 // HELPERS START
 
@@ -67,7 +68,14 @@ canReflect.assignMap(fixture, {
 });
 
 if(typeof window !== "undefined" && typeof require.resolve !== "function") {
-	window.fixture = fixture;
+	// window.fixture = fixture;
+
+	window.fixture = function(){
+		debugger
+		canDev.warn("You using the global fixture. Make sure you import can-fixture.");
+
+		return fixture.apply(this, arguments);
+	};	
 }
 
 

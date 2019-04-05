@@ -1980,3 +1980,20 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		stop();
 	});
 } // END onabort check
+
+
+
+testHelpers.dev.devOnlyTest("window.fixture warns when called", function() {
+	debugger
+	var teardown = testHelpers.dev.willWarn(/You using the global fixture\. Make sure you import can-fixture\./, function(message, matched) {
+			if(matched) {
+				ok(true, "received warning");
+			}
+	});
+
+	window.fixture("GET /api/products", function(){
+		return {};
+	});
+
+	teardown();	
+});
