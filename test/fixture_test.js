@@ -1958,6 +1958,20 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		xhr.send();
 	});
 
+	testHelpers.dev.devOnlyTest("window.fixture warns when called", function() {
+		var teardown = testHelpers.dev.willWarn(/You are using the global fixture\. Make sure you import can-fixture\./, function(message, matched) {
+			if(matched) {
+				ok(true, "received warning");
+			}
+		});
+
+		window.fixture("GET /api/products", function(){
+			return {};
+		});
+
+		teardown();	
+	});
+
 	testHelpers.dev.devOnlyTest("Works with steal-clone", function() {
 		steal.loader.import("steal-clone", { name: "can-fixture" })
 		.then(function(clone) {
@@ -1983,17 +1997,3 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 
 
-testHelpers.dev.devOnlyTest("window.fixture warns when called", function() {
-	debugger
-	var teardown = testHelpers.dev.willWarn(/You using the global fixture\. Make sure you import can-fixture\./, function(message, matched) {
-			if(matched) {
-				ok(true, "received warning");
-			}
-	});
-
-	window.fixture("GET /api/products", function(){
-		return {};
-	});
-
-	teardown();	
-});

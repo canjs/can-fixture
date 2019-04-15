@@ -68,11 +68,9 @@ canReflect.assignMap(fixture, {
 });
 
 if(typeof window !== "undefined" && typeof require.resolve !== "function") {
-	// window.fixture = fixture;
 
 	window.fixture = function(){
-		debugger
-		canDev.warn("You using the global fixture. Make sure you import can-fixture.");
+		canDev.warn("You are using the global fixture. Make sure you import can-fixture.");
 
 		return fixture.apply(this, arguments);
 	};	
