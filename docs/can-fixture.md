@@ -11,6 +11,8 @@
 
   If an XHR request matches ajaxSettings, calls requestHandler with the XHR requests data. Makes the XHR request respond with the return value of requestHandler or the result of calling its response argument.
 
+  When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
+
   The following traps requests to GET /todos and responds with an array of data:
 
   ```js
@@ -34,7 +36,44 @@
   ```
   @codepen
 
-  When adding a fixture, it will remove any identical fixtures from the list of fixtures. The last fixture added will be the first matched.
+  The requestHandler also supports asynchronous results, by returning a promise or using `async`/`await`. This allows fixtures to depend on each other, introduce dynamic delays, and even depend on external resources.
+
+  ```js
+  import {fixture, ajax} from "can";
+
+  fixture( { method: "get", url: "/todos" },
+    ( request, response, headers, ajaxSettings ) => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve({
+          data: [
+            { id: 1, name: "dishes" },
+            { id: 2, name: "mow" }
+          ]
+        }), 1000);
+	  });
+    }
+  );
+
+  // or
+
+  fixture( { method: "get", url: "/todos" },
+    async ( request, response, headers, ajaxSettings ) => {
+      await delay(1000);
+      return {
+        data: [
+          { id: 1, name: "dishes" },
+          { id: 2, name: "mow" }
+        ]
+      };
+    });
+  );
+
+  ajax( {url: "/todos"} ).then( result => {
+    console.log( result.data ); //-> [{id: 1, name: "dishes"}, {id:2, name: "mow"}]
+  } );
+
+  ```
+  @codepen
 
   @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/todos/{_id}`.
   @param {can-fixture.requestHandler} requestHandler Handles the request and provides a response.
@@ -67,7 +106,7 @@
   @codepen
   @highlight 3
 
-  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/tasks/{_id}`. 
+  @param {can-fixture/types/ajaxSettings} ajaxSettings An object that is used to match values on an XHR object, namely the url and method. url can be templated like `/tasks/{_id}`.
   @param {String} url The pathname of requests that will be trapped.
 
 @signature `fixture( ajaxSettings, data )`
@@ -182,7 +221,7 @@
     "GET /tasks": { data: [ {id: 1, name: "mow lawn"} ] },
     "/people": "fixtures/people.json"
   } );
-  
+
   ajax( {type: "POST", url:"/tasks"} ).then( result => {
     console.log( result ); //-> {id: RandomNumber}
   } );
@@ -249,6 +288,6 @@
 @signature `fixture(ajaxSettingsArray)`
 
   Add fixtures that have been previously removed with another call to fixture.
-  
+
   @param {Array<can-fixture/types/ajaxSettings>}  An array of AJAX settings objects
   @return {Array<can-fixture/types/ajaxSettings>} Returns an array of any fixtures that are replaced by the fixtures that are added.
