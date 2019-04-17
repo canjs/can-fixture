@@ -135,8 +135,6 @@ test('dynamic fixtures', function () {
 		.done(function (data) {
 			equal(data[0].sweet, 'ness', 'can.get works');
 			start();
-		}).catch(function(err){
-			debugger;
 		});
 });
 
@@ -148,16 +146,14 @@ test('dynamic fixtures return promises', function () {
 			sweet: 'ness'
 		}]);
 	});
+
 	$.ajax({
 		url: 'something',
 		dataType: 'json'
-	})
-		.done(function (data) {
-			equal(data[0].sweet, 'ness', 'can.get works');
-			start();
-		}).catch(function(err){
-			debugger;
-		});
+	}).then(function (data) {
+		equal(data[0].sweet, 'ness', 'can.get works');
+		start();
+	});
 });
 
 if (__dirname !== '/') {
