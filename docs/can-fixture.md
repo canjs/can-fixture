@@ -36,7 +36,7 @@
   ```
   @codepen
 
-  The requestHandler also supports asynchronous results, by returning a promise or using `async`/`await`. This allows fixtures to depend on each other, introduce dynamic delays, and even depend on external resources.
+  Return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) (or use [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) & [await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)) from `requestHandler` to asynchronously return results. This allows fixtures to depend on each other, introduce dynamic delays, and even depend on external resources.
 
   ```js
   import {fixture, ajax} from "can";
