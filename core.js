@@ -213,9 +213,19 @@ exports.callDynamicFixture = function(xhrSettings, fixtureSettings, cb){
 		// fall the fixture
 		var result = fixtureSettings.fixture(xhrSettings, response, xhrSettings.headers, fixtureSettings);
 
-		if (result !== undefined) {
-			// Resolve with fixture results
-			response(200, result );
+		if (canReflect.isPromise(result)) {
+			// If we have a promise, wait for it to resolve
+			result.then(function (result) {
+				if (result !== undefined) {
+					// Resolve with fixture results
+					response(200, result );
+				}
+			});
+		} else {
+			if (result !== undefined) {
+				// Resolve with fixture results
+				response(200, result );
+			}
 		}
 	};
 
