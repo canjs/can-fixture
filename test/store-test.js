@@ -12,7 +12,7 @@ QUnit.test("createInstance, destroyInstance, updateInstance", function(assert){
         {id: 0, name: "foo"}
     ], new QueryLogic({identity: ["id"]}));
 
-    QUnit.stop();
+    var done = assert.async();
     store.createInstance({name: "bar"}).then(function(instance){
         var data = store.getList({});
         assert.deepEqual(data, {
@@ -44,18 +44,18 @@ QUnit.test("createInstance, destroyInstance, updateInstance", function(assert){
                 {id: 0, name: "foo"}
             ]
         });
-        QUnit.start();
+        done();
     });
 });
 
-QUnit.test("anything with a schema will be converted to a queryLogic automatically", function(){
+QUnit.test("anything with a schema will be converted to a queryLogic automatically", function(assert) {
     var store = fixture.store(
         [ {_id: 0, name: "foo"} ],
         {identity: ["id"]}
     );
 
     var res = store.get({_id: 0});
-    QUnit.ok(res, "an object works");
+    assert.ok(res, "an object works");
 
     var type = canReflect.assignSymbols({},{
         "can.getSchema": function(){
@@ -69,8 +69,8 @@ QUnit.test("anything with a schema will be converted to a queryLogic automatical
     );
 
     res = store.get({_id: 0});
-    QUnit.ok(res, "an object works");
-    //.then(function(){ QUnit.ok(true, "got data"); });
+    assert.ok(res, "an object works");
+    //.then(function(){ assert.ok(true, "got data"); });
 
 
 });
@@ -81,12 +81,12 @@ QUnit.test("createData, destroyData, updateData", function(assert){
         {id: 0, name: "foo"}
     ], new QueryLogic({identity: ["id"]}));
 
-    QUnit.stop();
+    var done = assert.async();
     store.createData({
         data: {name: "bar"}
     }, function(instance){
-        QUnit.deepEqual(instance, {id: 1, name: "bar"} );
-        QUnit.start();
+        assert.deepEqual(instance, {id: 1, name: "bar"} );
+        done();
     });
     /*
     .then(function(instance){
@@ -108,6 +108,6 @@ QUnit.test("createData, destroyData, updateData", function(assert){
                 {id: 0, name: "foo"}
             ]
         });
-        QUnit.start();
+        done();
     });*/
 });

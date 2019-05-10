@@ -14,8 +14,8 @@ var testHelpers = require("can-test-helpers");
 
 
 var errorCallback = function(xhr, status, error){
-	ok(false, error);
-	start();
+	assert.ok(false, error);
+	done();
 };
 
 var parseHeaders = function(str) {
@@ -42,8 +42,8 @@ var parseHeaders = function(str) {
 QUnit.module('can-fixture');
 
 if (__dirname !== '/') {
-	test('static fixtures', function () {
-		stop();
+	QUnit.test('static fixtures', function(assert) {
+		var done = assert.async();
 		fixture('GET something', __dirname+'/fixtures/test.json');
 		fixture('POST something', __dirname+'/fixtures/test.json');
 		fixture('PATCH something', __dirname+'/fixtures/test.json');
@@ -53,22 +53,22 @@ if (__dirname !== '/') {
 			dataType: 'json'
 		})
 			.then(function (data) {
-				equal(data.sweet, 'ness', 'can.get works');
+				assert.equal(data.sweet, 'ness', 'can.get works');
 				$.ajax({
 					url: 'something',
 					method: 'POST',
 					dataType: 'json'
 				})
 					.then(function (data) {
-						equal(data.sweet, 'ness', 'can.post works');
+						assert.equal(data.sweet, 'ness', 'can.post works');
 							$.ajax({
 						url: 'something',
 						method: 'PATCH',
 						dataType: 'json'
 					})
 						.then(function (data) {
-							equal(data.sweet, 'ness', 'can.patch works');
-							start();
+							assert.equal(data.sweet, 'ness', 'can.patch works');
+							done();
 						},errorCallback);
 					},errorCallback);
 			}, errorCallback);
@@ -76,52 +76,52 @@ if (__dirname !== '/') {
 }
 
 if (__dirname !== '/') {
-	test('static fixtures (using method signature)', function () {
-		stop();
+	QUnit.test('static fixtures (using method signature)', function(assert) {
+		var done = assert.async();
 		fixture({method: 'get', url: 'method/{id}'}, __dirname+'/fixtures/method.{id}.json');
 		$.ajax({
 			url: 'method/4',
 			dataType: 'json'
 		})
 			.then(function (data) {
-				equal(data.id, 4, 'Got data with proper id using method');
-				start();
+				assert.equal(data.id, 4, 'Got data with proper id using method');
+				done();
 			}, errorCallback);
 	});
 }
 
 if (__dirname !== '/') {
-	test('static fixtures (using type signature)', function () {
-		stop();
+	QUnit.test('static fixtures (using type signature)', function(assert) {
+		var done = assert.async();
 		fixture({type: 'get', url: 'type/{id}'}, __dirname+'/fixtures/type.{id}.json');
 		$.ajax({
 			url: 'type/4',
 			dataType: 'json'
 		})
 			.then(function (data) {
-				equal(data.id, 4, 'Got data with proper id using type');
-				start();
+				assert.equal(data.id, 4, 'Got data with proper id using type');
+				done();
 			}, errorCallback);
 	});
 }
 
 if (__dirname !== '/') {
-	test('templated static fixtures', function () {
-		stop();
+	QUnit.test('templated static fixtures', function(assert) {
+		var done = assert.async();
 		fixture('GET some/{id}', __dirname+'/fixtures/stuff.{id}.json');
 		$.ajax({
 			url: 'some/3',
 			dataType: 'json'
 		})
 			.then(function (data) {
-				equal(data.id, 3, 'Got data with proper id');
-				start();
+				assert.equal(data.id, 3, 'Got data with proper id');
+				done();
 			}, errorCallback);
 	});
 }
 
-test('dynamic fixtures', function () {
-	stop();
+QUnit.test('dynamic fixtures', function(assert) {
+	var done = assert.async();
 	fixture.delay = 10;
 	fixture('something', function () {
 		return [{
@@ -132,14 +132,14 @@ test('dynamic fixtures', function () {
 		url: 'something',
 		dataType: 'json'
 	})
-		.done(function (data) {
-			equal(data[0].sweet, 'ness', 'can.get works');
-			start();
+		.start(function (data) {
+			assert.equal(data[0].sweet, 'ness', 'can.get works');
+			done();
 		});
 });
 
-test('dynamic fixtures return promises', function () {
-	stop();
+QUnit.test('dynamic fixtures return promises', function(assert) {
+	var done = assert.async();
 	fixture.delay = 10;
 	fixture('something', function () {
 		return Promise.resolve([{
@@ -151,45 +151,45 @@ test('dynamic fixtures return promises', function () {
 		url: 'something',
 		dataType: 'json'
 	}).then(function (data) {
-		equal(data[0].sweet, 'ness', 'can.get works');
-		start();
+		assert.equal(data[0].sweet, 'ness', 'can.get works');
+		done();
 	});
 });
 
 if (__dirname !== '/') {
-	test('fixture function', 3, function () {
-		stop();
+	QUnit.test('fixture function', 3, function(assert) {
+		var done = assert.async();
 		var url = __dirname+'/fixtures/foo.json';
 		fixture(url, __dirname+'/fixtures/foobar.json');
 		$.ajax({
 			url: url,
 			dataType: 'json'
 		})
-			.done(function (data) {
-				equal(data.sweet, 'ner', 'url passed works');
+			.start(function (data) {
+				assert.equal(data.sweet, 'ner', 'url passed works');
 				fixture(url, __dirname+'/fixtures/test.json');
 				$.ajax({
 					url: url,
 					dataType: 'json'
 				})
-					.done(function (data) {
-						equal(data.sweet, 'ness', 'replaced');
+					.start(function (data) {
+						assert.equal(data.sweet, 'ness', 'replaced');
 						fixture(url, null);
 						$.ajax({
 							url: url,
 							dataType: 'json'
 						})
-							.done(function (data) {
-								equal(data.a, 'b', 'removed');
-								start();
+							.start(function (data) {
+								assert.equal(data.a, 'b', 'removed');
+								done();
 							});
 					});
 			});
 	});
 }
 
-test('fixture.store fixtures', function () {
-	stop();
+QUnit.test('fixture.store fixtures', function(assert) {
+	var done = assert.async();
 
 	var SearchText = matches.makeComparatorType(function(searchTextValue, dataSearchTextValue, data, path){
 		var regex = new RegExp('^' + searchTextValue);
@@ -225,15 +225,15 @@ test('fixture.store fixtures', function () {
 			searchText: 'thing 2'
 		},
 		success: function (things) {
-			equal(things.data[0].name, 'thing 29', 'first item is correct');
-			equal(things.data.length, 11, 'there are 11 items');
-			start();
+			assert.equal(things.data[0].name, 'thing 29', 'first item is correct');
+			assert.equal(things.data.length, 11, 'there are 11 items');
+			done();
 		}
 	});
 });
 
-test('fixture.store fixtures should have unique IDs', function () {
-	stop();
+QUnit.test('fixture.store fixtures should have unique IDs', function(assert) {
+	var done = assert.async();
 	var store = fixture.store(100, function (i) {
 		return {name: 'Test ' + i};
 	});
@@ -251,15 +251,15 @@ test('fixture.store fixtures should have unique IDs', function () {
 			var things = result.data;
 			for (var thingKey in things) {
 				var thing = things[thingKey];
-				ok(seenIds.indexOf(thing.id) === -1);
+				assert.ok(seenIds.indexOf(thing.id) === -1);
 				seenIds.push(thing.id);
 			}
-			start();
+			done();
 		}
 	});
 });
 
-test('fixture.store should assign unique IDs when fixtures provide IDs', function () {
+QUnit.test('fixture.store should assign unique IDs when fixtures provide IDs', function(assert) {
 	/* NOTE: We are testing whether the unique ID we are assigning to a new
 	         item will account for IDs which the user has provided.
 	*/
@@ -278,8 +278,8 @@ test('fixture.store should assign unique IDs when fixtures provide IDs', functio
 
 	function then (ajax, callback) {
 		ajax.then(callback, function (error) {
-			ok(false, 'ajax failure: ' + error);
-			start();
+			assert.ok(false, 'ajax failure: ' + error);
+			done();
 		});
 	}
 
@@ -292,11 +292,11 @@ test('fixture.store should assign unique IDs when fixtures provide IDs', functio
 		}
 	});
 
-	stop();
+	var done = assert.async();
 	then(request, function (response) {
-		notEqual(response.id, 0);
-		notEqual(response.id, 1);
-		notEqual(response.id, 2);
+		assert.notEqual(response.id, 0);
+		assert.notEqual(response.id, 1);
+		assert.notEqual(response.id, 2);
 
 		/* NOTE: This check will fail if the underlying implementation changes.
 		         This 3 is tightly coupled to the implementation.
@@ -304,37 +304,37 @@ test('fixture.store should assign unique IDs when fixtures provide IDs', functio
 		         properly test the edge-case and update these assertions.
 		         This check only serves to notify you to update the checks.
 		*/
-		equal(response.id, 3);
+		assert.equal(response.id, 3);
 
-		start();
+		done();
 	});
 });
 
-test('simulating an error', function () {
+QUnit.test('simulating an error', function(assert) {
 
 	fixture('/foo', function (request, response) {
 		return response(401, {type: "unauthorized"});
 	});
-	stop();
+	var done = assert.async();
 	$.ajax({
 		url: '/foo',
 		dataType: 'json'
 	})
-		.done(function () {
-			ok(false, 'success called');
-			start();
+		.start(function () {
+			assert.ok(false, 'success called');
+			done();
 		})
 		.fail(function (original, type) {
-			ok(true, 'error called');
-			deepEqual(JSON.parse(original.responseText), {type: "unauthorized"}, 'Original text passed');
-			start();
+			assert.ok(true, 'error called');
+			assert.deepEqual(JSON.parse(original.responseText), {type: "unauthorized"}, 'Original text passed');
+			done();
 		});
 });
 
-test('rand', function () {
+QUnit.test('rand', function(assert) {
 	var rand = fixture.rand;
 	var num = rand(3);
-	equal(typeof num, 'number');
+	assert.equal(typeof num, 'number');
 	var matched = {};
 	// this could ocassionally fail.
 	for(var i = 0; i < 100; i++) {
@@ -342,7 +342,7 @@ test('rand', function () {
 		matched[num] = true;
 	}
 	for(i = 0; i <= 3; i++) {
-		ok(matched[i], "has "+i);
+		assert.ok(matched[i], "has "+i);
 	}
 
 	matched = {};
@@ -358,40 +358,40 @@ test('rand', function () {
 	}
 
 	for(i = 1; i <= 3; i++) {
-		ok(matched[i], "has "+i);
+		assert.ok(matched[i], "has "+i);
 		delete matched[i];
 	}
 
 	choices.forEach(function(choice){
-		ok(matched[choice], "has "+choice);
+		assert.ok(matched[choice], "has "+choice);
 		delete matched[choice];
 	});
 
-	ok(canReflect.size(matched) === 0, "nothing else unexpected");
+	assert.ok(canReflect.size(matched) === 0, "nothing else unexpected");
 });
 
-test('dataFromUrl', function () {
+QUnit.test('dataFromUrl', function(assert) {
 	var data = dataFromUrl('/thingers/{id}', '/thingers/5');
-	equal(data.id, 5, 'gets data');
+	assert.equal(data.id, 5, 'gets data');
 	data = dataFromUrl('/thingers/5?hi.there', '/thingers/5?hi.there');
-	deepEqual(data, {}, 'gets data');
+	assert.deepEqual(data, {}, 'gets data');
 });
 
-test('core.dataFromUrl with double character value', function () {
+QUnit.test('core.dataFromUrl with double character value', function(assert) {
 	var data = dataFromUrl('/days/{id}/time_slots.json', '/days/17/time_slots.json');
-	equal(data.id, 17, 'gets data');
+	assert.equal(data.id, 17, 'gets data');
 });
 
 
 
-test('fixture function gets id', function () {
+QUnit.test('fixture function gets id', function(assert) {
 	fixture('/thingers/{id}', function (settings) {
 		return {
 			id: settings.data.id,
 			name: 'justin'
 		};
 	});
-	stop();
+	var done = assert.async();
 	$.ajax({
 		url: '/thingers/5',
 		dataType: 'json',
@@ -399,27 +399,27 @@ test('fixture function gets id', function () {
 			id: 5
 		}
 	})
-		.done(function (data) {
-			ok(data.id);
-			start();
+		.start(function (data) {
+			assert.ok(data.id);
+			done();
 		});
 });
 
 if (__dirname !== '/') {
-	test('replacing and removing a fixture', function () {
+	QUnit.test('replacing and removing a fixture', function(assert) {
 		var url = __dirname+'/fixtures/remove.json';
 		fixture('GET ' + url, function () {
 			return {
 				weird: 'ness!'
 			};
 		});
-		stop();
+		var done = assert.async();
 		$.ajax({
 			url: url,
 			dataType: 'json'
 		})
-			.done(function (json) {
-				equal(json.weird, 'ness!', 'fixture set right');
+			.start(function (json) {
+				assert.equal(json.weird, 'ness!', 'fixture set right');
 				fixture('GET ' + url, function () {
 					return {
 						weird: 'ness?'
@@ -429,23 +429,23 @@ if (__dirname !== '/') {
 					url: url,
 					dataType: 'json'
 				})
-					.done(function (json) {
-						equal(json.weird, 'ness?', 'fixture set right');
+					.start(function (json) {
+						assert.equal(json.weird, 'ness?', 'fixture set right');
 						fixture('GET ' + url, null);
 						$.ajax({
 							url: url,
 							dataType: 'json'
 						})
-							.done(function (json) {
-								equal(json.weird, 'ness', 'fixture set right');
-								start();
+							.start(function (json) {
+								assert.equal(json.weird, 'ness', 'fixture set right');
+								done();
 							});
 					});
 			});
 	});
 }
 
-test('fixture.store with can.Model', function () {
+QUnit.test('fixture.store with can.Model', function(assert) {
 	var store = fixture.store(100, function (i) {
 		return {
 			id: i,
@@ -466,10 +466,10 @@ test('fixture.store with can.Model', function () {
 	fixture('PUT /models/{id}', store.updateData);
 	fixture('DELETE /models/{id}', store.destroyData);
 
-	stop();
+	var done = assert.async();
 	function errorAndStart(e){
-		ok(false, "borked"+e);
-		start();
+		assert.ok(false, "borked"+e);
+		done();
 	}
 
 
@@ -478,7 +478,7 @@ test('fixture.store with can.Model', function () {
 			url: "/models/100",
 			dataType: 'json'
 		}).then(function(model){
-			equal(model.name, 'Updated test object', 'Successfully updated object');
+			assert.equal(model.name, 'Updated test object', 'Successfully updated object');
 		});
 	};
 
@@ -489,15 +489,15 @@ test('fixture.store with can.Model', function () {
 	}).then(function (modelsData) {
 		var models = modelsData.data;
 
-		equal(models.length, 100, 'Got 100 models for findAll with no parameters');
-		equal(models[95].name, 'Object 95', 'All models generated properly');
+		assert.equal(models.length, 100, 'Got 100 models for findAll with no parameters');
+		assert.equal(models[95].name, 'Object 95', 'All models generated properly');
 		return $.ajax({
 				url: "/models/51",
 				dataType: 'json'
 			})
 			.then(function (data) {
-				equal(data.id, 51, 'Got correct object id');
-				equal('Object 51', data.name, 'Object name generated correctly');
+				assert.equal(data.id, 51, 'Got correct object id');
+				assert.equal('Object 51', data.name, 'Object name generated correctly');
 				return $.ajax({
 						url: "/models",
 						dataType: 'json',
@@ -507,14 +507,14 @@ test('fixture.store with can.Model', function () {
 						}
 					})
 					.then(function (newmodel) {
-						equal(newmodel.id, 100, 'Id got incremented');
+						assert.equal(newmodel.id, 100, 'Id got incremented');
 						// Tests creating, deleting, updating
 						return $.ajax({
 								url: "/models/100",
 								dataType: 'json'
 							})
 							.then(function (model) {
-								equal(model.id, 100, 'Loaded new object');
+								assert.equal(model.id, 100, 'Loaded new object');
 								return $.ajax({
 										url: "/models/100",
 										dataType: 'json',
@@ -533,7 +533,7 @@ test('fixture.store with can.Model', function () {
 													type: 'delete'
 												})
 												.then(function (deleted) {
-													start();
+													done();
 												},errorAndStart);
 
 										}, errorAndStart);
@@ -545,7 +545,7 @@ test('fixture.store with can.Model', function () {
 	}, errorAndStart);
 });
 
-test('GET fixture.store returns 404 on findOne with bad id (#803)', function () {
+QUnit.test('GET fixture.store returns 404 on findOne with bad id (#803)', function(assert) {
 	var store = fixture.store(2, function (i) {
 		return {
 			id: i,
@@ -554,19 +554,19 @@ test('GET fixture.store returns 404 on findOne with bad id (#803)', function () 
 	});
 
 	fixture('GET /models/{id}', store.getData);
-	stop();
+	var done = assert.async();
 
 	$.ajax({url: "/models/3", dataType: "json"}).then(function(){},function (data) {
-		equal(data.status, 404, 'status');
-		equal(data.statusText, 'error', 'statusText');
-		equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
-		start();
+		assert.equal(data.status, 404, 'status');
+		assert.equal(data.statusText, 'error', 'statusText');
+		assert.equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
+		done();
 	});
 });
 
 // problem here is that memory cache is cool with these changes.  We need to do something different
 // if instance isn't there.
-test('fixture.store returns 404 on update with a bad id (#803)', function () {
+QUnit.test('fixture.store returns 404 on update with a bad id (#803)', function(assert) {
 	var store = fixture.store(5, function (i) {
 		return {
 			id: i,
@@ -574,22 +574,22 @@ test('fixture.store returns 404 on update with a bad id (#803)', function () {
 		};
 	});
 
-	stop();
+	var done = assert.async();
 	fixture('POST /models/{id}', store.updateData);
 
 	$.ajax({url: "/models/6", dataType: "json", data: {'jedan': 'dva'}, type: 'POST'})
 		.then(function(){
-			QUnit.ok(false, "success");
-			QUnit.start();
+			assert.ok(false, "success");
+			done();
 		},function (data) {
-			equal(data.status, 404, 'status');
-			equal(data.statusText, 'error', 'statusText');
-			equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
-			start();
+			assert.equal(data.status, 404, 'status');
+			assert.equal(data.statusText, 'error', 'statusText');
+			assert.equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
+			done();
 		});
 });
 
-test('fixture.store returns 404 on destroy with a bad id (#803)', function () {
+QUnit.test('fixture.store returns 404 on destroy with a bad id (#803)', function(assert) {
 	var store = fixture.store(2, function (i) {
 		return {
 			id: i,
@@ -597,20 +597,20 @@ test('fixture.store returns 404 on destroy with a bad id (#803)', function () {
 		};
 	});
 
-	stop();
+	var done = assert.async();
 
 	fixture('DELETE /models/{id}', store.destroyData);
 
 	$.ajax({url: "/models/6", dataType: "json", type: 'DELETE'})
 		.then(function(){},function (data) {
-			equal(data.status, 404, 'status');
-			equal(data.statusText, 'error', 'statusText');
-			equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
-			start();
+			assert.equal(data.status, 404, 'status');
+			assert.equal(data.statusText, 'error', 'statusText');
+			assert.equal(JSON.parse(data.responseText).title, 'no data', 'responseText');
+			done();
 		});
 });
 
-test('fixture.store can use id of different type (#742)', function () {
+QUnit.test('fixture.store can use id of different type (#742)', function(assert) {
 
 	var MustBeNumber = matches.makeComparatorType(function(queryVal, propVal){
 		return parseInt(queryVal,10) === propVal;
@@ -630,16 +630,16 @@ test('fixture.store can use id of different type (#742)', function () {
 			};
 		}, query);
 	fixture('GET /models', store.getListData);
-	stop();
+	var done = assert.async();
 	$.ajax({url: "/models", dataType: "json", data: { filter: {parentId: '4'} } })
 		.then(function (models) {
-			equal(models.data.length, 1, 'Got one model');
-			deepEqual(models.data[0], { id: 2, parentId: 4, name: 'Object 2' });
-			start();
+			assert.equal(models.data.length, 1, 'Got one model');
+			assert.deepEqual(models.data[0], { id: 2, parentId: 4, name: 'Object 2' });
+			done();
 		});
 });
 
-test('fixture("METHOD /path", store) should use the right method', function () {
+QUnit.test('fixture("METHOD /path", store) should use the right method', function(assert) {
 	/*
 		Examples:
 			fixture("GET /path", store) => fixture("GET /path", store.getData)
@@ -655,16 +655,16 @@ test('fixture("METHOD /path", store) should use the right method', function () {
 		};
 	});
 	fixture('GET /models', store); // <- CHANGE
-	stop();
+	var done = assert.async();
 	$.ajax({url: "/models", dataType: "json"})
 		.then(function (models) {
-			equal(models.data.length, 100, 'Gotta catch up all!');
-			start();
+			assert.equal(models.data.length, 100, 'Gotta catch up all!');
+			done();
 		});
 });
 
 //!steal-remove-start
-test('fixture("METHOD /path", store) should warn when correcting to the right method', function (assert) {
+QUnit.test('fixture("METHOD /path", store) should warn when correcting to the right method', function (assert) {
 	assert.expect(1);
 	var store = fixture.store(100, function (i) {
 		return {
@@ -681,7 +681,7 @@ test('fixture("METHOD /path", store) should warn when correcting to the right me
 });
 //!steal-remove-end
 
-test('fixture with response callback', 4, function () {
+QUnit.test('fixture with response callback', 4, function(assert) {
 	fixture.delay = 10;
 	fixture('responseCb', function (orig, response) {
 		response({
@@ -691,26 +691,26 @@ test('fixture with response callback', 4, function () {
 	fixture('responseErrorCb', function (orig, response) {
 		response(404, 'This is an error from callback');
 	});
-	stop();
+	var done = assert.async();
 	$.ajax({
 		url: 'responseCb',
 		dataType: 'json'
 	})
-		.done(function (data) {
-			equal(data.sweet, 'ness', 'can.get works');
-			start();
+		.start(function (data) {
+			assert.equal(data.sweet, 'ness', 'can.get works');
+			done();
 		});
-	stop();
+	var done = assert.async();
 	$.ajax({
 		url: 'responseErrorCb',
 		dataType: 'json'
 	})
 		.fail(function (orig, error, text) {
-			equal(error, 'error', 'Got error status');
-			equal(orig.responseText, 'This is an error from callback', 'Got error text');
-			start();
+			assert.equal(error, 'error', 'Got error status');
+			assert.equal(orig.responseText, 'This is an error from callback', 'Got error text');
+			done();
 		});
-	stop();
+	var done = assert.async();
 	fixture('cbWithTimeout', function (orig, response) {
 		setTimeout(function () {
 			response([{
@@ -722,35 +722,35 @@ test('fixture with response callback', 4, function () {
 		url: 'cbWithTimeout',
 		dataType: 'json'
 	})
-		.done(function (data) {
-			equal(data[0].epic, 'ness', 'Got responsen with timeout');
-			start();
+		.start(function (data) {
+			assert.equal(data[0].epic, 'ness', 'Got responsen with timeout');
+			done();
 		});
 });
 
-test('store create works with an empty array of items', function () {
+QUnit.test('store create works with an empty array of items', function(assert) {
 	var store = fixture.store(0, function () {
 		return {};
 	});
-	QUnit.stop();
+	var done = assert.async();
 	store.createData({
 		data: {}
 	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 1, 'the first id is 1');
-		QUnit.start();
+		assert.equal(responseData.id, 1, 'the first id is 1');
+		done();
 	});
 });
 
-QUnit.test('store creates sequential ids', function () {
+QUnit.test('store creates sequential ids', function(assert) {
 	var store = fixture.store(0, function () {
 		return {};
 	});
-	QUnit.stop();
+	var done = assert.async();
 
 	store.createData({
 		data: {}
 	}, function (responseData, responseHeaders) {
-		equal(responseData.id, 1, 'the first id is 1');
+		assert.equal(responseData.id, 1, 'the first id is 1');
 		createSecond();
 	})
 
@@ -758,7 +758,7 @@ QUnit.test('store creates sequential ids', function () {
 		store.createData({
 			data: {}
 		}, function (responseData, responseHeaders) {
-			equal(responseData.id, 2, 'the second id is 2');
+			assert.equal(responseData.id, 2, 'the second id is 2');
 			destroyFirst();
 		});
 	}
@@ -774,8 +774,8 @@ QUnit.test('store creates sequential ids', function () {
 		store.createData({
 			data: {}
 		}, function (responseData, responseHeaders) {
-			equal(responseData.id, 3, 'the third id is 3');
-			QUnit.start();
+			assert.equal(responseData.id, 3, 'the third id is 3');
+			done();
 		});
 	}
 
@@ -785,14 +785,14 @@ QUnit.test('store creates sequential ids', function () {
 
 });
 
-test('fixture updates request.data with id', function() {
-	expect(1);
-	stop();
+QUnit.test('fixture updates request.data with id', function(assert) {
+	assert.expect(1);
+	var done = assert.async();
 
 
 	fixture('foo/{id}', function(request) {
-		equal(request.data.id, 5);
-		start();
+		assert.equal(request.data.id, 5);
+		done();
 	});
 
 	$.ajax({
@@ -800,7 +800,7 @@ test('fixture updates request.data with id', function() {
 	});
 });
 
-test("create a store with array and comparison object",function(){
+QUnit.test("create a store with array and comparison object",function(assert) {
 
 	var SoftEq = matches.makeComparatorType(function(a, b){
 		/* jshint eqeqeq:false */
@@ -828,12 +828,12 @@ test("create a store with array and comparison object",function(){
 
 
 	fixture('GET /presetStore', store.getListData);
-	stop();
+	var done = assert.async();
 	$.ajax({ url: "/presetStore", method: "get", data: {filter: {year: 2013, modelId:1} }, dataType: "json" }).then(function(response){
 
-		equal(response.data[0].id, 1, "got the first item");
-		equal(response.data.length, 1, "only got one item");
-		start();
+		assert.equal(response.data[0].id, 1, "got the first item");
+		assert.equal(response.data.length, 1, "only got one item");
+		done();
 	});
 
 });
@@ -864,7 +864,7 @@ QUnit.test("posting an empty data object", function(assert) {
 	});
 });
 
-test("store with objects allows .create, .update and .destroy (#1471)", 4, function(){
+QUnit.test("store with objects allows .create, .update and .destroy (#1471)", 4, function(assert) {
 
 	var store = fixture.store([
 		{id: 1, modelId: 1, year: 2013, name: "2013 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2012/07/01-2013-ford-mustang-gt-review-585x388.jpg"},
@@ -887,18 +887,18 @@ test("store with objects allows .create, .update and .destroy (#1471)", 4, funct
 		return $.ajax({ url: "/cars", dataType: "json" });
 	};
 
-	stop();
+	var done = assert.async();
 
 	// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
 
 	findAll().then(function(carsData) {
-		equal(carsData.data.length, 8, 'Got all cars');
+		assert.equal(carsData.data.length, 8, 'Got all cars');
 		return $.ajax({ url: "/cars/"+carsData.data[1].id, method: "DELETE", dataType: "json" });
 	}).then(function() {
 		return findAll();
 	}).then(function(carsData) {
-		equal(carsData.data.length, 7, 'One car less');
-		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+		assert.equal(carsData.data.length, 7, 'One car less');
+		assert.equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
 	}).then(function() {
 
 		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
@@ -916,13 +916,13 @@ test("store with objects allows .create, .update and .destroy (#1471)", 4, funct
 	}).then(function(updated) {
 		return findAll();
 	}).then(function (cars) {
-		equal(cars.data.length, 8, 'New car created');
-		start();
+		assert.equal(cars.data.length, 8, 'New car created');
+		done();
 	});
 });
 
 
-test("filtering works", function() {
+QUnit.test("filtering works", function(assert) {
 	var next;
 	var store = fixture.store(
 		[	{ state : 'CA', name : 'Casadina' },
@@ -933,24 +933,24 @@ test("filtering works", function() {
 	fixture({
 		'GET /api/cities' : store.getListData,
 	});
-	stop();
+	var done = assert.async();
 	$.getJSON('/api/cities?filter[state]=CA').then(function(data){
-		deepEqual(data, {
+		assert.deepEqual(data, {
 			data: [{
 				state : 'CA',
 				name : 'Casadina'
 			}],
 			count: 1
 		});
-		QUnit.start();
+		done();
 	}, function(e){
-		ok(false, ""+e);
-		start();
+		assert.ok(false, ""+e);
+		done();
 	});
 });
 
-test("filtering works with nested props", function() {
-	QUnit.stop();
+QUnit.test("filtering works with nested props", function(assert) {
+	var done = assert.async();
 	var store = fixture.store([{
 		id : 1,
 		name : 'Cheese City',
@@ -974,7 +974,7 @@ test("filtering works with nested props", function() {
 	});
 	$.getJSON('/api/restaurants?filter[address][city]=Alberny').then(function(responseData){
 
-		deepEqual(responseData, {
+		assert.deepEqual(responseData, {
 			count: 1,
 			data: [{
 				id : 2,
@@ -986,16 +986,16 @@ test("filtering works with nested props", function() {
 				}
 			}]
 		});
-		QUnit.start();
+		done();
 
 	}, function(e){
-		ok(false);
-		start();
+		assert.ok(false);
+		done();
 	});
 });
 
-test("filtering works with nested.props", function() {
-	QUnit.stop();
+QUnit.test("filtering works with nested.props", function(assert) {
+	var done = assert.async();
 
 	var store =fixture.store([{
 		id : 1,
@@ -1016,7 +1016,7 @@ test("filtering works with nested.props", function() {
 	}]);
 	store.connection.getListData({filter: {"address.city": "Alberny"}})
 		.then(function(responseData){
-			deepEqual(responseData, {
+			assert.deepEqual(responseData, {
 				count: 1,
 				data: [{
 					id : 2,
@@ -1028,14 +1028,14 @@ test("filtering works with nested.props", function() {
 					}
 				}]
 			});
-			QUnit.start();
+			done();
 		});
 
 
 });
 
 
-QUnit.test("onreadystatechange, event is passed", function(){
+QUnit.test("onreadystatechange, event is passed", function(assert) {
 	fixture("GET something", function(){
 		return {};
 	});
@@ -1043,126 +1043,132 @@ QUnit.test("onreadystatechange, event is passed", function(){
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "something");
 	xhr.onreadystatechange = function(ev){
-		ok(ev.target != null, "the event object passed to onreadystatechange");
-		start();
+		assert.ok(ev.target != null, "the event object passed to onreadystatechange");
+		done();
 	};
 	xhr.send();
-	stop();
+	var done = assert.async();
 });
 
 if (__dirname !== '/') {
-	asyncTest("doesn't break onreadystatechange (#3)", function () {
-		var url = __dirname + '/fixtures/test.json';
-		var xhr = new XMLHttpRequest();
+	QUnit.test("doesn't break onreadystatechange (#3)", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        var xhr = new XMLHttpRequest();
 
-		xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = function () {
 			if (xhr.readyState === 4) {
-				ok(true, "we made a successful request");
-				start();
+				assert.ok(true, "we made a successful request");
+				ready();
 			}
 		};
 
-		xhr.open('GET', url);
-		xhr.send();
-	});
+        xhr.open('GET', url);
+        xhr.send();
+    });
 }
 
 QUnit.module("XHR Shim");
 
-test("Supports onload", function(){
+QUnit.test("Supports onload", function(assert) {
 	var xhr = new XMLHttpRequest();
-	QUnit.ok(("onload" in xhr), "shim passes onload detection");
+	assert.ok(("onload" in xhr), "shim passes onload detection");
 });
 
 if (__dirname !== '/') {
-	asyncTest("supports addEventListener on XHR shim", function(){
-		var url = __dirname + '/fixtures/test.json';
-		var xhr = new XMLHttpRequest();
+	QUnit.test("supports addEventListener on XHR shim", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        var xhr = new XMLHttpRequest();
 
-		xhr.addEventListener('load', function(){
-			ok(true, "our shim supports addEventListener");
-			start();
+        xhr.addEventListener('load', function(){
+			assert.ok(true, "our shim supports addEventListener");
+			ready();
 		});
 
-		xhr.open('GET', url);
-		xhr.send();
-	});
+        xhr.open('GET', url);
+        xhr.send();
+    });
 }
 
 if (__dirname !== '/') {
-	asyncTest("supports removeEventListener on XHR shim", function(){
-		var url = __dirname + '/fixtures/test.json';
-		var xhr = new XMLHttpRequest();
+	QUnit.test("supports removeEventListener on XHR shim", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        var xhr = new XMLHttpRequest();
 
-		var onload = function(){
-			ok(false, "this should not be called");
+        var onload = function(){
+			assert.ok(false, "this should not be called");
 		};
 
-		xhr.addEventListener('load', onload);
-		xhr.removeEventListener("load", onload);
+        xhr.addEventListener('load', onload);
+        xhr.removeEventListener("load", onload);
 
-		xhr.onload = function(){
+        xhr.onload = function(){
 			setTimeout(function(){
-				ok(true, 'didn\'t call the event listener');
-				start();
+				assert.ok(true, 'didn\'t call the event listener');
+				ready();
 			});
 		};
 
-		xhr.open('GET', url);
-		xhr.send();
-	});
+        xhr.open('GET', url);
+        xhr.send();
+    });
 }
 
-test("supports setDisableHeaderCheck", function(){
+QUnit.test("supports setDisableHeaderCheck", function(assert) {
 	var xhr = new XMLHttpRequest();
 
 	try {
 		xhr.setDisableHeaderCheck(true);
-		ok(true, "did not throw");
+		assert.ok(true, "did not throw");
 	} catch(e) {
-		ok(false, "do not support setDisableHeaderCheck");
+		assert.ok(false, "do not support setDisableHeaderCheck");
 	}
 });
 
 if (__dirname !== '/') {
-	asyncTest("supports setRequestHeader", function(){
-		var url = __dirname + '/fixtures/test.json';
-		var xhr = new XMLHttpRequest();
+	QUnit.test("supports setRequestHeader", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        var xhr = new XMLHttpRequest();
 
-		xhr.setRequestHeader("foo", "bar");
+        xhr.setRequestHeader("foo", "bar");
 
-		xhr.onreadystatechange = function(){
+        xhr.onreadystatechange = function(){
 			if(xhr.readyState === 4) {
-				equal(xhr._requestHeaders.foo, "bar", "header was set");
-				start();
+				assert.equal(xhr._requestHeaders.foo, "bar", "header was set");
+				ready();
 			}
 		};
 
-		xhr.open("GET", url);
-		xhr.send();
-	});
+        xhr.open("GET", url);
+        xhr.send();
+    });
 }
 
 if (__dirname !== '/') {
-	asyncTest("supports getResponseHeader", function(){
-		var url = __dirname + '/fixtures/test.json';
-		var xhr = new XMLHttpRequest();
+	QUnit.test("supports getResponseHeader", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        var xhr = new XMLHttpRequest();
 
-		xhr.onreadystatechange = function(){
+        xhr.onreadystatechange = function(){
 			if(xhr.readyState === 4) {
 				var header = xhr.getResponseHeader("Content-Type");
-				ok(header.indexOf("application/json") >= 0, "got correct header back");
-				start();
+				assert.ok(header.indexOf("application/json") >= 0, "got correct header back");
+				ready();
 			}
 		};
 
-		xhr.open("GET", url);
-		xhr.send();
-	});
+        xhr.open("GET", url);
+        xhr.send();
+    });
 }
 
-asyncTest("supports getAllResponseHeaders", function(){
-	fixture("GET something", function(req,res){
+QUnit.test("supports getAllResponseHeaders", function(assert) {
+    var ready = assert.async();
+    fixture("GET something", function(req,res){
 		res(200, {
 			message: 'this is the body'
 		}, {
@@ -1170,80 +1176,83 @@ asyncTest("supports getAllResponseHeaders", function(){
 		});
 	});
 
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.onreadystatechange = function(){
+    xhr.onreadystatechange = function(){
 		if(xhr.readyState === 4) {
 			var headers = xhr.getAllResponseHeaders();
 			var parsed = parseHeaders(headers);
-			ok(typeof headers === "string", "got headers back");
-			ok(parsed.foo === "bar", "got proper values");
-			start();
+			assert.ok(typeof headers === "string", "got headers back");
+			assert.ok(parsed.foo === "bar", "got proper values");
+			ready();
 		}
 	};
 
-	xhr.open("GET", "something");
-	xhr.send();
+    xhr.open("GET", "something");
+    xhr.send();
 });
 
-asyncTest("pass data to response handler (#13)", function(){
-	fixture("GET something", function(req,res){
+QUnit.test("pass data to response handler (#13)", function(assert) {
+    var ready = assert.async();
+    fixture("GET something", function(req,res){
 		res(403, {
 		    message: 'No bad guys'
 		});
 	});
 
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "something");
-	xhr.onreadystatechange = function(ev){
-		deepEqual(JSON.parse(this.responseText),{
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "something");
+    xhr.onreadystatechange = function(ev){
+		assert.deepEqual(JSON.parse(this.responseText),{
 		    message: 'No bad guys'
 		}, "correct response");
-		equal(this.status, 403, "correct status");
-		start();
+		assert.equal(this.status, 403, "correct status");
+		ready();
 	};
-	xhr.send();
+    xhr.send();
 });
 
-asyncTest("pass return value for fixture", function(){
+QUnit.test("pass return value for fixture", function(assert) {
+    var ready = assert.async();
 
-	fixture("GET something", {foo:"bar"});
+    fixture("GET something", {foo:"bar"});
 
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "something");
-	xhr.onreadystatechange = function(ev){
-		deepEqual(JSON.parse(this.responseText),{foo:"bar"}, "correct response");
-		equal(this.status, 200, "correct status");
-		start();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "something");
+    xhr.onreadystatechange = function(ev){
+		assert.deepEqual(JSON.parse(this.responseText),{foo:"bar"}, "correct response");
+		assert.equal(this.status, 200, "correct status");
+		ready();
 	};
-	xhr.send();
+    xhr.send();
 });
 
 if (__dirname !== '/') {
-	asyncTest("pass headers in fallthrough", function() {
-		var url = __dirname+'/fixtures/foobar.json';
-		var xhr = new XMLHttpRequest();
-		expect(2);
+	QUnit.test("pass headers in fallthrough", function(assert) {
+        var ready = assert.async();
+        var url = __dirname+'/fixtures/foobar.json';
+        var xhr = new XMLHttpRequest();
+        assert.expect(2);
 
-		xhr.open("GET", url);
-		xhr.setRequestHeader("foo", "bar");
-		xhr.onreadystatechange = function(ev){
+        xhr.open("GET", url);
+        xhr.setRequestHeader("foo", "bar");
+        xhr.onreadystatechange = function(ev){
 			var originalXhr = ev.target;
 			if(originalXhr.readyState === 1) {
 				originalXhr.setRequestHeader = function(key, val) {
-					equal(key, "foo");
-					equal(val, "bar");
+					assert.equal(key, "foo");
+					assert.equal(val, "bar");
 				};
 			}
 			if(originalXhr.readyState === 4) {
-				start();
+				ready();
 			}
 		};
-		xhr.send();
-	});
+        xhr.send();
+    });
 }
 
-test("first set.Algebra CRUD works (#12)", 5, function(){
+QUnit.test("first set.Algebra CRUD works (#12)", 5, function(assert) {
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1275,18 +1284,18 @@ test("first set.Algebra CRUD works (#12)", 5, function(){
 		return $.ajax({ url: "/cars", dataType: "json" });
 	};
 
-	stop();
+	var done = assert.async();
 
 	// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
 
 	findAll().then(function(carsData) {
-		equal(carsData.data.length, 8, 'Got all cars');
+		assert.equal(carsData.data.length, 8, 'Got all cars');
 		return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
 	}).then(function() {
 		return findAll();
 	}).then(function(carsData) {
-		equal(carsData.data.length, 7, 'One car less');
-		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+		assert.equal(carsData.data.length, 7, 'One car less');
+		assert.equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
 	}).then(function() {
 
 		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
@@ -1305,16 +1314,16 @@ test("first set.Algebra CRUD works (#12)", 5, function(){
 	}).then(function(updated) {
 		return findAll();
 	}).then(function (cars) {
-		equal(cars.data.length, 8, 'New car created');
+		assert.equal(cars.data.length, 8, 'New car created');
 		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 	}).then(function(car){
-		equal(car.name, "2013 Altima", "get a single car works");
-		start();
+		assert.equal(car.name, "2013 Altima", "get a single car works");
+		done();
 	});
 });
 
-test("set.Algebra CRUD works (#12)", 5, function(){
+QUnit.test("set.Algebra CRUD works (#12)", 5, function(assert) {
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1346,18 +1355,18 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 		return $.ajax({ url: "/cars", dataType: "json" });
 	};
 
-	stop();
+	var done = assert.async();
 
 	// $.ajax({ url: "/presetStore", method: "get", data: {year: 2013, modelId:1}, dataType: "json" })
 
 	findAll().then(function(carsData) {
-		equal(carsData.data.length, 8, 'Got all cars');
+		assert.equal(carsData.data.length, 8, 'Got all cars');
 		return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
 	}).then(function() {
 		return findAll();
 	}).then(function(carsData) {
-		equal(carsData.data.length, 7, 'One car less');
-		equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+		assert.equal(carsData.data.length, 7, 'One car less');
+		assert.equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
 	}).then(function() {
 
 		return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
@@ -1376,18 +1385,19 @@ test("set.Algebra CRUD works (#12)", 5, function(){
 	}).then(function(updated) {
 		return findAll();
 	}).then(function (cars) {
-		equal(cars.data.length, 8, 'New car created');
+		assert.equal(cars.data.length, 8, 'New car created');
 		return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 	}).then(function(car){
-		equal(car.name, "2013 Altima", "get a single car works");
-		start();
+		assert.equal(car.name, "2013 Altima", "get a single car works");
+		done();
 	});
 });
 
-asyncTest("set.Algebra clauses work", function(){
+QUnit.test("set.Algebra clauses work", function(assert) {
+    var ready = assert.async();
 
-	var NumberValue = matches.makeComparatorType(function(a,b){
+    var NumberValue = matches.makeComparatorType(function(a,b){
 		if(a === b) {
 			return true;
 		}
@@ -1397,7 +1407,7 @@ asyncTest("set.Algebra clauses work", function(){
 		return false;
 	});
 
-	var algebra = new set.Algebra(
+    var algebra = new set.Algebra(
 		new set.Translate("where","where"),
 		set.props.id("_id"),
 		set.props.sort('orderBy'),
@@ -1410,7 +1420,7 @@ asyncTest("set.Algebra clauses work", function(){
 		}
 	);
 
-	var store = fixture.store([
+    var store = fixture.store([
 		{_id: 1, modelId: 1, year: 2013, name: "2013 Mustang", type: "used"},
 		{_id: 2, modelId: 1, year: 2014, name: "2014 Mustang", type: "new"},
 		{_id: 3, modelId: 2, year: 2013, name: "2013 Focus", type: "used"},
@@ -1421,27 +1431,26 @@ asyncTest("set.Algebra clauses work", function(){
 		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
 	], algebra);
 
-	fixture('GET /cars', store.getListData);
+    fixture('GET /cars', store.getListData);
 
-	$.ajax({ url: "/cars?where[year]=2013", dataType: "json" }).then(function(carsData) {
-		equal(carsData.data.length, 4, 'Where clause works with numbers');
+    $.ajax({ url: "/cars?where[year]=2013", dataType: "json" }).then(function(carsData) {
+		assert.equal(carsData.data.length, 4, 'Where clause works with numbers');
 
 		return $.ajax({ url: "/cars?where[year]=2013&orderBy=name", dataType: "json" });
 
 	}).then(function(carsData){
 		var names = carsData.data.map(function(c){ return c.name; });
-		deepEqual(names, ["2013 Altima","2013 Focus","2013 Leaf","2013 Mustang"],"sort works");
+		assert.deepEqual(names, ["2013 Altima","2013 Focus","2013 Leaf","2013 Mustang"],"sort works");
 
 		return $.ajax({ url: "/cars?where[year]=2013&orderBy=name&start=1&end=2", dataType: "json" });
 	}).then(function(carsData){
 		var names = carsData.data.map(function(c){ return c.name; });
-		deepEqual(names, ["2013 Focus","2013 Leaf"], "pagination works");
-		start();
+		assert.deepEqual(names, ["2013 Focus","2013 Leaf"], "pagination works");
+		ready();
 	});
-
 });
 
-test("storeConnection reset", function(){
+QUnit.test("storeConnection reset", function(assert) {
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1467,11 +1476,11 @@ test("storeConnection reset", function(){
 		store.reset();
 		return findAll();
 	}).then(function(carsData){
-		equal(carsData.data.length, 2, 'Got all cars');
-		start();
+		assert.equal(carsData.data.length, 2, 'Got all cars');
+		done();
 	});
 
-	stop();
+	var done = assert.async();
 
 });
 
@@ -1503,16 +1512,16 @@ function makeAlgebraTest(fixtureUrl){
 			return $.ajax({ url: "/cars", dataType: "json" });
 		};
 
-		stop();
+		var done = assert.async();
 
 		findAll().then(function(carsData) {
-			equal(carsData.data.length, 8, 'Got all cars');
+			assert.equal(carsData.data.length, 8, 'Got all cars');
 			return $.ajax({ url: "/cars/"+carsData.data[1]._id, method: "DELETE", dataType: "json" });
 		}).then(function() {
 			return findAll();
 		}).then(function(carsData) {
-			equal(carsData.data.length, 7, 'One car less');
-			equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
+			assert.equal(carsData.data.length, 7, 'One car less');
+			assert.equal(carsData.data[1].name, '2013 Focus', 'Car actually deleted');
 		}).then(function() {
 
 			return $.ajax({ url: "/cars", method: "post", dataType: "json", data: {
@@ -1531,21 +1540,21 @@ function makeAlgebraTest(fixtureUrl){
 		}).then(function(updated) {
 			return findAll();
 		}).then(function (cars) {
-			equal(cars.data.length, 8, 'New car created');
+			assert.equal(cars.data.length, 8, 'New car created');
 			return $.ajax({ url: "/cars/5", method: "get", dataType: "json" });
 
 		}).then(function(car){
-			equal(car.name, "2013 Altima", "get a single car works");
-			start();
+			assert.equal(car.name, "2013 Altima", "get a single car works");
+			done();
 		});
-	}
+	};
 }
 
-test("set.Algebra CRUD works with easy hookup (#12)", 5, makeAlgebraTest('/cars/{_id}'));
-test("set.Algebra CRUD works with easy hookup and list-style url (#52)", 5, makeAlgebraTest('/cars'));
+QUnit.test("set.Algebra CRUD works with easy hookup (#12)", 5, makeAlgebraTest('/cars/{_id}'));
+QUnit.test("set.Algebra CRUD works with easy hookup and list-style url (#52)", 5, makeAlgebraTest('/cars'));
 
 
-test("store.getList and store.get", function(){
+QUnit.test("store.getList and store.get", function(assert) {
 
 	var algebra = new set.Algebra(
 		set.props.id("_id")
@@ -1562,34 +1571,35 @@ test("store.getList and store.get", function(){
 		{_id: 8, modelId: 4, year: 2014, name: "2014 Leaf", type: "used"}
 	], algebra);
 
-	equal( store.getList({year: 2013}).data.length, 4, "filtered");
+	assert.equal( store.getList({year: 2013}).data.length, 4, "filtered");
 
-	deepEqual(store.get({_id: 5}).name, "2013 Altima", "get");
+	assert.deepEqual(store.get({_id: 5}).name, "2013 Altima", "get");
 
 });
 
-asyncTest("supports addEventListener on shim using fixture", function(){
-	fixture("/addEventListener", function(){
+QUnit.test("supports addEventListener on shim using fixture", function(assert) {
+    var ready = assert.async();
+    fixture("/addEventListener", function(){
 		return {};
 	});
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		ok(true, "our shim supports addEventListener");
-		start();
+    xhr.addEventListener('load', function(){
+		assert.ok(true, "our shim supports addEventListener");
+		ready();
 	});
 
-	xhr.open('GET', "/addEventListener");
-	xhr.send();
+    xhr.open('GET', "/addEventListener");
+    xhr.send();
 });
 
 if (__dirname !== '/') {
-	test("supports sync on XHR shim (#23)", function(){
+	QUnit.test("supports sync on XHR shim (#23)", function(assert) {
 		var url = __dirname + '/fixtures/test.json';
 		var xhr = new XMLHttpRequest();
 
 		xhr.addEventListener('load', function(){
-			ok(true, "our shim supports addEventListener");
+			assert.ok(true, "our shim supports addEventListener");
 		});
 
 		xhr.open('GET', url, false);
@@ -1597,14 +1607,14 @@ if (__dirname !== '/') {
 	});
 }
 
-test("supports sync fixtures (#23)", function(){
+QUnit.test("supports sync fixtures (#23)", function(assert) {
 	fixture("/sync", function(){
 		return {};
 	});
 	var xhr = new XMLHttpRequest();
 
 	xhr.addEventListener('load', function(){
-		ok(true, "our shim supports sync");
+		assert.ok(true, "our shim supports sync");
 	});
 
 	xhr.open('GET', "/sync", false);
@@ -1612,13 +1622,13 @@ test("supports sync fixtures (#23)", function(){
 });
 
 if (__dirname !== '/') {
-	test("supports sync redirect fixtures (#23)", function(){
+	QUnit.test("supports sync redirect fixtures (#23)", function(assert) {
 		fixture("/sync_redirect", __dirname+'/fixtures/test.json');
 
 		var xhr = new XMLHttpRequest();
 
 		xhr.addEventListener('load', function(){
-			ok(true, "our shim supports sync redirect");
+			assert.ok(true, "our shim supports sync redirect");
 		});
 
 		xhr.open('GET', "/sync_redirect", false);
@@ -1627,154 +1637,164 @@ if (__dirname !== '/') {
 }
 
 if (__dirname !== '/') {
-	asyncTest("slow mode works (#26)", function(){
-		var url = __dirname + '/fixtures/test.json';
-		fixture({url: url}, 1000);
+	QUnit.test("slow mode works (#26)", function(assert) {
+        var ready = assert.async();
+        var url = __dirname + '/fixtures/test.json';
+        fixture({url: url}, 1000);
 
-		var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
 
-		var startTime = new Date();
+        var startTime = new Date();
 
-		xhr.addEventListener('load', function(){
+        xhr.addEventListener('load', function(){
 			var delay = new Date() - startTime;
-			ok(delay >= 900, delay + "ms >= 900ms");
+			assert.ok(delay >= 900, delay + "ms >= 900ms");
 			fixture({url: url}, null);
-			start();
+			ready();
 		});
 
-		xhr.open('GET', url);
-		xhr.send();
-	});
+        xhr.open('GET', url);
+        xhr.send();
+    });
 }
 
-asyncTest('onload should be triggered for HTTP error responses (#36)', function() {
-	fixture('/onload', function(req, res) {
+QUnit.test('onload should be triggered for HTTP error responses (#36)', function(assert) {
+    var ready1 = assert.async();
+    var ready = assert.async();
+    fixture('/onload', function(req, res) {
 		res(400);
 	});
 
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function() {
-		ok(true, 'onload should be invoked');
+    xhr.addEventListener('load', function() {
+		assert.ok(true, 'onload should be invoked');
 		fixture('/onload', null);
-		start();
+		ready();
 	});
 
-	xhr.addEventListener('error', function() {
-		ok(false, 'onerror should not be invoked');
+    xhr.addEventListener('error', function() {
+		assert.ok(false, 'onerror should not be invoked');
 		fixture('/onload', null);
-		start();
+		ready1();
 	});
 
-	xhr.open('GET', '/onload');
-	xhr.send();
+    xhr.open('GET', '/onload');
+    xhr.send();
 });
 
-asyncTest('responseText & responseXML should not be set for arraybuffer types (#38)', function() {
+QUnit.test('responseText & responseXML should not be set for arraybuffer types (#38)', function(assert) {
+    var ready1 = assert.async();
+    var ready = assert.async();
 
-	fixture('/onload', '/test/fixtures/foo.json');
+    fixture('/onload', '/test/fixtures/foo.json');
 
-	var oldError = window.onerror;
+    var oldError = window.onerror;
 
-	window.onerror = function (msg, url, line) {
-	    ok(false, 'There should not be an error');
-	    start();
+    window.onerror = function (msg, url, line) {
+	    assert.ok(false, 'There should not be an error');
+	    ready();
 	};
 
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function() {
+    xhr.addEventListener('load', function() {
 		fixture('/onload', null);
 		window.onerror = oldError;
-		ok(true, 'Got here without an error');
-		start();
+		assert.ok(true, 'Got here without an error');
+		ready1();
 	});
 
-	xhr.responseType = 'arraybuffer';
-	xhr.open('GET', '/onload');
-	xhr.send();
+    xhr.responseType = 'arraybuffer';
+    xhr.open('GET', '/onload');
+    xhr.send();
 });
 
-asyncTest('fixture with timeout does not run if $.ajax timeout less than delay', function() {
-	var delay = fixture.delay;
-	fixture.delay = 1000;
-	fixture('/onload', function() {
+QUnit.test('fixture with timeout does not run if $.ajax timeout less than delay', function(assert) {
+    var ready1 = assert.async();
+    var ready = assert.async();
+    var delay = fixture.delay;
+    fixture.delay = 1000;
+    fixture('/onload', function() {
 		fixture('/onload', null);
-		ok(false, 'timed out xhr did not abort');
-		start();
+		assert.ok(false, 'timed out xhr did not abort');
+		ready();
 	});
 
-	$.ajax({
+    $.ajax({
 		url: '/onload',
 		timeout: 50,
 		error: function(xhr) {
 			fixture('/onload', null);
-			ok(true, 'Got to the error handler');
-			equal(xhr.statusText, "timeout");
-			equal(xhr.status, "0");
-			start();
+			assert.ok(true, 'Got to the error handler');
+			assert.equal(xhr.statusText, "timeout");
+			assert.equal(xhr.status, "0");
+			ready1();
 		}
 	});
 
-	fixture.delay = delay;
+    fixture.delay = delay;
 });
 
-asyncTest("response headers are set", function(){
-	fixture("GET /todos", function(request, response){
+QUnit.test("response headers are set", function(assert) {
+    var ready = assert.async();
+    fixture("GET /todos", function(request, response){
 		response(200, "{}", { foo: "bar"});
 	});
 
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
+    xhr.addEventListener('load', function(){
 		var headers = parseHeaders(xhr.getAllResponseHeaders());
 
-		ok(headers.foo === "bar", "header was set");
-		start();
+		assert.ok(headers.foo === "bar", "header was set");
+		ready();
 	});
 
-	xhr.open('GET', "/todos");
-	xhr.send();
+    xhr.open('GET', "/todos");
+    xhr.send();
 });
 
-asyncTest("match values in get data", function(){
-	fixture({
+QUnit.test("match values in get data", function(assert) {
+    var ready = assert.async();
+    fixture({
 		method: "GET",
 		url: "/data-value",
 		data: {name: "justin"}
 	}, function(request, response){
-		QUnit.ok(true, "got it");
+		assert.ok(true, "got it");
 		return {};
 	});
 
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		QUnit.start();
+    xhr.addEventListener('load', function(){
+		ready();
 	});
 
-	xhr.open('GET', "/data-value?name=justin&age=22");
-	xhr.send();
+    xhr.open('GET', "/data-value?name=justin&age=22");
+    xhr.send();
 });
 
-asyncTest("universal match (#2000)", function(){
-	fixture({},function(){
-		ok(true, "got hit");
+QUnit.test("universal match (#2000)", function(assert) {
+    var ready = assert.async();
+    fixture({},function(){
+		assert.ok(true, "got hit");
 		return {};
 	});
-	var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
-	xhr.addEventListener('load', function(){
-		QUnit.start();
+    xhr.addEventListener('load', function(){
+		ready();
 		fixture.fixtures.splice(0, fixture.fixtures.length);
 	});
 
-	xhr.open('GET', "/something-totally-unexpected-62");
-	xhr.send();
+    xhr.open('GET', "/something-totally-unexpected-62");
+    xhr.send();
 });
 
 
-test("set.Algebra stores provide a count (#58)", function(){
+QUnit.test("set.Algebra stores provide a count (#58)", function(assert) {
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1797,53 +1817,55 @@ test("set.Algebra stores provide a count (#58)", function(){
 
 	fixture('/cars/{_id}', store);
 
-	stop();
+	var done = assert.async();
 
 	$.ajax({ url: "/cars", dataType: "json", data: {start: 2, end: 3} }).then(function(carsData) {
-		equal(carsData.data.length, 2, 'Got 2 cars');
-		equal(carsData.count, 8, "got the count");
-		QUnit.start();
+		assert.equal(carsData.data.length, 2, 'Got 2 cars');
+		assert.equal(carsData.count, 8, "got the count");
+		done();
 	}, function(){
-		QUnit.ok(false, "borked");
-		QUnit.start();
+		assert.ok(false, "borked");
+		done();
 	});
 });
 
-asyncTest('should allow Arrays as data type (#133)', function() {
-	fixture('/array-data', function(req, res) {
-		ok(req.data instanceof Array, 'data returned should be instance of Array');
+QUnit.test('should allow Arrays as data type (#133)', function(assert) {
+    var ready = assert.async();
+    fixture('/array-data', function(req, res) {
+		assert.ok(req.data instanceof Array, 'data returned should be instance of Array');
 		return {};
 	});
 
-	var data = [];
-	var xhr = new XMLHttpRequest();
-	xhr.addEventListener('load', function() {
+    var data = [];
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', function() {
 		fixture('/array-data', null);
-		ok(true, 'should not throw when sending Array');
-		start();
+		assert.ok(true, 'should not throw when sending Array');
+		ready();
 	});
-	xhr.open('GET', '/array-data');
-	xhr.send(data);
+    xhr.open('GET', '/array-data');
+    xhr.send(data);
 });
 
-asyncTest('should allow FormData as data type (#133)', function() {
-	fixture('/upload', function(req, res) {
-		ok(req.data instanceof FormData, 'data returned should be instance of formdata');
+QUnit.test('should allow FormData as data type (#133)', function(assert) {
+    var ready = assert.async();
+    fixture('/upload', function(req, res) {
+		assert.ok(req.data instanceof FormData, 'data returned should be instance of formdata');
 		res(400);
 	});
 
-	var data = new FormData();
-	var xhr = new XMLHttpRequest();
-	xhr.addEventListener('load', function() {
+    var data = new FormData();
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', function() {
 		fixture('/upload', null);
-		ok(true, 'should not throw when sending FormData');
-		start();
+		assert.ok(true, 'should not throw when sending FormData');
+		ready();
 	});
-	xhr.open('POST', '/upload', true);
-	xhr.send(data);
+    xhr.open('POST', '/upload', true);
+    xhr.send(data);
 });
 
-test('fixture returns the old fixture callback when fixtures are removed (#34)', function() {
+QUnit.test('fixture returns the old fixture callback when fixtures are removed (#34)', function(assert) {
 	var funcA = function(){
 		return "foo";
 	};
@@ -1851,67 +1873,70 @@ test('fixture returns the old fixture callback when fixtures are removed (#34)',
 
 	// in a test, remove default fixture and provide your own
 	var oldFixtures = fixture("/services/thing", null);
-	QUnit.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
+	assert.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
 });
 
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
-	asyncTest('fixture with timeout aborts if xhr timeout less than delay', function() {
-		fixture('/onload', 1000);
+	QUnit.test('fixture with timeout aborts if xhr timeout less than delay', function(assert) {
+        var ready1 = assert.async();
+        var ready = assert.async();
+        fixture('/onload', 1000);
 
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', '/onload');
-		xhr.send();
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/onload');
+        xhr.send();
 
-		setTimeout(function() {
+        setTimeout(function() {
 			xhr.abort();
 		}, 50);
 
 
-		xhr.addEventListener('abort', function() {
+        xhr.addEventListener('abort', function() {
 			fixture('/onload', null);
-			ok(true, 'Got to the error handler');
-			equal(xhr.statusText, '');
-			equal(xhr.status, 0);
-			start();
+			assert.ok(true, 'Got to the error handler');
+			assert.equal(xhr.statusText, '');
+			assert.equal(xhr.status, 0);
+			ready();
 		});
 
-		xhr.addEventListener('load', function() {
+        xhr.addEventListener('load', function() {
 			fixture('/onload', null);
-			ok(false, 'timed out xhr did not abort');
-			start();
+			assert.ok(false, 'timed out xhr did not abort');
+			ready1();
+		});
+    });
+
+	QUnit.test('dynamic fixture with timeout does not run if xhr timeout less than delay', function(assert) {
+        var ready1 = assert.async();
+        var ready = assert.async();
+        var delay = fixture.delay;
+        fixture.delay = 1000;
+        fixture('/onload', function() {
+			fixture('/onload', null);
+			assert.ok(false, 'timed out xhr did not abort');
+			ready();
 		});
 
-	});
-
-	asyncTest('dynamic fixture with timeout does not run if xhr timeout less than delay', function() {
-		var delay = fixture.delay;
-		fixture.delay = 1000;
-		fixture('/onload', function() {
-			fixture('/onload', null);
-			ok(false, 'timed out xhr did not abort');
-			start();
-		});
-
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', '/onload');
-		setTimeout(function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/onload');
+        setTimeout(function() {
 			xhr.abort();
 		}, 50);
-		xhr.send();
+        xhr.send();
 
-		xhr.addEventListener('abort', function() {
+        xhr.addEventListener('abort', function() {
 			fixture('/onload', null);
-			ok(true, 'Got to the error handler');
-			equal(xhr.statusText, '');
-			equal(xhr.status, 0);
-			start();
+			assert.ok(true, 'Got to the error handler');
+			assert.equal(xhr.statusText, '');
+			assert.equal(xhr.status, 0);
+			ready1();
 		});
 
-		fixture.delay = delay;
-	});
+        fixture.delay = delay;
+    });
 
-	test("abort() sets readyState correctly", function(){
-		stop();
+	QUnit.test("abort() sets readyState correctly", function(assert) {
+		var done = assert.async();
 
 		fixture('/foo', function() {
 			return {};
@@ -1922,13 +1947,13 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 		xhr.addEventListener('abort', function() {
 			fixture('/foo', null);
-			ok(true, 'Got to the error handler');
-			equal(xhr.status, 0);
-			equal(xhr.statusText, '');
+			assert.ok(true, 'Got to the error handler');
+			assert.equal(xhr.status, 0);
+			assert.equal(xhr.statusText, '');
 
 			setTimeout(function(){
-				equal(xhr.readyState, 0);
-				start();
+				assert.equal(xhr.readyState, 0);
+				done();
 			}, 50);
 		});
 
@@ -1936,8 +1961,8 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		xhr.abort();
 	});
 
-	test("abort() of already completed fixture", function(){
-		stop();
+	QUnit.test("abort() of already completed fixture", function(assert) {
+		var done = assert.async();
 
 		fixture('/foo', function() {
 			return {};
@@ -1948,36 +1973,37 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 
 		xhr.addEventListener('load', function() {
 			fixture('/foo', null);
-			equal(xhr.readyState, 4);
+			assert.equal(xhr.readyState, 4);
 			xhr.abort();
-			start();
+			done();
 		});
 
 		xhr.send();
 	});
 
-	asyncTest('should be able to call getResponseHeader onload', function() {
-		fixture('/onload', function(req, res) {
+	QUnit.test('should be able to call getResponseHeader onload', function(assert) {
+        var ready = assert.async();
+        fixture('/onload', function(req, res) {
 			res(400);
 		});
 
-		var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
 
-		xhr.addEventListener('load', function() {
+        xhr.addEventListener('load', function() {
 			fixture('/onload', null);
 			xhr.getResponseHeader('Set-Cookie');
-			ok(true, 'should not throw when calling getResponseHeader');
-			start();
+			assert.ok(true, 'should not throw when calling getResponseHeader');
+			ready();
 		});
 
-		xhr.open('GET', '/onload');
-		xhr.send();
-	});
+        xhr.open('GET', '/onload');
+        xhr.send();
+    });
 
-	testHelpers.dev.devOnlyTest("window.fixture warns when called", function() {
+	testHelpers.dev.devOnlyTest("window.fixture warns when called", function (assert) {
 		var teardown = testHelpers.dev.willWarn(/You are using the global fixture\. Make sure you import can-fixture\./, function(message, matched) {
 			if(matched) {
-				ok(true, "received warning");
+				assert.ok(true, "received warning");
 			}
 		});
 
@@ -1988,7 +2014,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		teardown();	
 	});
 
-	testHelpers.dev.devOnlyTest("Works with steal-clone", function() {
+	testHelpers.dev.devOnlyTest("Works with steal-clone", function (assert) {
 		steal.loader.import("steal-clone", { name: "can-fixture" })
 		.then(function(clone) {
 			clone({})["import"]("can-fixture").then(function(fixture){
@@ -1999,15 +2025,15 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 				var xhr = new XMLHttpRequest();
 				xhr.addEventListener('load', function() {
 					fixture('/onload', null);
-					QUnit.ok(true, "Got to the load event without throwing");
-					start();
+					assert.ok(true, "Got to the load event without throwing");
+					done();
 				});
 				xhr.open('GET', '/onload');
 				xhr.send();
 			});
 		});
 
-		stop();
+		var done = assert.async();
 	});
 } // END onabort check
 
