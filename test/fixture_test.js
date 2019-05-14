@@ -132,7 +132,7 @@ QUnit.test('dynamic fixtures', function(assert) {
 		url: 'something',
 		dataType: 'json'
 	})
-		.start(function (data) {
+		.done(function (data) {
 			assert.equal(data[0].sweet, 'ness', 'can.get works');
 			done();
 		});
@@ -157,7 +157,8 @@ QUnit.test('dynamic fixtures return promises', function(assert) {
 });
 
 if (__dirname !== '/') {
-	QUnit.test('fixture function', 3, function(assert) {
+	QUnit.test('fixture function', function(assert) {
+		assert.expect(3);
 		var done = assert.async();
 		var url = __dirname+'/fixtures/foo.json';
 		fixture(url, __dirname+'/fixtures/foobar.json');
@@ -165,21 +166,21 @@ if (__dirname !== '/') {
 			url: url,
 			dataType: 'json'
 		})
-			.start(function (data) {
+			.done(function (data) {
 				assert.equal(data.sweet, 'ner', 'url passed works');
 				fixture(url, __dirname+'/fixtures/test.json');
 				$.ajax({
 					url: url,
 					dataType: 'json'
 				})
-					.start(function (data) {
+					.done(function (data) {
 						assert.equal(data.sweet, 'ness', 'replaced');
 						fixture(url, null);
 						$.ajax({
 							url: url,
 							dataType: 'json'
 						})
-							.start(function (data) {
+							.done(function (data) {
 								assert.equal(data.a, 'b', 'removed');
 								done();
 							});
@@ -320,7 +321,7 @@ QUnit.test('simulating an error', function(assert) {
 		url: '/foo',
 		dataType: 'json'
 	})
-		.start(function () {
+		.done(function () {
 			assert.ok(false, 'success called');
 			done();
 		})
@@ -399,7 +400,7 @@ QUnit.test('fixture function gets id', function(assert) {
 			id: 5
 		}
 	})
-		.start(function (data) {
+		.done(function (data) {
 			assert.ok(data.id);
 			done();
 		});
@@ -418,7 +419,7 @@ if (__dirname !== '/') {
 			url: url,
 			dataType: 'json'
 		})
-			.start(function (json) {
+			.done(function (json) {
 				assert.equal(json.weird, 'ness!', 'fixture set right');
 				fixture('GET ' + url, function () {
 					return {
@@ -429,14 +430,14 @@ if (__dirname !== '/') {
 					url: url,
 					dataType: 'json'
 				})
-					.start(function (json) {
+					.done(function (json) {
 						assert.equal(json.weird, 'ness?', 'fixture set right');
 						fixture('GET ' + url, null);
 						$.ajax({
 							url: url,
 							dataType: 'json'
 						})
-							.start(function (json) {
+							.done(function (json) {
 								assert.equal(json.weird, 'ness', 'fixture set right');
 								done();
 							});
@@ -681,7 +682,8 @@ QUnit.test('fixture("METHOD /path", store) should warn when correcting to the ri
 });
 //!steal-remove-end
 
-QUnit.test('fixture with response callback', 4, function(assert) {
+QUnit.test('fixture with response callback', function(assert) {
+	assert.expect(4);
 	fixture.delay = 10;
 	fixture('responseCb', function (orig, response) {
 		response({
@@ -696,11 +698,11 @@ QUnit.test('fixture with response callback', 4, function(assert) {
 		url: 'responseCb',
 		dataType: 'json'
 	})
-		.start(function (data) {
+		.done(function (data) {
 			assert.equal(data.sweet, 'ness', 'can.get works');
-			done();
+			//done();
 		});
-	var done = assert.async();
+	//var done = assert.async();
 	$.ajax({
 		url: 'responseErrorCb',
 		dataType: 'json'
@@ -708,9 +710,9 @@ QUnit.test('fixture with response callback', 4, function(assert) {
 		.fail(function (orig, error, text) {
 			assert.equal(error, 'error', 'Got error status');
 			assert.equal(orig.responseText, 'This is an error from callback', 'Got error text');
-			done();
+			//done();
 		});
-	var done = assert.async();
+	//var done = assert.async();
 	fixture('cbWithTimeout', function (orig, response) {
 		setTimeout(function () {
 			response([{
@@ -722,7 +724,7 @@ QUnit.test('fixture with response callback', 4, function(assert) {
 		url: 'cbWithTimeout',
 		dataType: 'json'
 	})
-		.start(function (data) {
+		.done(function (data) {
 			assert.equal(data[0].epic, 'ness', 'Got responsen with timeout');
 			done();
 		});
@@ -864,8 +866,8 @@ QUnit.test("posting an empty data object", function(assert) {
 	});
 });
 
-QUnit.test("store with objects allows .create, .update and .destroy (#1471)", 4, function(assert) {
-
+QUnit.test("store with objects allows .create, .update and .destroy (#1471)", function(assert) {
+	assert.expect(4);
 	var store = fixture.store([
 		{id: 1, modelId: 1, year: 2013, name: "2013 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2012/07/01-2013-ford-mustang-gt-review-585x388.jpg"},
 		{id: 2, modelId: 1, year: 2014, name: "2014 Mustang", thumb: "http://mustangsdaily.com/blog/wp-content/uploads/2013/03/2014-roush-mustang.jpg"},
@@ -1252,7 +1254,8 @@ if (__dirname !== '/') {
     });
 }
 
-QUnit.test("first set.Algebra CRUD works (#12)", 5, function(assert) {
+QUnit.test("first set.Algebra CRUD works (#12)", function(assert) {
+	assert.expect(5);
 
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
@@ -1323,8 +1326,8 @@ QUnit.test("first set.Algebra CRUD works (#12)", 5, function(assert) {
 	});
 });
 
-QUnit.test("set.Algebra CRUD works (#12)", 5, function(assert) {
-
+QUnit.test("set.Algebra CRUD works (#12)", function(assert) {
+	assert.expect(5);
 	var algebra = new set.Algebra(
 		new set.Translate("where","where"),
 		set.props.id("_id"),
@@ -1485,8 +1488,8 @@ QUnit.test("storeConnection reset", function(assert) {
 });
 
 function makeAlgebraTest(fixtureUrl){
-	return function() {
-
+	return function(assert) {
+		assert.expect(5);
 		var algebra = new set.Algebra(
 			new set.Translate("where","where"),
 			set.props.id("_id"),
@@ -1550,8 +1553,8 @@ function makeAlgebraTest(fixtureUrl){
 	};
 }
 
-QUnit.test("set.Algebra CRUD works with easy hookup (#12)", 5, makeAlgebraTest('/cars/{_id}'));
-QUnit.test("set.Algebra CRUD works with easy hookup and list-style url (#52)", 5, makeAlgebraTest('/cars'));
+QUnit.test("set.Algebra CRUD works with easy hookup (#12)", makeAlgebraTest('/cars/{_id}'));
+QUnit.test("set.Algebra CRUD works with easy hookup and list-style url (#52)", makeAlgebraTest('/cars'));
 
 
 QUnit.test("store.getList and store.get", function(assert) {
@@ -1659,8 +1662,7 @@ if (__dirname !== '/') {
 }
 
 QUnit.test('onload should be triggered for HTTP error responses (#36)', function(assert) {
-    var ready1 = assert.async();
-    var ready = assert.async();
+    var done = assert.async();
     fixture('/onload', function(req, res) {
 		res(400);
 	});
@@ -1670,13 +1672,13 @@ QUnit.test('onload should be triggered for HTTP error responses (#36)', function
     xhr.addEventListener('load', function() {
 		assert.ok(true, 'onload should be invoked');
 		fixture('/onload', null);
-		ready();
+		done();
 	});
 
     xhr.addEventListener('error', function() {
 		assert.ok(false, 'onerror should not be invoked');
 		fixture('/onload', null);
-		ready1();
+		done();
 	});
 
     xhr.open('GET', '/onload');
@@ -1684,8 +1686,7 @@ QUnit.test('onload should be triggered for HTTP error responses (#36)', function
 });
 
 QUnit.test('responseText & responseXML should not be set for arraybuffer types (#38)', function(assert) {
-    var ready1 = assert.async();
-    var ready = assert.async();
+    var done = assert.async();
 
     fixture('/onload', '/test/fixtures/foo.json');
 
@@ -1693,7 +1694,7 @@ QUnit.test('responseText & responseXML should not be set for arraybuffer types (
 
     window.onerror = function (msg, url, line) {
 	    assert.ok(false, 'There should not be an error');
-	    ready();
+	    done();
 	};
 
     var xhr = new XMLHttpRequest();
@@ -1702,7 +1703,7 @@ QUnit.test('responseText & responseXML should not be set for arraybuffer types (
 		fixture('/onload', null);
 		window.onerror = oldError;
 		assert.ok(true, 'Got here without an error');
-		ready1();
+		done();
 	});
 
     xhr.responseType = 'arraybuffer';
@@ -1711,14 +1712,13 @@ QUnit.test('responseText & responseXML should not be set for arraybuffer types (
 });
 
 QUnit.test('fixture with timeout does not run if $.ajax timeout less than delay', function(assert) {
-    var ready1 = assert.async();
-    var ready = assert.async();
+    var done = assert.async();
     var delay = fixture.delay;
     fixture.delay = 1000;
     fixture('/onload', function() {
 		fixture('/onload', null);
 		assert.ok(false, 'timed out xhr did not abort');
-		ready();
+		done();
 	});
 
     $.ajax({
@@ -1729,7 +1729,7 @@ QUnit.test('fixture with timeout does not run if $.ajax timeout less than delay'
 			assert.ok(true, 'Got to the error handler');
 			assert.equal(xhr.statusText, "timeout");
 			assert.equal(xhr.status, "0");
-			ready1();
+			done();
 		}
 	});
 
@@ -1878,8 +1878,7 @@ QUnit.test('fixture returns the old fixture callback when fixtures are removed (
 
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
 	QUnit.test('fixture with timeout aborts if xhr timeout less than delay', function(assert) {
-        var ready1 = assert.async();
-        var ready = assert.async();
+        var done = assert.async();
         fixture('/onload', 1000);
 
         var xhr = new XMLHttpRequest();
@@ -1896,25 +1895,24 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 			assert.ok(true, 'Got to the error handler');
 			assert.equal(xhr.statusText, '');
 			assert.equal(xhr.status, 0);
-			ready();
+			done();
 		});
 
         xhr.addEventListener('load', function() {
 			fixture('/onload', null);
 			assert.ok(false, 'timed out xhr did not abort');
-			ready1();
+			done();
 		});
     });
 
 	QUnit.test('dynamic fixture with timeout does not run if xhr timeout less than delay', function(assert) {
-        var ready1 = assert.async();
-        var ready = assert.async();
+        var done = assert.async();
         var delay = fixture.delay;
         fixture.delay = 1000;
         fixture('/onload', function() {
 			fixture('/onload', null);
 			assert.ok(false, 'timed out xhr did not abort');
-			ready();
+			done();
 		});
 
         var xhr = new XMLHttpRequest();
@@ -1929,7 +1927,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 			assert.ok(true, 'Got to the error handler');
 			assert.equal(xhr.statusText, '');
 			assert.equal(xhr.status, 0);
-			ready1();
+			done();
 		});
 
         fixture.delay = delay;
