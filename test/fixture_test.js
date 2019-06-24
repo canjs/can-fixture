@@ -11,6 +11,7 @@ var canReflect = require("can-reflect");
 var matches = require("../matches");
 var QueryLogic = require("can-query-logic");
 var testHelpers = require("can-test-helpers");
+var DefineMap = require("can-define/map/map");
 
 
 var errorCallback = function(xhr, status, error){
@@ -1876,6 +1877,46 @@ QUnit.test('fixture returns the old fixture callback when fixtures are removed (
 	assert.deepEqual(oldFixtures, [{fixture: funcA, url: '/services/thing'}]);
 });
 
+QUnit.test("Using with nested types", function(assert){
+	var done = assert.async();
+
+	var Pet = DefineMap.extend("Pet", {
+		name: "string"
+	});
+	var Person = DefineMap.extend("Person", {
+		id: { type: "number", identity: true },
+		name: "string",
+		pet: Pet
+	});
+
+	var store = fixture.store([{
+		id: 1,
+		name: "Dorothy",
+		pet: {
+			name: "Max"
+		}
+	}], new QueryLogic(Person));
+
+	fixture('/api/persons/{id}', store);
+
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener('load', function() {
+		var data = JSON.parse(this.responseText);
+		var xhr2 = new XMLHttpRequest();
+
+		xhr2.addEventListener('load', function() {
+			var data = JSON.parse(this.responseText);
+			assert.equal(data.pet.name, "Max", "Still have the Pet type");
+			done();
+		});
+		xhr2.open('PUT', '/api/persons/1', true);
+		xhr2.send(data);
+
+	});
+	xhr.open('GET', '/api/persons/1', true);
+	xhr.send();
+});
+
 if ("onabort" in XMLHttpRequest._XHR.prototype) {
 	QUnit.test('fixture with timeout aborts if xhr timeout less than delay', function(assert) {
         var done = assert.async();
@@ -2009,7 +2050,7 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 			return {};
 		});
 
-		teardown();	
+		teardown();
 	});
 
 	testHelpers.dev.devOnlyTest("Works with steal-clone", function (assert) {
@@ -2034,6 +2075,3 @@ if ("onabort" in XMLHttpRequest._XHR.prototype) {
 		var done = assert.async();
 	});
 } // END onabort check
-
-
-

@@ -26,6 +26,7 @@
     "can-reflect": "^1.15.1"
   },
   "devDependencies": {
+    "can-define": "^2.7.18",
     "can-set-legacy": "<2.0.0",
     "can-test-helpers": "^1.1.2",
     "detect-cyclic-packages": "^1.1.0",
