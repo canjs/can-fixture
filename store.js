@@ -94,7 +94,7 @@ function typeConvert(data){
 	var copy = {};
 	canReflect.eachKey(data, function(value, key){
 		if(keys[key]) {
-			copy[key] = canReflect.convert(value, keys[key]);
+			copy[key] = canReflect.serialize(canReflect.convert(value, keys[key]));
 		} else {
 			copy[key] = value;
 		}
