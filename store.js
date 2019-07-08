@@ -23,15 +23,22 @@ var makeMakeItems = function(baseItems, idProp){
 	return function () {
 		// clone baseItems
 		var items = [],
-			maxId = 0;
+			maxId = 0,
+			idType = "number";
 		baseItems.forEach(function(item){
 			items.push(canReflect.serialize(item) );
-			maxId = Math.max(item[idProp], maxId) ;
+			var type = typeof item[idProp];
+			if(type === "number") {
+				maxId = Math.max(item[idProp], maxId) ;
+			} else {
+				idType = type;
+			}
 		});
 
 		return {
 			maxId: maxId,
-			items: items
+			items: items,
+			idType: idType
 		};
 	};
 };
@@ -82,12 +89,18 @@ var doNotConvert = function(v){ return v; };
 
 function typeConvert(data){
 	var schema = this.connection.queryLogic.schema;
+	var idType = this.idType;
 	var identityKey = schema.identity[0],
 		keys = schema.keys;
 	if(!keys || !keys[identityKey]) {
 		keys = {};
-		keys[identityKey] = function(value){
-			return typeof value === "string" ? stringToAny(value) : value;
+		keys[identityKey] = function(value) {
+			if(idType === "string") {
+				return ""+value;
+			} else {
+				return typeof value === "string" ? stringToAny(value) : value;
+			}
+
 		};
 	}
 		// this probably needs to be recursive, but this is ok for now
@@ -142,6 +155,7 @@ canReflect.assignMap(Store.prototype,{
 		}
 		var itemData =  this.makeItems();
 		this.maxId = itemData.maxId;
+		this.idType = itemData.idType;
 		this.connection.updateListData(itemData.items, {});
 	},
 	get: function (params) {

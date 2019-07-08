@@ -111,3 +111,17 @@ QUnit.test("createData, destroyData, updateData", function(assert){
         done();
     });*/
 });
+
+QUnit.test("createData with a string id", function(assert){
+    var store = fixture.store([
+        {id: "helloorld", name: "foo"}
+    ], new QueryLogic({identity: ["id"]}));
+
+    var done = assert.async();
+    store.createData({
+        data: {name: "bar"}
+    }, function(instance){
+        assert.deepEqual(instance, {id: "1", name: "bar"} );
+        done();
+    });
+});
