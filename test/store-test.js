@@ -2,10 +2,12 @@ var QUnit = require('steal-qunit');
 var fixture = require("can-fixture");
 var QueryLogic = require("can-query-logic");
 var canReflect = require("can-reflect");
-
+var canSymbol = require("can-symbol");
 
 QUnit.module("can-fixture.store");
 
+var newSymbol = canSymbol.for("can.new");
+var isMemberSymbol = canSymbol.for("can.isMember");
 
 QUnit.test("createInstance, destroyInstance, updateInstance", function(assert){
     var store = fixture.store([
@@ -125,3 +127,35 @@ QUnit.test("createData with a string id", function(assert){
         done();
     });
 });
+
+QUnit.test("can take a schema", function(assert) {
+	var schema = {
+		identity: ["id"],
+		keys: {}
+	};
+	var keys = schema.keys;
+
+	keys.id = {};
+	keys.id[newSymbol] = Number;
+	keys.id[isMemberSymbol] = function(value) {
+		return typeof value === "string";
+	};
+
+	keys.name = {};
+	keys.name[newSymbol] = function(value) {
+		return value.toUpperCase();
+	};
+	keys.name[isMemberSymbol] = function() { return false; };
+
+	var store = fixture.store([
+		{id: 1, name: "foo"}
+	], schema);
+
+	var done = assert.async();
+	store.createData({
+		data: {name: "bar"}
+	}, function(instance){
+		assert.deepEqual(instance, {id: 2, name: "BAR"} );
+		done();
+	});
+})
