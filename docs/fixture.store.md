@@ -1,5 +1,6 @@
 @function can-fixture.store store
 @parent can-fixture.properties
+@outline 3
 
 @description Creates a store.
 
@@ -245,4 +246,52 @@
   @param {can-query-logic} queryLogic A description of the service layer's parameters.
   @return {can-fixture/StoreType} A store that can be used to simulate
   a restful service layer that supports filtering, pagination, and
-  more.  
+  more.
+
+@body
+
+## Converting to a model schema
+
+Models created with [can-observable-object] and [can-define/map/map] contain a [can-reflect.getSchema] symbol that returns the model's *schema*, which contains the properties the model supports and their type information.
+
+With [can-observable-object] you often create properties with strict types like:
+
+```js
+import { ObservableObject } from "can";
+
+class Person extends ObservableObject {
+  static props = {
+    id: Number
+  };
+}
+```
+
+If you try to pass a string into this property it will throw:
+
+```js
+new Person({ id: "1" }); // throws!
+```
+
+The fixture store works by translating a query parameter like `/people/1` into a type. Since parameters in a query are all strings, this leads to type errors when creating a new `Person` instance.
+
+If you use [can-type]'s [can-type/convertAll] when creating your fixture, you can ensure that all properties are converted to their intended types:
+
+```js
+import { fixture, ObservableObject, type } from "can";
+
+class Person extends ObservableObject {
+  static props = {
+    id: Number,
+    name: String
+  };
+}
+
+// ... later
+const ConvertPerson = type.convertAll(Person);
+
+fixture.store([
+  { id: 1, name: "Wilbur" }
+], ConvertPerson);
+```
+
+This will allow your models to use strict types for values that are part of a query (such as ids).
