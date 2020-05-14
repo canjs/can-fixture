@@ -31,7 +31,7 @@
     "can-test-helpers": "^1.1.2",
     "detect-cyclic-packages": "^1.1.0",
     "jquery": "^3.1.1",
-    "jshint": "^2.7.0",
+    "jshint": "^2.11.1",
     "steal": "^1.0.0",
     "steal-qunit": "^2.0.0",
     "steal-tools": "^1.0.0",
